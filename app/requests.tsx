@@ -1,11 +1,20 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GeistText } from '@/components/GeistText';
 import { requests } from '@/lib/data';
+import { Link } from 'expo-router';
 
 const RequestsPage = () => {
   const [selectedStatus, setSelectedStatus] = useState('все');
+  const filteredRequests = useMemo(
+    () =>
+      requests.filter((request) => {
+        if (selectedStatus === 'все') return true;
+        return request.status === selectedStatus;
+      }),
+    [selectedStatus]
+  );
 
   const statusConfig: Record<
     string,
@@ -124,12 +133,19 @@ const RequestsPage = () => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.list}>
-          {requests.length > 0 ? (
-            requests.map((request) => {
+          {filteredRequests.length > 0 ? (
+            filteredRequests.map((request) => {
               const statusStyle =
                 statusConfig[request.status as keyof typeof statusConfig];
               return (
-                <View key={request.id} style={styles.requestCard}>
+                <Link
+                  href={{
+                    pathname: '/requests/[id]',
+                    params: { id: request.id },
+                  }}
+                  key={request.id}
+                  style={styles.requestCard}
+                >
                   <View style={styles.requestHeader}>
                     <View style={styles.requestClient}>
                       <GeistText weight={600} style={styles.clientName}>
@@ -200,7 +216,7 @@ const RequestsPage = () => {
                       </GeistText>
                     </View>
                   </View>
-                </View>
+                </Link>
               );
             })
           ) : (
@@ -308,8 +324,8 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   list: {
-    gap: 12,
     paddingBottom: 32,
+    gap: 12,
   },
   requestCard: {
     backgroundColor: '#FFFFFF',
