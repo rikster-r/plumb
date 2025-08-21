@@ -23,6 +23,45 @@ const Login = () => {
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
+  // const handleSubmit = async () => {
+  //   if (!email || !password) {
+  //     Alert.alert('Ошибка', 'Пожалуйста, заполните все поля');
+  //     return;
+  //   }
+
+  //   setIsLoading(true);
+
+  //   try {
+  //     const response = await fetch(
+  //       'https://doctoronduty.vercel.app/api/auth/login',
+  //       {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         body: JSON.stringify({
+  //           email, // ✅ email instead of phone_number
+  //           password,
+  //         }),
+  //       }
+  //     );
+
+  //     const data = await response.json();
+
+  //     if (!response.ok) {
+  //       Alert.alert('Ошибка', data.error || 'Ошибка входа');
+  //       return;
+  //     }
+
+  //     login(data.token, data.user);
+  //   } catch (error) {
+  //     console.error(error);
+  //     Alert.alert('Ошибка', 'Произошла ошибка при входе');
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const handleSubmit = async () => {
     if (!email || !password) {
       Alert.alert('Ошибка', 'Пожалуйста, заполните все поля');
@@ -32,28 +71,18 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        'https://doctoronduty.vercel.app/api/auth/login',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email, // ✅ email instead of phone_number
-            password,
-          }),
-        }
-      );
+      // fake token + user (like in UserProvider)
+      const fakeToken = 'test-token';
+      const fakeUser = {
+        id: 1,
+        email: 'test@example.com',
+        fullName: 'Григорьев Анатолий Генадьевич',
+        phone: '89161234567',
+        role: 'Мастер',
+        access: 'open',
+      };
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        Alert.alert('Ошибка', data.error || 'Ошибка входа');
-        return;
-      }
-
-      login(data.token, data.user);
+      await login(fakeToken, fakeUser);
     } catch (error) {
       console.error(error);
       Alert.alert('Ошибка', 'Произошла ошибка при входе');
