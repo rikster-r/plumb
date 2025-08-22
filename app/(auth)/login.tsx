@@ -185,7 +185,7 @@ const Login = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#EBF4FD',
+    backgroundColor: '#F5F5F5',
   },
   keyboardAvoidingView: {
     flex: 1,

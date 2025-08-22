@@ -299,7 +299,6 @@ const RequestDetailsPage = () => {
                       request.priority.slice(1)}
                   </GeistText>
                 </View>
-                
               </View>
               <GeistText
                 weight={400}
@@ -531,7 +530,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 20,
     color: '#09090B',
     lineHeight: 32,
   },
