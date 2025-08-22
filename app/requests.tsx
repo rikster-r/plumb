@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import {
   View,
   ScrollView,
@@ -17,14 +17,16 @@ import { useUser } from '@/context/currentUser';
 const { width: screenWidth } = Dimensions.get('window');
 
 const RequestsPage = () => {
-  const [selectedStatus, setSelectedStatus] = useState('все');
+  const [selectedStatus, setSelectedStatus] = useState('актуальные');
   const [showUserPopover, setShowUserPopover] = useState(false);
   const { user, logout } = useUser();
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const filteredRequests = useMemo(
     () =>
       requests.filter((request) => {
         if (selectedStatus === 'все') return true;
+        if (selectedStatus === 'актуальные') return request.status !== 'завершена';
         return request.status === selectedStatus;
       }),
     [selectedStatus]
@@ -71,6 +73,38 @@ const RequestsPage = () => {
     низкий: '#0A7E5E',
   };
 
+  const statusTabs = [
+    'актуальные',
+    'все',
+    'новая',
+    'в пути',
+    'в работе',
+    'завершена',
+  ];
+
+  const scrollToTab = (index: number) => {
+    if (scrollViewRef.current) {
+      // Calculate the position to scroll to
+      // Each tab has width ~72px + 12px margin, starting with 24px padding
+      const tabWidth = 84; // approximate tab width + margin
+      const scrollPosition = Math.max(
+        0,
+        index * tabWidth - screenWidth / 2 + tabWidth / 2
+      );
+
+      scrollViewRef.current.scrollTo({
+        x: scrollPosition,
+        animated: true,
+      });
+    }
+  };
+
+  const handleTabPress = (status: string) => {
+    const tabIndex = statusTabs.indexOf(status);
+    setSelectedStatus(status);
+    scrollToTab(tabIndex);
+  };
+
   const formatTime = (dateString: string) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleTimeString('ru-RU', {
@@ -99,8 +133,6 @@ const RequestsPage = () => {
     }
     return phone;
   };
-
-  const statusTabs = ['все', 'новая', 'в пути', 'в работе', 'завершена'];
 
   return (
     <View style={styles.container}>
@@ -199,6 +231,7 @@ const RequestsPage = () => {
       {/* Status Tabs */}
       <View style={styles.tabsContainer}>
         <ScrollView
+          ref={scrollViewRef}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{
@@ -212,7 +245,7 @@ const RequestsPage = () => {
               return (
                 <TouchableOpacity
                   key={status}
-                  onPress={() => setSelectedStatus(status)}
+                  onPress={() => handleTabPress(status)}
                   style={[
                     styles.tab,
                     isActive ? styles.activeTab : styles.inactiveTab,
