@@ -14,14 +14,7 @@ module.exports = {
     android: {
       edgeToEdgeEnabled: true,
       useNextNotificationsApi: true,
-      package: 'com.riksterr.doctoronduty',
-      googleServicesFile:
-        process.env.GOOGLE_SERVICES_JSON || './google-services.json',
-    },
-    web: {
-      bundler: 'metro',
-      output: 'static',
-      favicon: './assets/images/favicon.png',
+      package: 'com.riksterr.doctoronduty'
     },
     plugins: [
       'expo-router',
@@ -31,7 +24,7 @@ module.exports = {
           image: './assets/icons/mainIcon.png',
           imageWidth: 200,
           resizeMode: 'contain',
-          backgroundColor: '#1936ac',
+          backgroundColor: '#fff',
         },
       ],
       'expo-secure-store',
