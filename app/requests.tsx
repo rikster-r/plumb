@@ -10,26 +10,43 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GeistText } from '@/components/GeistText';
-import { requests } from '@/lib/data';
 import { Link } from 'expo-router';
 import { useUser } from '@/context/currentUser';
+import useSWRNative from '@nandorojo/swr-react-native';
+import { fetcherWithToken } from '@/lib/fetcher';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 const RequestsPage = () => {
-  const [selectedStatus, setSelectedStatus] = useState('актуальные');
+  const [selectedStatus, setSelectedStatus] = useState('Актуальные');
   const [showUserPopover, setShowUserPopover] = useState(false);
-  const { user, logout } = useUser();
+  const { user, token, logout } = useUser();
+  const { data: requests } = useSWRNative<Request[]>(
+    [`${process.env.EXPO_PUBLIC_API_URL}/users/${user?.id}/requests`, token],
+    ([url, token]) => fetcherWithToken(url, token)
+  );
+
   const scrollViewRef = useRef<ScrollView>(null);
+
+  const statusTabs = [
+    'Актуальные',
+    'Все',
+    'Принята',
+    'В пути',
+    'На исполнении',
+    'Выполнена',
+    'Закрыта',
+  ];
 
   const filteredRequests = useMemo(
     () =>
-      requests.filter((request) => {
-        if (selectedStatus === 'все') return true;
-        if (selectedStatus === 'актуальные') return request.status !== 'завершена';
+      (requests ?? []).filter((request) => {
+        if (selectedStatus === 'Все') return true;
+        if (selectedStatus === 'Актуальные')
+          return request.status !== 'Выполнена' && request.status !== 'Закрыта';
         return request.status === selectedStatus;
       }),
-    [selectedStatus]
+    [selectedStatus, requests]
   );
 
   const statusConfig: Record<
@@ -41,56 +58,56 @@ const RequestsPage = () => {
       icon: keyof typeof Ionicons.glyphMap;
     }
   > = {
-    новая: {
+    Принята: {
       color: '#1F5EDB',
       backgroundColor: '#F0F5FF',
       borderColor: '#D0E0FF',
       icon: 'alert-circle-outline',
     },
-    'в пути': {
+    'В пути': {
       color: '#B47D00',
       backgroundColor: '#FFF8E6',
       borderColor: '#FFECB3',
       icon: 'car-outline',
     },
-    'в работе': {
+    'На исполнении': {
       color: '#0A7E5E',
       backgroundColor: '#ECFDF5',
       borderColor: '#A7F3D0',
       icon: 'construct-outline',
     },
-    завершена: {
+    Выполнена: {
       color: '#4B5563',
       backgroundColor: '#F9FAFB',
       borderColor: '#D1D5DB',
       icon: 'checkmark-circle-outline',
     },
+    Закрыта: {
+      color: '#71717A',
+      backgroundColor: '#F4F4F5',
+      borderColor: '#E4E4E7',
+      icon: 'lock-closed-outline',
+    },
   };
 
   const priorityColors = {
-    высокий: '#C21818',
-    средний: '#B47D00',
-    низкий: '#0A7E5E',
+    Высокий: '#C21818',
+    Средний: '#B47D00',
+    Низкий: '#0A7E5E',
   };
-
-  const statusTabs = [
-    'актуальные',
-    'все',
-    'новая',
-    'в пути',
-    'в работе',
-    'завершена',
-  ];
 
   const scrollToTab = (index: number) => {
     if (scrollViewRef.current) {
-      // Calculate the position to scroll to
-      // Each tab has width ~72px + 12px margin, starting with 24px padding
-      const tabWidth = 84; // approximate tab width + margin
-      const scrollPosition = Math.max(
-        0,
-        index * tabWidth - screenWidth / 2 + tabWidth / 2
-      );
+      // Get the width of the tab from styles (paddingHorizontal: 14, minWidth: 60, marginRight: 12)
+      const tabWidth = 60 + 14 * 2; // minWidth + horizontal padding
+      const tabMargin = 12;
+      const totalTabWidth = tabWidth + tabMargin;
+
+      // Calculate the x position of the tab's center
+      const tabCenter = 24 + index * totalTabWidth + tabWidth / 2; // 24 is left padding
+
+      // Scroll so that tabCenter is in the middle of the screen
+      const scrollPosition = Math.max(0, tabCenter - screenWidth / 2);
 
       scrollViewRef.current.scrollTo({
         x: scrollPosition,
@@ -105,33 +122,9 @@ const RequestsPage = () => {
     scrollToTab(tabIndex);
   };
 
-  const formatTime = (dateString: string) => {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleTimeString('ru-RU', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ru-RU', {
-      day: 'numeric',
-      month: 'short',
-    });
-  };
-
   const handleLogout = async () => {
     setShowUserPopover(false);
     await logout();
-  };
-
-  const formatPhone = (phone: string) => {
-    // Format phone number like +7 (916) 123-45-67
-    if (phone.startsWith('89')) {
-      const cleaned = phone.slice(1);
-      return `+7 (${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 8)}-${cleaned.slice(8)}`;
-    }
-    return phone;
   };
 
   return (
@@ -145,7 +138,7 @@ const RequestsPage = () => {
             </GeistText>
             <GeistText weight={400} style={styles.subtitle}>
               Активных:{' '}
-              {requests.filter((r) => r.status !== 'завершена').length}
+              {(requests ?? []).filter((r) => r.status !== 'завершена').length}
             </GeistText>
           </View>
 
@@ -184,7 +177,7 @@ const RequestsPage = () => {
                       ФИО
                     </GeistText>
                     <GeistText weight={400} style={styles.userInfoValue}>
-                      {user?.fullName || 'Не указано'}
+                      {user?.name || 'Не указано'}
                     </GeistText>
                   </View>
 
@@ -202,7 +195,7 @@ const RequestsPage = () => {
                       Телефон
                     </GeistText>
                     <GeistText weight={400} style={styles.userInfoValue}>
-                      {user?.phone ? formatPhone(user.phone) : 'Не указан'}
+                      {user?.phone ?? 'Не указан'}
                     </GeistText>
                   </View>
 
@@ -293,10 +286,10 @@ const RequestsPage = () => {
                     <View style={styles.requestHeader}>
                       <View style={styles.requestClient}>
                         <GeistText weight={600} style={styles.clientName}>
-                          {request.client.name}
+                          {request.house}
                         </GeistText>
                         <GeistText weight={400} style={styles.clientAddress}>
-                          {request.address.house}
+                          {request.customer}
                         </GeistText>
                       </View>
                       <View
@@ -330,13 +323,12 @@ const RequestsPage = () => {
                       style={styles.problemText}
                       numberOfLines={2}
                     >
-                      {request.problem.description}
+                      {request.problem}
                     </GeistText>
                     <View style={styles.divider} />
                     <View style={styles.requestFooter}>
                       <GeistText weight={400} style={styles.timeText}>
-                        {formatDate(request.createdAt)} в{' '}
-                        {formatTime(request.createdAt)}
+                        {request.created_at.replace(' ', ' в ')}
                       </GeistText>
                       <View style={styles.footerRight}>
                         <GeistText

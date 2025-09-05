@@ -1,53 +1,42 @@
 interface User {
   id: number;
-  fullName: string;
+  name: string;
   email: string;
   phone: string;
   role: string;
-  access: string;
+  active: string;
 }
 
 interface Request {
   id: number;
+  apartment: number;
+  entrance: number;
+  floor: number;
+  house: string;
 
-  // Время
-  createdAt: string; // время поступления
-  departureAt?: string; // время выезда
-  arrivalAt?: string; // время прибытия
-  completedAt?: string; // время выполнения
-  repeat: boolean; // повторная заявка
+  applicant: string | null;
+  applicant_phone: string | null;
+  customer: string;
+  customer_phone: string;
 
-  // Заявитель
-  applicant: {
-    name: string;
-    phone: string;
-  };
+  arrival_time: string;     // e.g. "05.09.2025 11:58"
+  complete_time: string;    // same format
+  created_at: string;       // same format
+  exist_time: string;       // same format
 
-  // Клиент
-  client: {
-    name: string;
-    phone: string;
-  };
+  category: string;         // e.g. "Водопровод", "Электрика"
+  problem: string;
+  problem_customer: string;
+  work_done: string | null;
 
-  // Информация
-  category: string;
-  priority: string; //
-  status: string; // "новая" | "в пути" | "в работе" | "завершена"
-  address: {
-    house: string;
-    entranceNumber?: string;
-    floorNumber?: string;
-    apartmentNumber?: string;
-    intercomCode?: string;
-  };
-  note?: string;
-  isPaid: boolean; // платная заявка?
+  intercom_code: string;
+  is_copy: boolean;
+  paid: boolean;
+  priority: string;         // e.g. "Средний", "Низкий"
+  status: string;           // e.g. "Принята"
+  note: string;
+  organization: string;
 
-  // Проблема
-  problem: {
-    description: string; // проблема
-    applicantWords?: string; // проблема со слов заявителя
-  };
-  worksDone?: string; // выполненные работы
-  files: File[];
+  files: any[];             // unclear structure, currently empty array
+  users: string[];
 }
