@@ -59,8 +59,6 @@ export const UserProvider = ({ children }: ProviderProps) => {
   }, []);
 
   const login = async (newToken: string, user: User) => {
-    console.log(newToken, user)
-
     await SecureStore.setItemAsync(TOKEN_KEY, newToken);
     setToken(newToken);
     mutateUser(user);

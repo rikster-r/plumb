@@ -14,7 +14,7 @@ module.exports = {
     android: {
       edgeToEdgeEnabled: true,
       useNextNotificationsApi: true,
-      package: 'com.riksterr.doctoronduty'
+      package: 'com.riksterr.doctoronduty',
     },
     plugins: [
       'expo-router',
