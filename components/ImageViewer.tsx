@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Modal,
   View,
@@ -7,6 +7,7 @@ import {
   Image,
   Dimensions,
   StyleSheet,
+  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GeistText } from '@/components/GeistText';
@@ -34,6 +35,17 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
   onClose,
   onIndexChange,
 }) => {
+  
+  useEffect(() => {
+    if (visible) {
+      StatusBar.setBarStyle('light-content', true);
+      StatusBar.setBackgroundColor('#000000', true); // Android only
+    } else {
+      StatusBar.setBarStyle('dark-content', true);
+      StatusBar.setBackgroundColor('#FFFFFF', true); // restore default
+    }
+  }, [visible]);
+
   if (!files.length) return null;
 
   return (
