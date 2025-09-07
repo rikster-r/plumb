@@ -26,6 +26,7 @@ const statusConfig: Record<
     backgroundColor: string;
     borderColor: string;
     icon: keyof typeof Ionicons.glyphMap;
+    sentAPIStatus?: string | null;
     nextStatus: string | null;
     nextLabel: string | null;
   }
@@ -35,6 +36,7 @@ const statusConfig: Record<
     backgroundColor: '#F0F5FF',
     borderColor: '#D0E0FF',
     icon: 'alert-circle-outline',
+    sentAPIStatus: 'В пути',
     nextStatus: 'В пути',
     nextLabel: 'Выехать',
   },
@@ -43,7 +45,8 @@ const statusConfig: Record<
     backgroundColor: '#FFF8E6',
     borderColor: '#FFECB3',
     icon: 'car-outline',
-    nextStatus: 'В работе',
+    sentAPIStatus: 'В работе',
+    nextStatus: 'На исполнении',
     nextLabel: 'Начать работу',
   },
   'На исполнении': {
@@ -51,7 +54,8 @@ const statusConfig: Record<
     backgroundColor: '#ECFDF5',
     borderColor: '#A7F3D0',
     icon: 'construct-outline',
-    nextStatus: 'Завершена',
+    sentAPIStatus: 'Завершена',
+    nextStatus: 'Выполнена',
     nextLabel: 'Завершить',
   },
   Выполнена: {
@@ -59,6 +63,7 @@ const statusConfig: Record<
     backgroundColor: '#F9FAFB',
     borderColor: '#D1D5DB',
     icon: 'checkmark-circle-outline',
+    sentAPIStatus: null,
     nextStatus: null,
     nextLabel: null,
   },
@@ -67,6 +72,7 @@ const statusConfig: Record<
     backgroundColor: '#F4F4F5',
     borderColor: '#E4E4E7',
     icon: 'lock-closed-outline',
+    sentAPIStatus: null,
     nextStatus: null,
     nextLabel: null,
   },
@@ -134,7 +140,7 @@ const RequestDetailsPage = () => {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ status: currentStatus.nextStatus }),
+          body: JSON.stringify({ status: currentStatus.sentAPIStatus }),
         }
       );
 
