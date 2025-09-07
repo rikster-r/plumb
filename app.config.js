@@ -1,11 +1,11 @@
 module.exports = {
   expo: {
-    name: 'Дежурный доктор',
-    slug: 'doctoronduty',
+    name: 'Plumb',
+    slug: 'plumb',
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/icons/mainIconWithBackground.png',
-    scheme: 'doctoronduty',
+    scheme: 'plumb',
     userInterfaceStyle: 'dark',
     newArchEnabled: true,
     ios: {
@@ -14,7 +14,7 @@ module.exports = {
     android: {
       edgeToEdgeEnabled: true,
       useNextNotificationsApi: true,
-      package: 'com.riksterr.doctoronduty',
+      package: 'com.riksterr.plumb',
     },
     plugins: [
       'expo-router',
