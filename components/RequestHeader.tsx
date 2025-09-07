@@ -10,23 +10,26 @@ interface RequestHeaderProps {
     status: string;
     paid?: boolean;
   };
-  statusConfig: Record<string, {
-    color: string;
-    backgroundColor: string;
-    borderColor: string;
-    icon: keyof typeof Ionicons.glyphMap;
-  }>;
+  statusConfig: Record<
+    string,
+    {
+      color: string;
+      backgroundColor: string;
+      borderColor: string;
+      icon: keyof typeof Ionicons.glyphMap;
+    }
+  >;
 }
 
-const RequestHeader: React.FC<RequestHeaderProps> = ({ request, statusConfig }) => {
-  const statusStyle = statusConfig[request.status as keyof typeof statusConfig] || statusConfig['Принята'];
+const RequestHeader: React.FC<RequestHeaderProps> = ({
+  request,
+  statusConfig,
+}) => {
+  const statusStyle = statusConfig[request.status as keyof typeof statusConfig];
 
   return (
     <View style={styles.header}>
-      <TouchableOpacity
-        onPress={() => router.back()}
-        style={styles.backButton}
-      >
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Ionicons name="chevron-back" size={24} color="#09090B" />
       </TouchableOpacity>
       <View style={styles.headerContent}>
@@ -55,14 +58,6 @@ const RequestHeader: React.FC<RequestHeaderProps> = ({ request, statusConfig }) 
               {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
             </GeistText>
           </View>
-          {request.paid && (
-            <View style={styles.paidBadge}>
-              <Ionicons name="checkmark-circle" size={12} color="#0A7E5E" />
-              <GeistText weight={500} style={styles.paidText}>
-                Оплачено
-              </GeistText>
-            </View>
-          )}
         </View>
       </View>
     </View>

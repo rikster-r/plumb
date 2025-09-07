@@ -27,7 +27,7 @@ const TimelineSection: React.FC<TimelineSectionProps> = ({
   const timelineItems: TimelineItem[] = [
     {
       icon: 'time-outline',
-      label: 'Создана',
+      label: 'Заявка принята',
       datetime: createdAt,
     },
     ...(existTime
@@ -52,7 +52,7 @@ const TimelineSection: React.FC<TimelineSectionProps> = ({
       ? [
           {
             icon: 'checkmark-circle-outline' as keyof typeof Ionicons.glyphMap,
-            label: 'Завершена',
+            label: 'Заявка выполнена',
             datetime: completeTime,
           },
         ]

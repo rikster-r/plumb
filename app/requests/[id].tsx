@@ -52,7 +52,7 @@ const statusConfig: Record<
     nextStatus: 'В работе',
     nextLabel: 'Начать работу',
   },
-  'В работе': {
+  'На исполнении': {
     color: '#0A7E5E',
     backgroundColor: '#ECFDF5',
     borderColor: '#A7F3D0',
@@ -60,11 +60,19 @@ const statusConfig: Record<
     nextStatus: 'Завершена',
     nextLabel: 'Завершить',
   },
-  Завершена: {
+  Выполнена: {
     color: '#4B5563',
     backgroundColor: '#F9FAFB',
     borderColor: '#D1D5DB',
     icon: 'checkmark-circle-outline',
+    nextStatus: null,
+    nextLabel: null,
+  },
+  Закрыта: {
+    color: '#71717A',
+    backgroundColor: '#F4F4F5',
+    borderColor: '#E4E4E7',
+    icon: 'lock-closed-outline',
     nextStatus: null,
     nextLabel: null,
   },
@@ -260,127 +268,131 @@ const RequestDetailsPage = () => {
   const nextStatusLabel = currentStatusConfig?.nextLabel;
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-    >
+    <View style={styles.container}>
       <RequestHeader request={request} statusConfig={statusConfig} />
 
-      <ScrollView
-        ref={scrollViewRef}
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1 }}
+      <KeyboardAvoidingView
+        style={styles.keyboardContainer}
+        behavior={'padding'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 10}
       >
-        {/* Applicant Info */}
-        {(request.applicant || request.applicant_phone) && (
-          <InfoSection title="Заявитель">
-            {request.applicant && (
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.content}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.contentContainer}
+        >
+          {/* Applicant Info */}
+          {(request.applicant || request.applicant_phone) && (
+            <InfoSection title="Заявитель">
+              {request.applicant && (
+                <InfoRow
+                  icon="person-outline"
+                  text={request.applicant}
+                  weight={500}
+                />
+              )}
+              {request.applicant_phone && (
+                <InfoRow icon="call-outline" text={request.applicant_phone} />
+              )}
+            </InfoSection>
+          )}
+
+          {/* Customer Info */}
+          <InfoSection title="Клиент">
+            <InfoRow
+              icon="person-outline"
+              text={request.customer}
+              weight={500}
+            />
+            <InfoRow icon="call-outline" text={request.customer_phone} />
+          </InfoSection>
+
+          {/* Address */}
+          <InfoSection title="Адрес">
+            <InfoRow
+              icon="location-outline"
+              text={`${request.house}${request.apartment ? `, кв. ${request.apartment}` : ''}`}
+            />
+            {(request.entrance || request.floor) && (
               <InfoRow
-                icon="person-outline"
-                text={request.applicant}
-                weight={500}
+                icon="business-outline"
+                text={`${request.entrance ? `Подъезд ${request.entrance}` : ''}${
+                  request.entrance && request.floor ? ', ' : ''
+                }${request.floor ? `этаж ${request.floor}` : ''}`}
               />
             )}
-            {request.applicant_phone && (
-              <InfoRow icon="call-outline" text={request.applicant_phone} />
+            {request.intercom_code && (
+              <InfoRow
+                icon="keypad-outline"
+                text={`Код домофона: ${request.intercom_code}`}
+              />
             )}
           </InfoSection>
-        )}
 
-        {/* Customer Info */}
-        <InfoSection title="Клиент">
-          <InfoRow icon="person-outline" text={request.customer} weight={500} />
-          <InfoRow icon="call-outline" text={request.customer_phone} />
-        </InfoSection>
+          {/* Organization */}
+          {request.organization && (
+            <InfoSection title="Организация">
+              <InfoRow icon="business-outline" text={request.organization} />
+            </InfoSection>
+          )}
 
-        {/* Address */}
-        <InfoSection title="Адрес">
-          <InfoRow
-            icon="location-outline"
-            text={`${request.house}${request.apartment ? `, кв. ${request.apartment}` : ''}`}
+          {/* Problem Details */}
+          <ProblemSection
+            category={request.category}
+            priority={request.priority}
+            problem={request.problem}
+            problemCustomer={request.problem_customer}
           />
-          {(request.entrance || request.floor) && (
-            <InfoRow
-              icon="business-outline"
-              text={`${request.entrance ? `Подъезд ${request.entrance}` : ''}${
-                request.entrance && request.floor ? ', ' : ''
-              }${request.floor ? `этаж ${request.floor}` : ''}`}
-            />
+
+          {/* Work Done Section */}
+          {request.work_done && (
+            <InfoSection title="Выполненные работы">
+              <GeistText weight={400} style={styles.workDoneText}>
+                {request.work_done}
+              </GeistText>
+            </InfoSection>
           )}
-          {request.intercom_code && (
-            <InfoRow
-              icon="keypad-outline"
-              text={`Код домофона: ${request.intercom_code}`}
-            />
+
+          {/* Timeline */}
+          <TimelineSection
+            createdAt={request.created_at}
+            existTime={request.exist_time}
+            arrivalTime={request.arrival_time}
+            completeTime={request.complete_time}
+            formatDateTime={formatDateTime}
+          />
+
+          {/* Assigned Users */}
+          {request.users && request.users.length > 0 && (
+            <InfoSection title={`Исполнители (${request.users.length})`}>
+              {request.users.map((user, index) => (
+                <View key={index} style={index > 0 && styles.userRowBorder}>
+                  <InfoRow icon="person-outline" text={user} />
+                </View>
+              ))}
+            </InfoSection>
           )}
-        </InfoSection>
 
-        {/* Organization */}
-        {request.organization && (
-          <InfoSection title="Организация">
-            <InfoRow icon="business-outline" text={request.organization} />
-          </InfoSection>
-        )}
+          {/* Images Section */}
+          <ImagesSection
+            files={request.files}
+            onAddFile={handleAddFile}
+            onImagePress={handleImagePress}
+          />
 
-        {/* Problem Details */}
-        <ProblemSection
-          category={request.category}
-          priority={request.priority}
-          problem={request.problem}
-          problemCustomer={request.problem_customer}
-        />
-
-        {/* Work Done Section */}
-        {request.work_done && (
-          <InfoSection title="Выполненные работы">
-            <GeistText weight={400} style={styles.workDoneText}>
-              {request.work_done}
-            </GeistText>
-          </InfoSection>
-        )}
-
-        {/* Timeline */}
-        <TimelineSection
-          createdAt={request.created_at}
-          existTime={request.exist_time}
-          arrivalTime={request.arrival_time}
-          completeTime={request.complete_time}
-          formatDateTime={formatDateTime}
-        />
-
-        {/* Assigned Users */}
-        {request.users && request.users.length > 0 && (
-          <InfoSection title={`Исполнители (${request.users.length})`}>
-            {request.users.map((user, index) => (
-              <View key={index} style={index > 0 && styles.userRowBorder}>
-                <InfoRow icon="person-outline" text={user} />
-              </View>
-            ))}
-          </InfoSection>
-        )}
-
-        {/* Images Section */}
-        <ImagesSection
-          files={request.files}
-          onAddFile={handleAddFile}
-          onImagePress={handleImagePress}
-        />
-
-        {/* Notes Section */}
-        <NotesSection
-          note={request.note}
-          isEditing={isEditingNote}
-          newNote={newNote}
-          onEditPress={handleEditNotePress}
-          onNoteChange={setNewNote}
-          onSave={handleAddNote}
-          onCancel={handleCancelNote}
-        />
-
-        <View style={styles.bottomSpacer} />
-      </ScrollView>
+          {/* Notes Section */}
+          <NotesSection
+            note={request.note}
+            isEditing={isEditingNote}
+            newNote={newNote}
+            onEditPress={handleEditNotePress}
+            onNoteChange={setNewNote}
+            onSave={handleAddNote}
+            onCancel={handleCancelNote}
+          />
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Bottom Action Button */}
       <BottomAction
@@ -397,7 +409,7 @@ const RequestDetailsPage = () => {
         onClose={() => setImageViewerVisible(false)}
         onIndexChange={setSelectedImageIndex}
       />
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -406,8 +418,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FCFCFD',
   },
+  keyboardContainer: {
+    flex: 1,
+  },
   content: {
     flex: 1,
+  },
+  contentContainer: {
+    flexGrow: 1,
+    paddingBottom: 120,
   },
   workDoneText: {
     fontSize: 15,
@@ -419,9 +438,6 @@ const styles = StyleSheet.create({
     borderTopColor: '#F1F1F1',
     marginTop: 8,
     paddingTop: 16,
-  },
-  bottomSpacer: {
-    height: 120,
   },
 });
 
