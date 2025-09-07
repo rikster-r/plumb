@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useAppInitialization } from '@/hooks/useAppInitialization';
 import * as NavigationBar from 'expo-navigation-bar';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 SplashScreen.preventAutoHideAsync();
 SplashScreen.setOptions({
@@ -54,10 +55,12 @@ function AppContent() {
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <UserProvider>
-        <AppContent />
-      </UserProvider>
-    </GestureHandlerRootView>
+    <KeyboardProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <UserProvider>
+          <AppContent />
+        </UserProvider>
+      </GestureHandlerRootView>
+    </KeyboardProvider>
   );
 }
