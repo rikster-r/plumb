@@ -13,7 +13,6 @@ module.exports = {
     },
     android: {
       edgeToEdgeEnabled: true,
-      useNextNotificationsApi: true,
       package: 'com.riksterr.plumb',
     },
     plugins: [
@@ -24,7 +23,7 @@ module.exports = {
           image: './assets/icons/mainIcon.png',
           imageWidth: 200,
           resizeMode: 'contain',
-          backgroundColor: '#fff',
+          backgroundColor: '#3b639d',
         },
       ],
       'expo-secure-store',

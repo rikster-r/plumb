@@ -49,7 +49,7 @@ export default function LoadingScreen({ error, onRetry }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0073e6',
+    backgroundColor: '#3b639d',
     justifyContent: 'center',
     alignItems: 'center',
   },

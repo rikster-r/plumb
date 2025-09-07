@@ -48,6 +48,13 @@ function AppContent() {
         <Stack.Screen name="index" />
         <Stack.Screen name="requests" />
         <Stack.Screen name="(auth)" />
+        <Stack.Screen
+          name="(modals)/ImageViewer"
+          options={{
+            presentation: 'transparentModal', // or "modal"
+            animation: 'fade',
+          }}
+        />
       </Stack>
     </>
   );

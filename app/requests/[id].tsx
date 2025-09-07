@@ -3,7 +3,7 @@ import { View, StyleSheet, Alert } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Ionicons } from '@expo/vector-icons';
 import { GeistText } from '@/components/GeistText';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
 import { useUser } from '@/context/currentUser';
 import { fetcherWithToken } from '@/lib/fetcher';
@@ -14,10 +14,10 @@ import RequestHeader from '../../components/RequestHeader';
 import { InfoSection, InfoRow } from '../../components/InfoSection';
 import ProblemSection from '../../components/ProblemSection';
 import ImagesSection from '../../components/ImagesSection';
-import ImageViewer from '../../components/ImageViewer';
 import NotesSection from '../../components/NotesSection';
 import TimelineSection from '../../components/TimelineSection';
 import BottomAction from '../../components/BottomAction';
+import RequestDetailsSkeleton from '@/components/RequestDetailsSkeleton';
 
 const statusConfig: Record<
   string,
@@ -93,8 +93,6 @@ const RequestDetailsPage = () => {
 
   const [newNote, setNewNote] = useState('');
   const [isEditingNote, setIsEditingNote] = useState(false);
-  const [imageViewerVisible, setImageViewerVisible] = useState(false);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
     if (request) {
@@ -239,8 +237,15 @@ const RequestDetailsPage = () => {
   };
 
   const handleImagePress = (index: number) => {
-    setSelectedImageIndex(index);
-    setImageViewerVisible(true);
+    if (!request) return;
+
+    router.push({
+      pathname: '/(modals)/ImageViewer',
+      params: {
+        files: JSON.stringify(request.files),
+        selectedIndex: index,
+      },
+    });
   };
 
   const handleEditNotePress = () => {
@@ -253,13 +258,7 @@ const RequestDetailsPage = () => {
   };
 
   if (!request || isLoading) {
-    return (
-      <View style={styles.container}>
-        <GeistText weight={500} style={{ padding: 24 }}>
-          Загрузка...
-        </GeistText>
-      </View>
-    );
+    return <RequestDetailsSkeleton />;
   }
 
   const currentStatusConfig = statusConfig[request.status];
@@ -390,15 +389,6 @@ const RequestDetailsPage = () => {
         nextStatus={nextStatus}
         nextStatusLabel={nextStatusLabel}
         onStatusChange={handleStatusChange}
-      />
-
-      {/* Image Viewer Modal */}
-      <ImageViewer
-        visible={imageViewerVisible}
-        files={request.files}
-        selectedIndex={selectedImageIndex}
-        onClose={() => setImageViewerVisible(false)}
-        onIndexChange={setSelectedImageIndex}
       />
     </View>
   );
