@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { Ionicons } from '@expo/vector-icons';
 import { GeistText } from '@/components/GeistText';
 import { router, useLocalSearchParams } from 'expo-router';
-import * as DocumentPicker from 'expo-document-picker';
 import { useUser } from '@/context/currentUser';
 import { fetcherWithToken } from '@/lib/fetcher';
 import useSWRNative from '@nandorojo/swr-react-native';
+import { statusConfig } from '../../constants/statusConfig';
+import { useRequestActions } from '@/hooks/useRequestActions';
 
 // Import components
 import RequestHeader from '../../components/RequestHeader';
@@ -18,65 +18,7 @@ import NotesSection from '../../components/NotesSection';
 import TimelineSection from '../../components/TimelineSection';
 import BottomAction from '../../components/BottomAction';
 import RequestDetailsSkeleton from '@/components/RequestDetailsSkeleton';
-
-const statusConfig: Record<
-  string,
-  {
-    color: string;
-    backgroundColor: string;
-    borderColor: string;
-    icon: keyof typeof Ionicons.glyphMap;
-    sentAPIStatus?: string | null;
-    nextStatus: string | null;
-    nextLabel: string | null;
-  }
-> = {
-  Принята: {
-    color: '#1F5EDB',
-    backgroundColor: '#F0F5FF',
-    borderColor: '#D0E0FF',
-    icon: 'alert-circle-outline',
-    sentAPIStatus: 'В пути',
-    nextStatus: 'В пути',
-    nextLabel: 'Выехать',
-  },
-  'В пути': {
-    color: '#B47D00',
-    backgroundColor: '#FFF8E6',
-    borderColor: '#FFECB3',
-    icon: 'car-outline',
-    sentAPIStatus: 'В работе',
-    nextStatus: 'На исполнении',
-    nextLabel: 'Начать работу',
-  },
-  'На исполнении': {
-    color: '#0A7E5E',
-    backgroundColor: '#ECFDF5',
-    borderColor: '#A7F3D0',
-    icon: 'construct-outline',
-    sentAPIStatus: 'Завершена',
-    nextStatus: 'Выполнена',
-    nextLabel: 'Завершить',
-  },
-  Выполнена: {
-    color: '#4B5563',
-    backgroundColor: '#F9FAFB',
-    borderColor: '#D1D5DB',
-    icon: 'checkmark-circle-outline',
-    sentAPIStatus: null,
-    nextStatus: null,
-    nextLabel: null,
-  },
-  Закрыта: {
-    color: '#71717A',
-    backgroundColor: '#F4F4F5',
-    borderColor: '#E4E4E7',
-    icon: 'lock-closed-outline',
-    sentAPIStatus: null,
-    nextStatus: null,
-    nextLabel: null,
-  },
-};
+import { formatDateTime } from '@/utils/dates';
 
 const RequestDetailsPage = () => {
   const { id: requestId } = useLocalSearchParams();
@@ -90,6 +32,13 @@ const RequestDetailsPage = () => {
     [`${process.env.EXPO_PUBLIC_API_URL}/requests/${requestId}`, token],
     ([url, token]) => fetcherWithToken(url, token)
   );
+  const { handleStatusChange, handleAddFile, handleAddNote } =
+    useRequestActions({
+      request,
+      requestId: Number(requestId),
+      token: token || '',
+      mutate,
+    });
 
   const [newNote, setNewNote] = useState('');
   const [isEditingNote, setIsEditingNote] = useState(false);
@@ -99,142 +48,6 @@ const RequestDetailsPage = () => {
       setNewNote(request.note || '');
     }
   }, [request]);
-
-  const parseDateTime = (dateTimeString: string) => {
-    if (!dateTimeString) return null;
-    const [datePart, timePart] = dateTimeString.split(' ');
-    const [day, month, year] = datePart.split('.');
-    return new Date(`${year}-${month}-${day}T${timePart}:00`);
-  };
-
-  const formatDateTime = (dateTimeString: string) => {
-    const date = parseDateTime(dateTimeString);
-    if (!date) return { date: '', time: '' };
-
-    return {
-      date: date.toLocaleDateString('ru-RU', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      }),
-      time: date.toLocaleTimeString('ru-RU', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-    };
-  };
-
-  const handleStatusChange = async () => {
-    if (!request) return;
-    const currentStatus = statusConfig[request.status];
-    if (!currentStatus?.nextStatus) return;
-
-    try {
-      const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/requests/${requestId}/status`,
-        {
-          method: 'PATCH',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ status: currentStatus.sentAPIStatus }),
-        }
-      );
-
-      if (response.ok) {
-        mutate({ ...request, status: currentStatus.nextStatus }, false);
-      } else {
-        const errorData = await response.json();
-        Alert.alert(
-          'Ошибка',
-          errorData.message || 'Не удалось изменить статус'
-        );
-      }
-    } catch (error) {
-      Alert.alert('Ошибка', 'Не удалось подключиться к серверу');
-    }
-  };
-
-  const handleAddFile = async () => {
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'image/*',
-        copyToCacheDirectory: true,
-        multiple: true,
-      });
-
-      if (!result.canceled && result.assets) {
-        const formData = new FormData();
-
-        result.assets.forEach((asset) => {
-          formData.append('files[]', {
-            uri: asset.uri,
-            type: asset.mimeType || 'image/jpeg',
-            name: asset.name || `file-${Date.now()}.jpg`,
-          } as any);
-        });
-
-        const response = await fetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/requests/${requestId}/media`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'multipart/form-data',
-            },
-            body: formData,
-          }
-        );
-
-        if (response.ok) {
-          mutate();
-        } else {
-          const errorData = await response.json();
-          Alert.alert(
-            'Ошибка',
-            errorData.message || 'Не удалось добавить файлы'
-          );
-        }
-      }
-    } catch (error) {
-      Alert.alert('Ошибка', 'Не удалось добавить файлы');
-    }
-  };
-
-  const handleAddNote = async () => {
-    if (!request) return;
-
-    if (newNote.trim()) {
-      try {
-        const response = await fetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/requests/${requestId}/comment`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ comment: newNote.trim() }),
-          }
-        );
-
-        if (response.ok) {
-          mutate({ ...request, note: newNote.trim() }, false);
-          setIsEditingNote(false);
-          Alert.alert('Успешно', 'Примечание сохранено');
-        } else {
-          const errorData = await response.json();
-          Alert.alert(
-            'Ошибка',
-            errorData.message || 'Не удалось сохранить примечание'
-          );
-        }
-      } catch (error) {
-        Alert.alert('Ошибка', 'Не удалось подключиться к серверу');
-      }
-    }
-  };
 
   const handleImagePress = (index: number) => {
     if (!request) return;
@@ -379,7 +192,7 @@ const RequestDetailsPage = () => {
           newNote={newNote}
           onEditPress={handleEditNotePress}
           onNoteChange={setNewNote}
-          onSave={handleAddNote}
+          onSave={() => handleAddNote(newNote, setIsEditingNote)}
           onCancel={handleCancelNote}
         />
       </KeyboardAwareScrollView>

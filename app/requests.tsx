@@ -14,6 +14,7 @@ import { Link } from 'expo-router';
 import { useUser } from '@/context/currentUser';
 import useSWRNative from '@nandorojo/swr-react-native';
 import { fetcherWithToken } from '@/lib/fetcher';
+import { statusConfig } from '@/constants/statusConfig';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -48,47 +49,6 @@ const RequestsPage = () => {
       }),
     [selectedStatus, requests]
   );
-
-  const statusConfig: Record<
-    string,
-    {
-      color: string;
-      backgroundColor: string;
-      borderColor: string;
-      icon: keyof typeof Ionicons.glyphMap;
-    }
-  > = {
-    Принята: {
-      color: '#1F5EDB',
-      backgroundColor: '#F0F5FF',
-      borderColor: '#D0E0FF',
-      icon: 'alert-circle-outline',
-    },
-    'В пути': {
-      color: '#B47D00',
-      backgroundColor: '#FFF8E6',
-      borderColor: '#FFECB3',
-      icon: 'car-outline',
-    },
-    'На исполнении': {
-      color: '#0A7E5E',
-      backgroundColor: '#ECFDF5',
-      borderColor: '#A7F3D0',
-      icon: 'construct-outline',
-    },
-    Выполнена: {
-      color: '#4B5563',
-      backgroundColor: '#F9FAFB',
-      borderColor: '#D1D5DB',
-      icon: 'checkmark-circle-outline',
-    },
-    Закрыта: {
-      color: '#71717A',
-      backgroundColor: '#F4F4F5',
-      borderColor: '#E4E4E7',
-      icon: 'lock-closed-outline',
-    },
-  };
 
   const priorityColors = {
     Высокий: '#C21818',
