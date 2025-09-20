@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { GeistText } from '@/components/GeistText';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -101,7 +101,13 @@ const RequestDetailsPage = () => {
               />
             )}
             {request.applicant_phone && (
-              <InfoRow icon="call-outline" text={request.applicant_phone} />
+              <InfoRow
+                icon="call-outline"
+                text={request.applicant_phone}
+                onPress={() =>
+                  Linking.openURL(`tel:${request.applicant_phone}`)
+                }
+              />
             )}
           </InfoSection>
         )}
@@ -109,7 +115,12 @@ const RequestDetailsPage = () => {
         {/* Customer Info */}
         <InfoSection title="Клиент">
           <InfoRow icon="person-outline" text={request.customer} weight={500} />
-          <InfoRow icon="call-outline" text={request.customer_phone} />
+
+          <InfoRow
+            icon="call-outline"
+            text={request.customer_phone}
+            onPress={() => Linking.openURL(`tel:${request.customer_phone}`)}
+          />
         </InfoSection>
 
         {/* Address */}

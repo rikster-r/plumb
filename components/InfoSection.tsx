@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GeistText } from '@/components/GeistText';
 
@@ -11,33 +11,51 @@ interface InfoSectionProps {
 interface InfoRowProps {
   icon: keyof typeof Ionicons.glyphMap;
   text: string;
+  onPress?: () => void;
   weight?: 400 | 500 | 600 | 700;
 }
 
-export const InfoSection: React.FC<InfoSectionProps> = ({ title, children }) => (
+export const InfoSection: React.FC<InfoSectionProps> = ({
+  title,
+  children,
+}) => (
   <View style={styles.section}>
     <GeistText weight={600} style={styles.sectionTitle}>
       {title}
     </GeistText>
-    <View style={styles.card}>
-      {children}
-    </View>
+    <View style={styles.card}>{children}</View>
   </View>
 );
 
-export const InfoRow: React.FC<InfoRowProps> = ({ icon, text, weight = 400 }) => (
-  <View style={styles.infoRow}>
-    <Ionicons name={icon} size={20} color="#52525B" />
-    <GeistText weight={weight} style={styles.infoText}>
-      {text}
-    </GeistText>
-  </View>
-);
+export const InfoRow: React.FC<InfoRowProps> = ({
+  icon,
+  text,
+  onPress,
+  weight = 400,
+}) => {
+  const Wrapper = onPress ? TouchableOpacity : View;
 
-export const EmptyCard: React.FC<{ icon: keyof typeof Ionicons.glyphMap; text: string }> = ({ 
-  icon, 
-  text 
-}) => (
+  return (
+    <Wrapper
+      style={styles.infoRow}
+      onPress={onPress}
+      activeOpacity={onPress ? 0.5 : undefined}
+    >
+      <Ionicons name={icon} size={20} color="#52525B" />
+      <GeistText weight={weight} style={styles.infoText}>
+        {text}
+      </GeistText>
+      {onPress && (
+        <Ionicons name="chevron-forward-outline" size={20} color="#A1A1AA" />
+      )}
+    </Wrapper>
+  );
+};
+
+export const EmptyCard: React.FC<{
+  icon: keyof typeof Ionicons.glyphMap;
+  text: string;
+}> = ({ icon, text }) => (
   <View style={styles.emptyCard}>
     <Ionicons name={icon} size={32} color="#A1A1AA" />
     <GeistText weight={400} style={styles.emptyText}>
