@@ -58,3 +58,19 @@ export const statusConfig: Record<
     nextLabel: null,
   },
 };
+
+export const statusTabs = [
+  'Актуальные',
+  'Все',
+  'Принята',
+  'В пути',
+  'На исполнении',
+  'Выполнена',
+  'Закрыта',
+];
+
+export const priorityColors = {
+  Высокий: '#C21818',
+  Средний: '#B47D00',
+  Низкий: '#0A7E5E',
+};

@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, Linking } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { GeistText } from '@/components/GeistText';
-import { router, useLocalSearchParams } from 'expo-router';
 import { useUser } from '@/context/currentUser';
+import { useRequestActions } from '@/hooks/useRequestActions';
 import { fetcherWithToken } from '@/lib/fetcher';
 import useSWRNative from '@nandorojo/swr-react-native';
-import { statusConfig } from '../../constants/statusConfig';
-import { useRequestActions } from '@/hooks/useRequestActions';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Linking, StyleSheet, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { statusConfig } from '../../constants/requests';
 
 // Import components
-import RequestHeader from '../../components/RequestHeader';
-import { InfoSection, InfoRow } from '../../components/InfoSection';
-import ProblemSection from '../../components/ProblemSection';
-import ImagesSection from '../../components/ImagesSection';
-import NotesSection from '../../components/NotesSection';
-import TimelineSection from '../../components/TimelineSection';
-import BottomAction from '../../components/BottomAction';
 import RequestDetailsSkeleton from '@/components/RequestDetailsSkeleton';
 import { formatDateTime } from '@/utils/dates';
+import BottomAction from '../../components/BottomAction';
+import ImagesSection from '../../components/ImagesSection';
+import { InfoRow, InfoSection } from '../../components/InfoSection';
+import NotesSection from '../../components/NotesSection';
+import ProblemSection from '../../components/ProblemSection';
+import RequestHeader from '../../components/RequestHeader';
+import TimelineSection from '../../components/TimelineSection';
 
 const RequestDetailsPage = () => {
   const { id: requestId } = useLocalSearchParams();

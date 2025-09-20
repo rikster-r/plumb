@@ -1,7 +1,7 @@
-import { Alert } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
+import { Alert } from 'react-native';
 import type { KeyedMutator } from 'swr';
-import { statusConfig } from '../constants/statusConfig';
+import { statusConfig } from '../constants/requests';
 
 type Props = {
   request: Request | undefined;
