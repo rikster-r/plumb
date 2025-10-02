@@ -28,6 +28,15 @@ module.exports = {
       ],
       'expo-secure-store',
       [
+        'react-native-edge-to-edge',
+        {
+          android: {
+            parentTheme: 'Default',
+            enforceNavigationBarContrast: false,
+          },
+        },
+      ],
+      [
         'expo-notifications',
         {
           icon: './assets/icons/mainIconWithBackground.png',

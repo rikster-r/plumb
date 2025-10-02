@@ -48,7 +48,7 @@ export const UserPopover: React.FC<Props> = ({
               <View style={styles.popoverContent}>
                 <View style={styles.userInfoItem}>
                   <GeistText weight={500} style={styles.userInfoLabel}>
-                    ФИО
+                    {user?.role === "Служебный транспорт" ? "Транспорт" : "ФИО"}
                   </GeistText>
                   <GeistText weight={400} style={styles.userInfoValue}>
                     {user?.name || 'Не указано'}
