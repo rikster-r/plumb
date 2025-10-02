@@ -1,26 +1,22 @@
 import React, { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import useSWRNative from '@nandorojo/swr-react-native';
 import { statusConfig, statusTabs, priorityColors } from '@/constants/requests';
 import { useUser } from '@/context/currentUser';
-import { fetcherWithToken } from '@/lib/fetcher';
 
 import { StatusTabs } from '@/components/StatusTabs';
 import { RequestsPageHeader } from '@/components/RequestsPageHeader';
 import { UserPopover } from '@/components/UserPopover';
 import { RequestCardsList } from '@/components/RequestCardsList';
+import { useRequests } from '@/hooks/useRequests';
 
 const RequestsPage = () => {
   const [selectedStatus, setSelectedStatus] = useState('Актуальные');
   const [showUserPopover, setShowUserPopover] = useState(false);
-  const { user, token, logout } = useUser();
+  const { user, logout } = useUser();
   const router = useRouter();
 
-  const { data: requests } = useSWRNative<Request[]>(
-    [`${process.env.EXPO_PUBLIC_API_URL}/users/${user?.id}/requests`, token],
-    ([url, token]) => fetcherWithToken(url, token)
-  );
+  const { requests } = useRequests();
 
   const filteredRequests = useMemo(
     () =>
@@ -34,7 +30,10 @@ const RequestsPage = () => {
   );
 
   const activeRequestsCount = useMemo(
-    () => (requests ?? []).filter((r) => r.status !== 'завершена').length,
+    () =>
+      (requests ?? []).filter(
+        (r) => r.status !== 'Выполнена' && r.status !== 'Закрыта'
+      ).length,
     [requests]
   );
 
