@@ -1,7 +1,7 @@
 module.exports = {
   expo: {
-    name: 'Plumb',
-    slug: 'plumb',
+    name: 'ADS Мастер',
+    slug: 'ads-master',
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/icons/mainIconWithBackground.png',
@@ -13,7 +13,7 @@ module.exports = {
     },
     android: {
       edgeToEdgeEnabled: true,
-      package: 'com.riksterr.plumb',
+      package: 'com.riksterr.adsmaster',
     },
     plugins: [
       'expo-router',
@@ -50,7 +50,7 @@ module.exports = {
     extra: {
       router: {},
       eas: {
-        projectId: '99badb8d-3b90-4bfe-9d1d-52aaff8032a9',
+        projectId: '03e85369-e46c-4141-9fad-2f4bb010c4be',
       },
     },
     owner: 'riksterr',
