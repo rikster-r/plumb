@@ -14,6 +14,8 @@ module.exports = {
     android: {
       edgeToEdgeEnabled: true,
       package: 'com.riksterr.adsmaster',
+      googleServicesFile:
+        process.env.GOOGLE_SERVICES_JSON || './google-services.json',
     },
     plugins: [
       'expo-router',
