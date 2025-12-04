@@ -9,12 +9,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { GeistText } from '@/components/GeistText';
 
-interface File {
-  id?: number | string;
-  url?: string;
-  uri?: string;
-}
-
 interface ImagesSectionProps {
   files: File[];
   onAddFile: () => void;

@@ -14,12 +14,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-interface File {
-  id?: number | string;
-  url?: string;
-  uri?: string;
-}
-
 export default function ImageViewer() {
   const router = useRouter();
   const insets = useSafeAreaInsets();

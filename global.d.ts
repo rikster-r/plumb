@@ -7,6 +7,12 @@ interface User {
   active: string;
 }
 
+interface File {
+  id?: number | string;
+  url?: string;
+  uri?: string;
+}
+
 interface Request {
   id: number;
   apartment: number;
@@ -37,6 +43,6 @@ interface Request {
   note: string;
   organization: string;
 
-  files: any[];             // unclear structure, currently empty array
+  files: File[];
   users: string[];
 }
