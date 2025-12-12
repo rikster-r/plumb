@@ -16,7 +16,19 @@ export const RequestCard: React.FC<RequestCardProps> = ({
   priorityColors,
   onPress,
 }) => {
-  const statusStyle = statusConfig[request.status as keyof typeof statusConfig];
+  const statusStyle = statusConfig[request.status] || {};
+
+  const address = (typeof request.house === 'object' && request.house?.full_address) || request.organization || 'Адрес не указан';
+  const customer = request.customer || request.applicant || null;
+  const problem = request.problem || request.problem_customer || null;
+
+  const status = request.status
+    ? request.status[0].toUpperCase() + request.status.slice(1)
+    : 'Неизвестно';
+
+  const priority = request.priority
+    ? request.priority[0].toUpperCase() + request.priority.slice(1)
+    : '';
 
   return (
     <TouchableOpacity
@@ -24,72 +36,83 @@ export const RequestCard: React.FC<RequestCardProps> = ({
       onPress={() => onPress?.(String(request.id))}
       activeOpacity={0.7}
     >
+      {/* HEADER */}
       <View style={styles.requestHeader}>
         <View style={styles.requestClient}>
           <GeistText weight={600} style={styles.clientName}>
-            {request.house}
+            {address}
           </GeistText>
-          <GeistText weight={400} style={styles.clientAddress}>
-            {request.customer}
-          </GeistText>
+
+          {customer && (
+            <GeistText weight={400} style={styles.clientAddress}>
+              {customer}
+            </GeistText>
+          )}
         </View>
+
         <View
           style={[
             styles.statusBadge,
             {
-              backgroundColor: statusStyle?.backgroundColor || '#F5F5F5',
-              borderColor: statusStyle?.borderColor || '#E4E4E7',
+              backgroundColor: statusStyle.backgroundColor || '#F5F5F5',
+              borderColor: statusStyle.borderColor || '#E4E4E7',
             },
           ]}
         >
           <Ionicons
-            name={statusStyle?.icon || 'help-outline'}
+            name={statusStyle.icon || 'help-outline'}
             size={14}
-            color={statusStyle?.color || '#52525B'}
+            color={statusStyle.color || '#52525B'}
           />
           <GeistText
             weight={500}
-            style={[
-              styles.statusText,
-              { color: statusStyle?.color || '#52525B' },
-            ]}
+            style={[styles.statusText, { color: statusStyle.color || '#52525B' }]}
           >
-            {request.status.slice(0, 1).toUpperCase() + request.status.slice(1)}
+            {status}
           </GeistText>
         </View>
       </View>
 
-      <GeistText weight={400} style={styles.problemText} numberOfLines={2}>
-        {request.problem}
-      </GeistText>
-
-      <View style={styles.divider} />
-
-      <View style={styles.requestFooter}>
-        <GeistText weight={400} style={styles.timeText}>
-          {request.created_at.replace(' ', ' в ')}
+      {/* PROBLEM — only render if exists */}
+      {problem && (
+        <GeistText weight={400} style={styles.problemText} numberOfLines={2}>
+          {problem}
         </GeistText>
-        <View style={styles.footerRight}>
+      )}
+
+      {/* DIVIDER — only show if there is problem or useful footer */}
+      {(problem || request.created_at || request.priority) && (
+        <View style={styles.divider} />
+      )}
+
+      {/* FOOTER */}
+      <View style={styles.requestFooter}>
+        {request.created_at ? (
+          <GeistText weight={400} style={styles.timeText}>
+            {request.created_at.replace(' ', ' в ')}
+          </GeistText>
+        ) : (
+          <View style={{ flex: 1 }} />
+        )}
+
+        {priority && (
           <GeistText
             weight={500}
             style={[
               styles.priorityText,
               {
-                color:
-                  priorityColors[
-                    request.priority as keyof typeof priorityColors
-                  ] || '#52525B',
+                color: priorityColors[request.priority] || '#52525B',
               },
             ]}
           >
-            {request.priority.slice(0, 1).toUpperCase() +
-              request.priority.slice(1)}
+            {priority}
           </GeistText>
-        </View>
+        )}
       </View>
     </TouchableOpacity>
   );
 };
+
 
 const styles = StyleSheet.create({
   requestCard: {

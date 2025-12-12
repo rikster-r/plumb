@@ -113,34 +113,64 @@ const RequestDetailsPage = () => {
         )}
 
         {/* Customer Info */}
-        <InfoSection title="Клиент">
-          <InfoRow icon="person-outline" text={request.customer} weight={500} />
+        {(request.customer || request.customer_phone) && (
+          <InfoSection title="Клиент">
+            {request.customer && (
+              <InfoRow
+                icon="person-outline"
+                text={request.customer}
+                weight={500}
+              />
+            )}
 
-          <InfoRow
-            icon="call-outline"
-            text={request.customer_phone}
-            onPress={() => Linking.openURL(`tel:${request.customer_phone}`)}
-          />
-        </InfoSection>
+            {request.customer_phone && (
+              <InfoRow
+                icon="call-outline"
+                text={request.customer_phone}
+                onPress={() => Linking.openURL(`tel:${request.customer_phone}`)}
+              />
+            )}
+          </InfoSection>
+        )}
 
         {/* Address */}
         <InfoSection title="Адрес">
+          {/* Адрес дома + квартира */}
           <InfoRow
             icon="location-outline"
-            text={`${request.house}${request.apartment ? `, кв. ${request.apartment}` : ''}`}
+            text={
+              request.house
+                ? typeof request.house === 'string'
+                  ? `${request.house}`
+                  : `${request.house.full_address}${request.apartment ? `, кв. ${request.apartment}` : ''}`
+                : request.apartment
+                  ? `Кв. ${request.apartment}`
+                  : 'Адрес не указан'
+            }
           />
+
+          {/* Подъезд / этаж */}
           {(request.entrance || request.floor) && (
             <InfoRow
               icon="business-outline"
               text={`${request.entrance ? `Подъезд ${request.entrance}` : ''}${
                 request.entrance && request.floor ? ', ' : ''
-              }${request.floor ? `этаж ${request.floor}` : ''}`}
+              }${request.floor ? `Этаж ${request.floor}` : ''}`}
             />
           )}
-          {request.intercom_code && (
+
+          {/* Домофон: приоритет — у заявки, fallback — дом */}
+          {(request.intercom_code ||
+            (typeof request.house !== 'string' &&
+              request.house?.intercom_code)) && (
             <InfoRow
               icon="keypad-outline"
-              text={`Код домофона: ${request.intercom_code}`}
+              text={`Код домофона: ${
+                request.intercom_code ||
+                (typeof request.house !== 'string'
+                  ? request.house?.intercom_code
+                  : '')
+              }`}
             />
           )}
         </InfoSection>
@@ -154,10 +184,10 @@ const RequestDetailsPage = () => {
 
         {/* Problem Details */}
         <ProblemSection
-          category={request.category}
+          category={request.category || 'Категория не указана'}
           priority={request.priority}
-          problem={request.problem}
-          problemCustomer={request.problem_customer}
+          problem={request.problem || 'Проблема не указана'}
+          problemCustomer={request.problem_customer || 'Не указана'}
         />
 
         {/* Work Done Section */}
@@ -198,7 +228,7 @@ const RequestDetailsPage = () => {
 
         {/* Notes Section */}
         <NotesSection
-          note={request.note}
+          note={request.note || ''}
           isEditing={isEditingNote}
           newNote={newNote}
           onEditPress={handleEditNotePress}

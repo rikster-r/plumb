@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useFonts } from 'expo-font';
-import { router } from 'expo-router';
 import { useUser } from '@/context/currentUser';
 
 export const useAppInitialization = () => {
   const [appError, setAppError] = useState<Error | null>(null);
-  const [initialRoute, setInitialRoute] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
   const {
@@ -39,17 +37,6 @@ export const useAppInitialization = () => {
       setAppError(null);
     }
   }, [authError]);
-
-  // Handle navigation after app is ready
-  useEffect(() => {
-    if (isAppReady && !appError) {
-      const targetRoute = user ? '/requests' : '/(auth)/login';
-      if (initialRoute !== targetRoute) {
-        setInitialRoute(targetRoute);
-        router.replace(targetRoute);
-      }
-    }
-  }, [isAppReady, user, appError, initialRoute]);
 
   // Retry function
   const retry = async () => {

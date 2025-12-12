@@ -64,6 +64,12 @@ export const UserProvider = ({ children }: ProviderProps) => {
     mutateUser(user);
 
     // index redirects accordingly
+    // user role check
+    // if (user.role === 'admin') {
+    //   router.replace('/(tabs)/requests');
+    // } else {
+    //   router.replace('/requests');
+    // }
     router.replace('/requests');
   };
 
@@ -78,7 +84,15 @@ export const UserProvider = ({ children }: ProviderProps) => {
 
   return (
     <UserContext.Provider
-      value={{ user, token, login, logout, isLoading, error, mutate: mutateUser }}
+      value={{
+        user,
+        token,
+        login,
+        logout,
+        isLoading,
+        error,
+        mutate: mutateUser,
+      }}
     >
       {children}
     </UserContext.Provider>
