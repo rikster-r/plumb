@@ -19,7 +19,11 @@ export default function AdminTabsLayout() {
     <Tabs screenOptions={{ headerShown: false }}>
       <Tabs.Screen
         name="requests"
-        options={{ title: 'Requests' }}
+        options={{ title: 'Заявки' }}
+      />
+      <Tabs.Screen
+        name="houses"
+        options={{ title: 'Дома' }}
       />
     </Tabs>
   )
