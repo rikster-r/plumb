@@ -1,18 +1,16 @@
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View, ActivityIndicator, Text } from 'react-native';
+import { StyleSheet, View, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { statusConfig, statusTabs, priorityColors } from '@/constants/requests';
-import { useUser } from '@/context/currentUser';
-import { StatusTabs } from '@/components/StatusTabs';
-import { RequestsPageHeader } from '@/components/RequestsPageHeader';
-import { UserPopover } from '@/components/UserPopover';
-import { RequestCardsList } from '@/components/RequestCardsList';
 import { useAdminRequests } from '@/hooks/useAdminRequests';
+
+import { StatusTabs } from '@/components/StatusTabs';
+import { PageHeader } from '@/components/PageHeader';
+import { RequestCardsList } from '@/components/RequestCardsList';
+import { GeistText } from '@/components/GeistText';
 
 const AdminRequestsPage = () => {
   const [selectedStatus, setSelectedStatus] = useState('Актуальные');
-  const [showUserPopover, setShowUserPopover] = useState(false);
-  const { user, logout } = useUser();
   const router = useRouter();
 
   const {
@@ -36,11 +34,6 @@ const AdminRequestsPage = () => {
     return requests.filter((request) => request.status === selectedStatus);
   }, [selectedStatus, requests]);
 
-  const handleLogout = async () => {
-    setShowUserPopover(false);
-    await logout();
-  };
-
   const handleRequestPress = (requestId: string) => {
     router.push({
       pathname: `/requests/[id]`,
@@ -57,11 +50,7 @@ const AdminRequestsPage = () => {
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <RequestsPageHeader
-          title="Все заявки"
-          subtitle="Загрузка..."
-          onUserPress={() => setShowUserPopover(true)}
-        />
+        <PageHeader title="Все заявки" subtitle="Загрузка..." />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#007AFF" />
         </View>
@@ -72,18 +61,14 @@ const AdminRequestsPage = () => {
   if (error) {
     return (
       <View style={styles.container}>
-        <RequestsPageHeader
-          title="Все заявки"
-          subtitle="Ошибка"
-          onUserPress={() => setShowUserPopover(true)}
-        />
+        <PageHeader title="Все заявки" subtitle="Ошибка" />
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>
+          <GeistText style={styles.errorText}>
             {error?.message || 'Не удалось загрузить заявки'}
-          </Text>
-          <Text style={styles.retryText} onPress={refresh}>
+          </GeistText>
+          <GeistText style={styles.retryText} onPress={refresh}>
             Повторить попытку
-          </Text>
+          </GeistText>
         </View>
       </View>
     );
@@ -91,17 +76,7 @@ const AdminRequestsPage = () => {
 
   return (
     <View style={styles.container}>
-      <RequestsPageHeader
-        title="Все заявки"
-        onUserPress={() => setShowUserPopover(true)}
-      />
-
-      <UserPopover
-        visible={showUserPopover}
-        user={user}
-        onClose={() => setShowUserPopover(false)}
-        onLogout={handleLogout}
-      />
+      <PageHeader title="Все заявки" />
 
       <StatusTabs
         tabs={statusTabs}
@@ -122,7 +97,7 @@ const AdminRequestsPage = () => {
             style={[styles.footerLoader, { opacity: isLoadingMore ? 1 : 0 }]}
           >
             <ActivityIndicator size="small" color="#007AFF" />
-            <Text style={styles.footerText}>Загрузка</Text>
+            <GeistText style={styles.footerText}>Загрузка</GeistText>
           </View>
         }
       />

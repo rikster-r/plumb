@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { useAppInitialization } from '@/hooks/useAppInitialization';
 import * as NavigationBar from 'expo-navigation-bar';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 SplashScreen.preventAutoHideAsync();
 SplashScreen.setOptions({
@@ -85,9 +86,11 @@ export default function RootLayout() {
   return (
     <KeyboardProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <UserProvider>
-          <AppContent />
-        </UserProvider>
+        <BottomSheetModalProvider>
+          <UserProvider>
+            <AppContent />
+          </UserProvider>
+        </BottomSheetModalProvider>
       </GestureHandlerRootView>
     </KeyboardProvider>
   );
