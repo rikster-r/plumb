@@ -4,5 +4,6 @@ import { FormRow } from './FormRow';
 import { FormSection } from './FormSection';
 import { LabeledInput } from './LabeledInput';
 import { BareInput } from './BareInput';
+import { LabeledDropdown } from './LabeledDropdown';
 
-export { CheckboxField, FormActions, FormRow, FormSection, LabeledInput, BareInput };
+export { CheckboxField, FormActions, FormRow, FormSection, LabeledInput, BareInput, LabeledDropdown };

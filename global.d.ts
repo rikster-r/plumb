@@ -119,3 +119,16 @@ interface OrganizationDetailed extends Organization {
   branch_id: number;
   note: string | null;
 }
+
+interface Branch {
+  id: number;
+  name: string;
+}
+
+interface Schedule {
+  id: number;
+  working: number;
+  day_off: number;
+  start_time: string; // Format: "HH:MM"
+  end_time: string; // Format: "HH:MM"
+}

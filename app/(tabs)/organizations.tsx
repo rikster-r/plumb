@@ -182,11 +182,13 @@ const OrganizationsPage = () => {
       />
 
       {/* Bottom Sheet for Creating Organization */}
-      <CreateOrganizationBottomSheet
-        bottomSheetRef={bottomSheetRef}
-        onCreate={handleCreateOrganization}
-        onClose={() => bottomSheetRef.current?.dismiss()}
-      />
+      {bottomSheetRef && (
+        <CreateOrganizationBottomSheet
+          bottomSheetRef={bottomSheetRef}
+          onCreate={handleCreateOrganization}
+          onClose={() => bottomSheetRef.current?.dismiss()}
+        />
+      )}
     </View>
   );
 };
