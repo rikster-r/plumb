@@ -13,7 +13,7 @@ import { useUser } from '@/context/currentUser';
 import { fetcherWithToken } from '@/lib/fetcher';
 import useSWRNative from '@nandorojo/swr-react-native';
 import { type BottomSheetModal } from '@gorhom/bottom-sheet';
-// import CreateOrganizationBottomSheet from '@/components/CreateOrganizationBottomSheet';
+import CreateOrganizationBottomSheet from '@/components/CreateOrganizationBottomSheet';
 import OrganizationCard from '@/components/OrganizationCard';
 import { PageHeader } from '@/components/PageHeader';
 
@@ -182,11 +182,11 @@ const OrganizationsPage = () => {
       />
 
       {/* Bottom Sheet for Creating Organization */}
-      {/* <CreateOrganizationBottomSheet
+      <CreateOrganizationBottomSheet
         bottomSheetRef={bottomSheetRef}
         onCreate={handleCreateOrganization}
         onClose={() => bottomSheetRef.current?.dismiss()}
-      /> */}
+      />
     </View>
   );
 };
