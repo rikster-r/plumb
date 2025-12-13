@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-  StyleSheet,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, StyleSheet } from 'react-native';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import BottomSheet from './BottomSheet';
-import { GeistText } from './GeistText';
+import {
+  LabeledInput,
+  CheckboxField,
+  FormRow,
+  FormSection,
+  FormActions,
+} from './formComponents';
 
 interface FormData {
   city: string;
@@ -60,6 +59,10 @@ const CreateHouseBottomSheet = ({
 
   const [isCreating, setIsCreating] = useState(false);
 
+  const updateField = <K extends keyof FormData>(key: K, value: FormData[K]) => {
+    setFormData(prev => ({ ...prev, [key]: value }));
+  };
+
   const resetForm = () => {
     setFormData({
       city: '',
@@ -92,7 +95,7 @@ const CreateHouseBottomSheet = ({
       resetForm();
       onClose();
     } catch (err) {
-      // Error handling is done in parent
+      // Error handling done in parent
     } finally {
       setIsCreating(false);
     }
@@ -111,294 +114,140 @@ const CreateHouseBottomSheet = ({
       onDismiss={handleDismiss}
     >
       <View style={styles.formContainer}>
-        {/* === Обязательные поля === */}
-        <GeistText weight={600} style={styles.sectionTitle}>
-          Обязательные поля
-        </GeistText>
 
-        <View style={styles.formGroup}>
-          <GeistText weight={500} style={styles.label}>
-            Город *
-          </GeistText>
-          <TextInput
-            style={styles.input}
+        <FormSection title="Обязательные поля">
+          <LabeledInput
+            label="Город *"
             value={formData.city}
-            onChangeText={(t) => setFormData({ ...formData, city: t })}
+            onChangeText={(t) => updateField('city', t)}
             placeholder="Воронеж"
-            placeholderTextColor="#8E8E93"
           />
-        </View>
-
-        <View style={styles.formGroup}>
-          <GeistText weight={500} style={styles.label}>
-            Улица *
-          </GeistText>
-          <TextInput
-            style={styles.input}
+          <LabeledInput
+            label="Улица *"
             value={formData.street}
-            onChangeText={(t) => setFormData({ ...formData, street: t })}
+            onChangeText={(t) => updateField('street', t)}
             placeholder="Острогожская"
-            placeholderTextColor="#8E8E93"
           />
-        </View>
-
-        <View style={styles.formGroup}>
-          <GeistText weight={500} style={styles.label}>
-            Номер дома *
-          </GeistText>
-          <TextInput
-            style={styles.input}
+          <LabeledInput
+            label="Номер дома *"
             value={formData.number}
-            onChangeText={(t) => setFormData({ ...formData, number: t })}
+            onChangeText={(t) => updateField('number', t)}
             placeholder="158/2"
-            placeholderTextColor="#8E8E93"
           />
-        </View>
+        </FormSection>
 
-        {/* === Характеристики здания === */}
-        <GeistText weight={600} style={styles.sectionTitle}>
-          Характеристики здания
-        </GeistText>
-
-        <View style={styles.formRow}>
-          <View style={[styles.formGroup, styles.formGroupHalf]}>
-            <GeistText weight={500} style={styles.label}>
-              Подъезды
-            </GeistText>
-            <TextInput
-              style={styles.input}
+        <FormSection title="Характеристики здания">
+          <FormRow>
+            <LabeledInput
+              label="Подъезды"
               value={formData.count_entrance}
-              onChangeText={(t) =>
-                setFormData({ ...formData, count_entrance: t })
-              }
+              onChangeText={(t) => updateField('count_entrance', t)}
+              keyboardType="numeric"
               placeholder="4"
-              keyboardType="numeric"
-              placeholderTextColor="#8E8E93"
             />
-          </View>
-          <View style={[styles.formGroup, styles.formGroupHalf]}>
-            <GeistText weight={500} style={styles.label}>
-              Этажи
-            </GeistText>
-            <TextInput
-              style={styles.input}
+            <LabeledInput
+              label="Этажи"
               value={formData.count_floor}
-              onChangeText={(t) =>
-                setFormData({ ...formData, count_floor: t })
-              }
+              onChangeText={(t) => updateField('count_floor', t)}
+              keyboardType="numeric"
               placeholder="9"
-              keyboardType="numeric"
-              placeholderTextColor="#8E8E93"
             />
-          </View>
-        </View>
+          </FormRow>
 
-        <View style={styles.formRow}>
-          <View style={[styles.formGroup, styles.formGroupHalf]}>
-            <GeistText weight={500} style={styles.label}>
-              Квартиры
-            </GeistText>
-            <TextInput
-              style={styles.input}
+          <FormRow>
+            <LabeledInput
+              label="Квартиры"
               value={formData.count_apartment}
-              onChangeText={(t) =>
-                setFormData({ ...formData, count_apartment: t })
-              }
-              placeholder="72"
+              onChangeText={(t) => updateField('count_apartment', t)}
               keyboardType="numeric"
-              placeholderTextColor="#8E8E93"
+              placeholder="72"
             />
-          </View>
-          <View style={[styles.formGroup, styles.formGroupHalf]}>
-            <GeistText weight={500} style={styles.label}>
-              Площадь (м²)
-            </GeistText>
-            <TextInput
-              style={styles.input}
+            <LabeledInput
+              label="Площадь (м²)"
               value={formData.square}
-              onChangeText={(t) => setFormData({ ...formData, square: t })}
+              onChangeText={(t) => updateField('square', t)}
+              keyboardType="decimal-pad"
               placeholder="3240.50"
-              keyboardType="decimal-pad"
-              placeholderTextColor="#8E8E93"
             />
-          </View>
-        </View>
+          </FormRow>
+        </FormSection>
 
-        {/* === Информация о доступе === */}
-        <GeistText weight={600} style={styles.sectionTitle}>
-          Информация о доступе
-        </GeistText>
-
-        <View style={styles.formGroup}>
-          <GeistText weight={500} style={styles.label}>
-            Код домофона
-          </GeistText>
-          <TextInput
-            style={styles.input}
+        <FormSection title="Информация о доступе">
+          <LabeledInput
+            label="Код домофона"
             value={formData.intercom_code}
-            onChangeText={(t) =>
-              setFormData({ ...formData, intercom_code: t })
-            }
+            onChangeText={(t) => updateField('intercom_code', t)}
             placeholder="1234"
-            placeholderTextColor="#8E8E93"
           />
-        </View>
-
-        <View style={styles.formGroup}>
-          <GeistText weight={500} style={styles.label}>
-            Местонахождение ключей
-          </GeistText>
-          <TextInput
-            style={styles.input}
+          <LabeledInput
+            label="Местонахождение ключей"
             value={formData.key_location}
-            onChangeText={(t) =>
-              setFormData({ ...formData, key_location: t })
-            }
+            onChangeText={(t) => updateField('key_location', t)}
             placeholder="У консьержа"
-            placeholderTextColor="#8E8E93"
           />
-        </View>
+        </FormSection>
 
-        {/* === График обслуживания === */}
-        <GeistText weight={600} style={styles.sectionTitle}>
-          График обслуживания
-        </GeistText>
-
-        <View style={styles.formRow}>
-          <View style={[styles.formGroup, styles.formGroupHalf]}>
-            <GeistText weight={500} style={styles.label}>
-              С (ЧЧ:ММ)
-            </GeistText>
-            <TextInput
-              style={styles.input}
+        <FormSection title="График обслуживания">
+          <FormRow>
+            <LabeledInput
+              label="С (ЧЧ:ММ)"
               value={formData.maintenance_from}
-              onChangeText={(t) =>
-                setFormData({ ...formData, maintenance_from: t })
-              }
+              onChangeText={(t) => updateField('maintenance_from', t)}
               placeholder="09:00"
-              placeholderTextColor="#8E8E93"
             />
-          </View>
-          <View style={[styles.formGroup, styles.formGroupHalf]}>
-            <GeistText weight={500} style={styles.label}>
-              До (ЧЧ:ММ)
-            </GeistText>
-            <TextInput
-              style={styles.input}
+            <LabeledInput
+              label="До (ЧЧ:ММ)"
               value={formData.maintenance_to}
-              onChangeText={(t) =>
-                setFormData({ ...formData, maintenance_to: t })
-              }
+              onChangeText={(t) => updateField('maintenance_to', t)}
               placeholder="18:00"
-              placeholderTextColor="#8E8E93"
             />
-          </View>
-        </View>
+          </FormRow>
+        </FormSection>
 
-        {/* === Координаты === */}
-        <GeistText weight={600} style={styles.sectionTitle}>
-          Координаты
-        </GeistText>
-
-        <View style={styles.formRow}>
-          <View style={[styles.formGroup, styles.formGroupHalf]}>
-            <GeistText weight={500} style={styles.label}>
-              Широта
-            </GeistText>
-            <TextInput
-              style={styles.input}
+        <FormSection title="Координаты">
+          <FormRow>
+            <LabeledInput
+              label="Широта"
               value={formData.lat}
-              onChangeText={(t) => setFormData({ ...formData, lat: t })}
+              onChangeText={(t) => updateField('lat', t)}
+              keyboardType="decimal-pad"
               placeholder="51.6605"
-              keyboardType="decimal-pad"
-              placeholderTextColor="#8E8E93"
             />
-          </View>
-          <View style={[styles.formGroup, styles.formGroupHalf]}>
-            <GeistText weight={500} style={styles.label}>
-              Долгота
-            </GeistText>
-            <TextInput
-              style={styles.input}
+            <LabeledInput
+              label="Долгота"
               value={formData.long}
-              onChangeText={(t) => setFormData({ ...formData, long: t })}
-              placeholder="39.2007"
+              onChangeText={(t) => updateField('long', t)}
               keyboardType="decimal-pad"
-              placeholderTextColor="#8E8E93"
+              placeholder="39.2007"
             />
-          </View>
-        </View>
+          </FormRow>
+        </FormSection>
 
-        {/* === Коммерческая недвижимость === */}
-        <TouchableOpacity
-          style={styles.checkboxRow}
-          onPress={() =>
-            setFormData({ ...formData, commercial: !formData.commercial })
-          }
-          activeOpacity={0.7}
-        >
-          <View
-            style={[
-              styles.checkbox,
-              formData.commercial && styles.checkboxChecked,
-            ]}
-          >
-            {formData.commercial && (
-              <Ionicons name="checkmark" size={18} color="#FFFFFF" />
-            )}
-          </View>
-          <GeistText weight={400} style={styles.checkboxLabel}>
-            Коммерческая недвижимость
-          </GeistText>
-        </TouchableOpacity>
+        <CheckboxField
+          label="Коммерческая недвижимость"
+          checked={formData.commercial}
+          onToggle={() => updateField('commercial', !formData.commercial)}
+        />
 
-        {/* === Примечание === */}
-        <View style={styles.formGroup}>
-          <GeistText weight={500} style={styles.label}>
-            Примечание
-          </GeistText>
-          <TextInput
-            style={[styles.input, styles.textArea]}
+        <FormSection title="Примечание">
+          <LabeledInput
+            label="Примечание"
             value={formData.note}
-            onChangeText={(t) => setFormData({ ...formData, note: t })}
+            onChangeText={(t) => updateField('note', t)}
             placeholder="Дополнительная информация..."
-            placeholderTextColor="#8E8E93"
             multiline
             numberOfLines={4}
-            textAlignVertical="top"
+            style={styles.textArea}
           />
-        </View>
+        </FormSection>
 
-        {/* === Кнопки === */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={handleDismiss}
-            activeOpacity={0.7}
-          >
-            <GeistText weight={600} style={styles.cancelButtonText}>
-              Отмена
-            </GeistText>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.createButton,
-              isCreating && styles.createButtonDisabled,
-            ]}
-            onPress={handleCreate}
-            disabled={isCreating}
-            activeOpacity={0.7}
-          >
-            {isCreating ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <GeistText weight={600} style={styles.createButtonText}>
-                Создать
-              </GeistText>
-            )}
-          </TouchableOpacity>
-        </View>
+        <FormActions
+          onCancel={handleDismiss}
+          onSubmit={handleCreate}
+          isSubmitting={isCreating}
+          submitText="Создать"
+          cancelText="Отмена"
+        />
 
         <View style={{ height: 40 }} />
       </View>
@@ -410,94 +259,9 @@ const styles = StyleSheet.create({
   formContainer: {
     paddingHorizontal: 20,
   },
-  sectionTitle: {
-    fontSize: 18,
-    color: '#000000',
-    marginBottom: 16,
-    marginTop: 8,
-  },
-  formGroup: {
-    marginBottom: 16,
-  },
-  formGroupHalf: {
-    flex: 1,
-  },
-  formRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  label: {
-    fontSize: 14,
-    color: '#3C3C43',
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: '#F2F2F7',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: '#000000',
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
   textArea: {
     minHeight: 100,
     paddingTop: 12,
-  },
-  checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    marginTop: 8,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: '#D1D1D6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  checkboxChecked: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
-  },
-  checkboxLabel: {
-    fontSize: 16,
-    color: '#000000',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 24,
-  },
-  cancelButton: {
-    flex: 1,
-    paddingVertical: 16,
-    borderRadius: 12,
-    backgroundColor: '#F2F2F7',
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    color: '#000000',
-  },
-  createButton: {
-    flex: 1,
-    paddingVertical: 16,
-    borderRadius: 12,
-    backgroundColor: '#007AFF',
-    alignItems: 'center',
-  },
-  createButtonDisabled: {
-    opacity: 0.6,
-  },
-  createButtonText: {
-    fontSize: 16,
-    color: '#FFFFFF',
   },
 });
 

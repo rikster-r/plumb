@@ -98,6 +98,7 @@ const styles = StyleSheet.create({
   },
   childrenContainer: {
     flex: 1,
+    paddingTop: 16,
   },
   header: {
     flexDirection: 'row',
@@ -106,6 +107,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
+    borderBottomColor: '#eee',
+    borderBottomWidth: 1,
   },
   title: {
     fontSize: 16,
