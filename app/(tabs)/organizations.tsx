@@ -13,94 +13,63 @@ import { useUser } from '@/context/currentUser';
 import { fetcherWithToken } from '@/lib/fetcher';
 import useSWRNative from '@nandorojo/swr-react-native';
 import { type BottomSheetModal } from '@gorhom/bottom-sheet';
-import CreateHouseBottomSheet from '@/components/CreateHouseBottomSheet';
-import HouseCard from '@/components/HouseCard';
+// import CreateOrganizationBottomSheet from '@/components/CreateOrganizationBottomSheet';
+import OrganizationCard from '@/components/OrganizationCard';
 import { PageHeader } from '@/components/PageHeader';
 
-const HousesPage = () => {
+interface Organization {
+  id: number;
+  name: string;
+}
+
+const OrganizationsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCity, setSelectedCity] = useState('Все');
   const { user, token } = useUser();
   const bottomSheetRef = useRef<BottomSheetModal>(
     null
   ) as React.RefObject<BottomSheetModal>;
 
   const {
-    data: houses,
+    data: organizations,
     error,
     isLoading,
     mutate,
-  } = useSWRNative<House[]>(
-    user && token ? [`${process.env.EXPO_PUBLIC_API_URL}/houses`, token] : null,
+  } = useSWRNative<Organization[]>(
+    user && token
+      ? [`${process.env.EXPO_PUBLIC_API_URL}/organizations`, token]
+      : null,
     ([url, token]) => fetcherWithToken(url, token)
   );
 
-  // Get unique cities
-  const cities = useMemo(() => {
-    if (!houses) return ['Все'];
-    const citySet = new Set(houses.map((h) => h.city));
-    return ['Все', ...Array.from(citySet)];
-  }, [houses]);
+  // Filter organizations
+  const filteredOrganizations = useMemo(() => {
+    if (!organizations) return [];
 
-  // Filter houses
-  const filteredHouses = useMemo(() => {
-    if (!houses) return [];
-    let filtered = houses;
+    if (!searchQuery.trim()) return organizations;
 
-    if (selectedCity !== 'Все') {
-      filtered = filtered.filter((h) => h.city === selectedCity);
-    }
-
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (h) =>
-          (h.full_address?.toLowerCase().includes(query) ?? false) ||
-          (h.street?.toLowerCase().includes(query) ?? false) ||
-          (h.number?.toLowerCase().includes(query) ?? false)
-      );
-    }
-
-    return filtered;
-  }, [searchQuery, selectedCity, houses]);
+    const query = searchQuery.toLowerCase();
+    return organizations.filter((org) =>
+      org.name.toLowerCase().includes(query)
+    );
+  }, [searchQuery, organizations]);
 
   const handleOpenBottomSheet = useCallback(() => {
     bottomSheetRef.current?.present();
   }, []);
 
-  const handleCreateHouse = async (formData: any) => {
-    if (!formData.city || !formData.street || !formData.number) {
-      alert('Заполните обязательные поля');
+  const handleCreateOrganization = async (formData: any) => {
+    if (!formData.name) {
+      alert('Введите название организации');
       return;
     }
 
     try {
       const payload = {
-        city: formData.city,
-        street: formData.street,
-        number: formData.number,
-        count_entrance: formData.count_entrance
-          ? parseInt(formData.count_entrance)
-          : null,
-        count_floor: formData.count_floor
-          ? parseInt(formData.count_floor)
-          : null,
-        count_apartment: formData.count_apartment
-          ? parseInt(formData.count_apartment)
-          : null,
-        square: formData.square || null,
-        intercom_code: formData.intercom_code || null,
-        key_location: formData.key_location || null,
-        maintenance_from: formData.maintenance_from,
-        maintenance_to: formData.maintenance_to,
-        lat: formData.lat || null,
-        long: formData.long || null,
-        commercial: formData.commercial,
-        note: formData.note || null,
+        name: formData.name,
       };
 
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/houses`,
+        `${process.env.EXPO_PUBLIC_API_URL}/organizations`,
         {
           method: 'POST',
           headers: {
@@ -111,11 +80,11 @@ const HousesPage = () => {
         }
       );
 
-      if (!response.ok) throw new Error('Не удалось создать дом');
+      if (!response.ok) throw new Error('Не удалось создать организацию');
 
       await mutate();
     } catch (error: any) {
-      alert(error.message || 'Ошибка при создании дома');
+      alert(error.message || 'Ошибка при создании организации');
       throw error;
     }
   };
@@ -123,7 +92,7 @@ const HousesPage = () => {
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <PageHeader title="Дома" />
+        <PageHeader title="Организации" />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#007AFF" />
         </View>
@@ -134,10 +103,10 @@ const HousesPage = () => {
   if (error) {
     return (
       <View style={styles.container}>
-        <PageHeader title="Дома" />
+        <PageHeader title="Организации" />
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>
-            {error?.message || 'Не удалось загрузить дома'}
+            {error?.message || 'Не удалось загрузить организации'}
           </Text>
           <TouchableOpacity onPress={() => mutate()}>
             <Text style={styles.retryText}>Повторить попытку</Text>
@@ -151,8 +120,8 @@ const HousesPage = () => {
     <View style={styles.container}>
       {/* Header */}
       <PageHeader
-        title="Дома"
-        subtitle={`${filteredHouses.length} из ${houses?.length || 0}`}
+        title="Организации"
+        subtitle={`${filteredOrganizations.length} из ${organizations?.length || 0}`}
       />
 
       {/* Search Bar */}
@@ -166,7 +135,7 @@ const HousesPage = () => {
           />
           <TextInput
             style={styles.searchInput}
-            placeholder="Поиск по адресу..."
+            placeholder="Поиск организаций..."
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholderTextColor="#8E8E93"
@@ -190,56 +159,34 @@ const HousesPage = () => {
         </TouchableOpacity>
       </View>
 
-      {/* City Filter Tabs */}
-      <View style={styles.tabsContainer}>
-        <FlatList
-          horizontal
-          data={cities}
-          keyExtractor={(item) => item}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabsContent}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[styles.tab, selectedCity === item && styles.tabActive]}
-              onPress={() => setSelectedCity(item)}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  selectedCity === item && styles.tabTextActive,
-                ]}
-              >
-                {item}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
-      </View>
-
-      {/* Houses List */}
+      {/* Organizations List */}
       <FlatList
-        data={filteredHouses}
+        data={filteredOrganizations}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <HouseCard item={item} />}
+        renderItem={({ item }) => <OrganizationCard item={item} />}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         refreshing={isLoading}
         onRefresh={() => mutate()}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="home-outline" size={64} color="#D1D1D6" />
-            <Text style={styles.emptyText}>Дома не найдены</Text>
-            <Text style={styles.emptySubtext}>Попробуйте изменить фильтры</Text>
+            <Ionicons name="briefcase-outline" size={64} color="#D1D1D6" />
+            <Text style={styles.emptyText}>Организации не найдены</Text>
+            <Text style={styles.emptySubtext}>
+              {searchQuery
+                ? 'Попробуйте изменить запрос'
+                : 'Добавьте первую организацию'}
+            </Text>
           </View>
         }
       />
 
-      {/* Bottom Sheet for Creating House */}
-      <CreateHouseBottomSheet
+      {/* Bottom Sheet for Creating Organization */}
+      {/* <CreateOrganizationBottomSheet
         bottomSheetRef={bottomSheetRef}
-        onCreate={handleCreateHouse}
+        onCreate={handleCreateOrganization}
         onClose={() => bottomSheetRef.current?.dismiss()}
-      />
+      /> */}
     </View>
   );
 };
@@ -265,11 +212,10 @@ const styles = StyleSheet.create({
   searchRowContainer: {
     marginHorizontal: 20,
     marginTop: 16,
-    marginBottom: 12,
+    marginBottom: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     gap: 12,
   },
   searchContainer: {
@@ -293,35 +239,8 @@ const styles = StyleSheet.create({
   clearButton: {
     padding: 4,
   },
-  tabsContainer: {
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F1F1',
-  },
-  tabsContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  tab: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginHorizontal: 4,
-    backgroundColor: '#F2F2F7',
-  },
-  tabActive: {
-    backgroundColor: '#007AFF',
-  },
-  tabText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#3C3C43',
-  },
-  tabTextActive: {
-    color: '#FFFFFF',
-  },
   listContent: {
-    padding: 16,
+    paddingHorizontal: 16,
     paddingBottom: 32,
   },
   loadingContainer: {
@@ -365,4 +284,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HousesPage;
+export default OrganizationsPage;

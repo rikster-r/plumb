@@ -101,3 +101,21 @@ interface House {
   updated_at: string; // ISO 8601 format
   deleted_at: string | null; // ISO 8601 format or null
 }
+
+interface Organization {
+  id: number;
+  name: string;
+}
+
+interface OrganizationDetailed extends Organization {
+  full_name: string | null;
+  address: string | null;
+  phones: string[];
+  schedule_id: number;
+  time_from: string; // Format: "HH:MM"
+  time_end: string; // Format: "HH:MM"
+  start_cooperation: string; // Format: "DD.MM.YYYY"
+  end_cooperation: string | null; // Format: "DD.MM.YYYY"
+  branch_id: number;
+  note: string | null;
+}

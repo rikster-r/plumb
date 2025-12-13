@@ -1,13 +1,13 @@
-import { Redirect, Tabs } from 'expo-router'
-import { useUser } from '@/context/currentUser'
+import { Redirect, Tabs } from 'expo-router';
+import { useUser } from '@/context/currentUser';
 
 export default function AdminTabsLayout() {
-  const { user, isLoading } = useUser()
+  const { user, isLoading } = useUser();
 
-  if (isLoading) return null
+  if (isLoading) return null;
 
   if (!user) {
-    return <Redirect href="/(auth)/login" />
+    return <Redirect href="/(auth)/login" />;
   }
 
   // user role check
@@ -17,14 +17,9 @@ export default function AdminTabsLayout() {
 
   return (
     <Tabs screenOptions={{ headerShown: false }}>
-      <Tabs.Screen
-        name="requests"
-        options={{ title: 'Заявки' }}
-      />
-      <Tabs.Screen
-        name="houses"
-        options={{ title: 'Дома' }}
-      />
+      <Tabs.Screen name="requests" options={{ title: 'Заявки' }} />
+      <Tabs.Screen name="houses" options={{ title: 'Дома' }} />
+      <Tabs.Screen name="organizations" options={{ title: 'Организации' }} />
     </Tabs>
-  )
+  );
 }
