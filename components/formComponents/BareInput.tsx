@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, TextInput, StyleSheet, type TextInputProps } from 'react-native';
 
 type Props = Omit<TextInputProps, 'style'> & {

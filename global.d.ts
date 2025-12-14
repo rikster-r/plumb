@@ -132,3 +132,37 @@ interface Schedule {
   start_time: string; // Format: "HH:MM"
   end_time: string; // Format: "HH:MM"
 }
+
+interface AddressType {
+  id: number;
+  name: string;
+}
+
+interface ResourceOrganization {
+  id: number;
+  name: string;
+}
+
+interface Employee {
+  id: number;
+  organization_id: number;
+  full_name: string;
+  position: string;
+  phone: string;
+}
+
+interface ExceptServiceTime {
+  id?: number | null;
+  day: number; // 1-7 (Monday-Sunday)
+  time_from: string; // HH:MM
+  time_to: string; // HH:MM
+}
+
+interface HouseTariff {
+  branch_id: string;
+  organization_id: string;
+  date_maintenance_from: string; // YYYY-MM-DD
+  date_maintenance_to: string; // YYYY-MM-DD
+  rate: boolean;
+  sum_rate: string;
+}

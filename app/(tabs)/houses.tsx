@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,19 +12,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '@/context/currentUser';
 import { fetcherWithToken } from '@/lib/fetcher';
 import useSWRNative from '@nandorojo/swr-react-native';
-import { type BottomSheetModal } from '@gorhom/bottom-sheet';
-import CreateHouseBottomSheet from '@/components/CreateHouseBottomSheet';
 import HouseCard from '@/components/HouseCard';
 import { PageHeader } from '@/components/PageHeader';
+import { useRouter } from 'expo-router';
 
 const HousesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('Все');
   const { user, token } = useUser();
-  const bottomSheetRef = useRef<BottomSheetModal>(
-    null
-  ) as React.RefObject<BottomSheetModal>;
-
+  const router = useRouter();
   const {
     data: houses,
     error,
@@ -65,60 +61,8 @@ const HousesPage = () => {
   }, [searchQuery, selectedCity, houses]);
 
   const handleOpenBottomSheet = useCallback(() => {
-    bottomSheetRef.current?.present();
-  }, []);
-
-  const handleCreateHouse = async (formData: any) => {
-    if (!formData.city || !formData.street || !formData.number) {
-      alert('Заполните обязательные поля');
-      return;
-    }
-
-    try {
-      const payload = {
-        city: formData.city,
-        street: formData.street,
-        number: formData.number,
-        count_entrance: formData.count_entrance
-          ? parseInt(formData.count_entrance)
-          : null,
-        count_floor: formData.count_floor
-          ? parseInt(formData.count_floor)
-          : null,
-        count_apartment: formData.count_apartment
-          ? parseInt(formData.count_apartment)
-          : null,
-        square: formData.square || null,
-        intercom_code: formData.intercom_code || null,
-        key_location: formData.key_location || null,
-        maintenance_from: formData.maintenance_from,
-        maintenance_to: formData.maintenance_to,
-        lat: formData.lat || null,
-        long: formData.long || null,
-        commercial: formData.commercial,
-        note: formData.note || null,
-      };
-
-      const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/houses`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!response.ok) throw new Error('Не удалось создать дом');
-
-      await mutate();
-    } catch (error: any) {
-      alert(error.message || 'Ошибка при создании дома');
-      throw error;
-    }
-  };
+    router.push('/houses/create');
+  }, [router]);
 
   if (isLoading) {
     return (
@@ -232,13 +176,6 @@ const HousesPage = () => {
             <Text style={styles.emptySubtext}>Попробуйте изменить фильтры</Text>
           </View>
         }
-      />
-
-      {/* Bottom Sheet for Creating House */}
-      <CreateHouseBottomSheet
-        bottomSheetRef={bottomSheetRef}
-        onCreate={handleCreateHouse}
-        onClose={() => bottomSheetRef.current?.dismiss()}
       />
     </View>
   );
