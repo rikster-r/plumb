@@ -285,7 +285,7 @@ const CreateOrganizationBottomSheet = ({
               </View>
             ))}
           </View>
-          ``
+          
           {errors.phones && (
             <GeistText style={styles.errorText}>{errors.phones[0]}</GeistText>
           )}
