@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Pressable, View } from 'react-native';
 
-// Custom tab button with press feedback
 const TabBarButton = ({ children, onPress }: any) => (
   <Pressable
     onPress={onPress}
@@ -36,7 +35,6 @@ export default function AdminTabsLayout() {
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: '#8E8E93',
         tabBarStyle: {
-          backgroundColor: '#F9F9F9',
           borderTopWidth: 0,
           elevation: 5,
           shadowColor: '#000',
