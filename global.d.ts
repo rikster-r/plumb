@@ -102,6 +102,25 @@ interface House {
   deleted_at: string | null; // ISO 8601 format or null
 }
 
+interface HouseDetailed extends House {
+  exist_time: string;   // "DD.MM.YYYY HH:mm"
+  arrival_time: string; // "DD.MM.YYYY HH:mm"
+
+  execpt_service_times: ExceptServiceTime[];
+
+  house_tariff: HouseTariff;
+
+  barrier: boolean;
+  basement: boolean;
+  technical_floor: boolean;
+
+  vru: boolean | null;
+  dhw: boolean | null;
+  cws: boolean | null;
+  heating_unit: boolean | null;
+  pump: boolean | null;
+}
+
 interface Organization {
   id: number;
   name: string;
@@ -158,11 +177,16 @@ interface ExceptServiceTime {
   time_to: string; // HH:MM
 }
 
-interface HouseTariff {
+interface HouseTariffCreate {
   branch_id: string;
   organization_id: string;
   date_maintenance_from: string; // YYYY-MM-DD
   date_maintenance_to: string; // YYYY-MM-DD
   rate: boolean;
-  sum_rate: string;
+  sum_rate: string | null;
+}
+
+interface HouseTariff extends HouseTariffCreate {
+  id: number;
+  house_id: number;
 }

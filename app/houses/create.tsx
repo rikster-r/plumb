@@ -42,7 +42,7 @@ interface HouseInfo {
   maintenance_to: string; // HH:MM
   square: string;
   exceptServiceTime: ExceptServiceTime[];
-  houseTariff: HouseTariff;
+  houseTariff: HouseTariffCreate;
   address_type_id: string;
   commercial: boolean;
 }

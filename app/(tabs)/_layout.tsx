@@ -92,6 +92,12 @@ export default function AdminTabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="houses/[id]"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

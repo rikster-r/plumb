@@ -60,7 +60,7 @@ const HousesPage = () => {
     return filtered;
   }, [searchQuery, selectedCity, houses]);
 
-  const handleOpenBottomSheet = useCallback(() => {
+  const handleCreateRedirect = useCallback(() => {
     router.push('/houses/create');
   }, [router]);
 
@@ -127,7 +127,7 @@ const HousesPage = () => {
 
         <TouchableOpacity
           style={styles.addButton}
-          onPress={handleOpenBottomSheet}
+          onPress={handleCreateRedirect}
           activeOpacity={0.7}
         >
           <Ionicons name="add" size={24} color="#FFFFFF" />
@@ -164,7 +164,17 @@ const HousesPage = () => {
       <FlatList
         data={filteredHouses}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <HouseCard item={item} />}
+        renderItem={({ item }) => (
+          <HouseCard
+            item={item}
+            onPress={() =>
+              router.push({
+                pathname: `/houses/[id]`,
+                params: { id: item.id.toString() },
+              })
+            }
+          />
+        )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         refreshing={isLoading}
