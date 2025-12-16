@@ -15,7 +15,7 @@ type BottomActionBarProps = {
   actions: Action[];
 };
 
-export const BottomActionBar = ({ actions }: BottomActionBarProps) => {
+const BottomActionBar = ({ actions }: BottomActionBarProps) => {
   const insets = useSafeAreaInsets();
 
   return (

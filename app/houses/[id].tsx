@@ -1,5 +1,6 @@
-
+import BottomActionBar from '@/components/BottomActionBar';
 import { GeistText } from '@/components/GeistText';
+import { useUser } from '@/context/currentUser';
 import { useHouseDetails } from '@/hooks/useHouseDetails';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -13,15 +14,23 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import BottomActionBar from '@/components/BottomActionBar';
+import { mutate as mutateGlobal } from 'swr';
 
 const DAYS_OF_WEEK = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
 const HouseDetailPage = () => {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { house, branch, organization, addressType, error, isLoading, mutate } =
-    useHouseDetails(id);
+  const { token } = useUser();
+  const {
+    house,
+    branch,
+    organization,
+    addressType,
+    error,
+    isLoading,
+    mutate: mutateHouse,
+  } = useHouseDetails(id);
 
   const openInMaps = () => {
     if (house?.lat && house?.long) {
@@ -35,6 +44,8 @@ const HouseDetailPage = () => {
     //router.push(`/house/edit/${id}`);
   };
 
+  console.log(id);
+
   const handleDelete = () => {
     Alert.alert('Удалить дом', 'Вы уверены, что хотите удалить этот дом?', [
       {
@@ -46,15 +57,24 @@ const HouseDetailPage = () => {
         style: 'destructive',
         onPress: async () => {
           try {
-            const response = await fetch(`/api/houses/${id}`, {
-              method: 'DELETE',
-            });
+            const response = await fetch(
+              `${process.env.EXPO_PUBLIC_API_URL}/houses/${id}`,
+              {
+                method: 'DELETE',
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
 
             if (!response.ok) {
+              const errorData = await response.json();
+              console.error('Delete failed:', errorData);
               throw new Error('Failed to delete house');
             }
 
-            // After successful deletion, navigate back
+            await mutateGlobal(`${process.env.EXPO_PUBLIC_API_URL}/houses`); // refresh and wait for completion
             router.back();
           } catch (err) {
             Alert.alert('Ошибка', 'Не удалось удалить дом. Попробуйте снова.');
@@ -99,7 +119,7 @@ const HouseDetailPage = () => {
           <GeistText weight={600} style={styles.errorText}>
             Не удалось загрузить данные
           </GeistText>
-          <TouchableOpacity onPress={() => mutate()} style={styles.retryButton}>
+          <TouchableOpacity onPress={() => mutateHouse()} style={styles.retryButton}>
             <GeistText weight={600} style={styles.retryText}>
               Повторить попытку
             </GeistText>

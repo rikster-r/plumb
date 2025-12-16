@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   LabeledInput,
@@ -90,7 +90,7 @@ const HouseOrganizationStep = ({ formData, updateFormData, errors, referenceData
                   value={phone}
                   onChangeText={(t) => updatePhone(index, t)}
                   placeholder="+7 (___) ___-__-__"
-                  keyboardType="phone-pad"
+                  keyboardType="default"
                   style={orgErrors.phones ? styles.inputError : undefined}
                 />
               </View>

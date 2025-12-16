@@ -1,14 +1,14 @@
-import React, { useState, useMemo } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  Alert,
-  TouchableOpacity,
-} from 'react-native';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import useSWRNative from '@nandorojo/swr-react-native';
+import { useRouter } from 'expo-router';
+import React, { useMemo, useState } from 'react';
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { GeistText } from '@/components/GeistText';
 import { FormActions } from '@/components/formComponents';
@@ -17,10 +17,11 @@ import { fetcherWithToken } from '@/lib/fetcher';
 
 // Import step components (to be created)
 import HouseInfoStep from '@/components/createHouseSteps/HouseInfoStep';
-import HouseTariffStep from '@/components/createHouseSteps/HouseTariffStep';
 import HouseOrganizationStep from '@/components/createHouseSteps/HouseOrganizationStep';
-import HouseTechnicalStep from '@/components/createHouseSteps/HouseTechnicalStep';
 import HouseReviewStep from '@/components/createHouseSteps/HouseReviewStep';
+import HouseTariffStep from '@/components/createHouseSteps/HouseTariffStep';
+import HouseTechnicalStep from '@/components/createHouseSteps/HouseTechnicalStep';
+import { mutate } from 'swr';
 
 // Reference data interfaces
 interface HouseInfo {
@@ -350,6 +351,8 @@ const CreateHouseScreen = () => {
     }
   };
 
+  console.log(errors);
+
   // Create house
   const handleCreate = async () => {
     if (!validateCurrentStep()) return;
@@ -420,12 +423,49 @@ const CreateHouseScreen = () => {
         if (response.status === 422) {
           const errorData = await response.json();
           if (errorData.errors) {
-            setErrors(errorData.errors);
+            /*
+            Map over returned object like this 
+              {"info.houseTariff.branch_id": [""]]} 
+            and turn into like this 
+              {"info": {"houseTariff": {"branch_id": [""]}}}
+            */
+            const formattedErrors: FormErrors = Object.entries(
+              errorData.errors
+            ).reduce((acc: FormErrors, [path, value]) => {
+              const keys = path.split('.');
+              const errorValue = value as string[];
+
+              let current: any = acc;
+
+              for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
+
+                // last key → assign value
+                if (i === keys.length - 1) {
+                  current[key] = errorValue;
+                } else {
+                  // create object if missing
+                  if (!current[key]) {
+                    current[key] = {};
+                  }
+                  current = current[key];
+                }
+              }
+
+              return acc;
+            }, {});
+            setErrors(formattedErrors);
+
             // Navigate to first step with errors
-            const errorStep = Object.keys(errorData.errors)[0];
-            if (errorStep === 'info') setCurrentStep(0);
-            else if (errorStep === 'organization') setCurrentStep(2);
-            else if (errorStep === 'other') setCurrentStep(3);
+            if ('houseTariff' in formattedErrors.info) {
+              setCurrentStep(1);
+            } else if (formattedErrors.info) {
+              setCurrentStep(0);
+            } else if (formattedErrors.organization) {
+              setCurrentStep(2);
+            } else if (formattedErrors.other) {
+              setCurrentStep(3);
+            }
           }
           throw new Error('Validation error');
         }
@@ -438,6 +478,8 @@ const CreateHouseScreen = () => {
           onPress: () => router.back(),
         },
       ]);
+
+      mutate(`${process.env.EXPO_PUBLIC_API_URL}/houses`);
     } catch (err: any) {
       if (err.message !== 'Validation error') {
         Alert.alert('Ошибка', 'Произошла ошибка при создании дома');
