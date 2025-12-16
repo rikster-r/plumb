@@ -74,7 +74,7 @@ interface House {
   count_entrance: number | null;
   count_floor: number | null;
   count_apartment: number | null;
-  square: string; // Stored as string in API (e.g., "799.30")
+  square: string | null; // Stored as string in API (e.g., "799.30")
 
   // Access information
   intercom_code: string | null;
@@ -168,6 +168,7 @@ interface Employee {
   full_name: string;
   position: string;
   phone: string;
+  note: string | null;
 }
 
 interface ExceptServiceTime {

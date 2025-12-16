@@ -1,26 +1,22 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useUser } from '@/context/currentUser';
-import { fetcherWithToken } from '@/lib/fetcher';
-import useSWRNative from '@nandorojo/swr-react-native';
-import { type BottomSheetModal } from '@gorhom/bottom-sheet';
 import CreateOrganizationBottomSheet from '@/components/CreateOrganizationBottomSheet';
 import OrganizationCard from '@/components/OrganizationCard';
 import { PageHeader } from '@/components/PageHeader';
-
-interface Organization {
-  id: number;
-  name: string;
-}
+import { useUser } from '@/context/currentUser';
+import { fetcherWithToken } from '@/lib/fetcher';
+import { Ionicons } from '@expo/vector-icons';
+import { type BottomSheetModal } from '@gorhom/bottom-sheet';
+import useSWRNative from '@nandorojo/swr-react-native';
+import { useRouter } from 'expo-router';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 const OrganizationsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -28,6 +24,7 @@ const OrganizationsPage = () => {
   const bottomSheetRef = useRef<BottomSheetModal>(
     null
   ) as React.RefObject<BottomSheetModal>;
+  const router = useRouter();
 
   const {
     data: organizations,
@@ -125,27 +122,27 @@ const OrganizationsPage = () => {
       />
 
       {/* Search Bar */}
-      <View style={styles.searchRowContainer}>
+      <View style={styles.searchSection}>
         <View style={styles.searchContainer}>
           <Ionicons
             name="search-outline"
             size={20}
-            color="#8E8E93"
+            color="#71717A"
             style={styles.searchIcon}
           />
           <TextInput
             style={styles.searchInput}
-            placeholder="Поиск организаций..."
+            placeholder="Поиск по адресу..."
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholderTextColor="#8E8E93"
+            placeholderTextColor="#A1A1AA"
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity
               onPress={() => setSearchQuery('')}
               style={styles.clearButton}
             >
-              <Ionicons name="close-circle" size={20} color="#8E8E93" />
+              <Ionicons name="close-circle" size={20} color="#71717A" />
             </TouchableOpacity>
           )}
         </View>
@@ -163,7 +160,17 @@ const OrganizationsPage = () => {
       <FlatList
         data={filteredOrganizations}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <OrganizationCard item={item} />}
+        renderItem={({ item }) => (
+          <OrganizationCard
+            item={item}
+            onPress={() =>
+              router.push({
+                pathname: `/organizations/[id]`,
+                params: { id: item.id },
+              })
+            }
+          />
+        )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         refreshing={isLoading}
@@ -198,51 +205,56 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FCFCFD',
   },
-  addButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  searchRowContainer: {
-    marginHorizontal: 20,
-    marginTop: 16,
-    marginBottom: 16,
+  searchSection: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 12,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F1F1',
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     gap: 12,
   },
   searchContainer: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
-    paddingHorizontal: 12,
-    borderRadius: 12,
+    backgroundColor: '#FAFAFA',
+    paddingHorizontal: 14,
+    borderRadius: 100,
     height: 44,
-    flexGrow: 1,
+    borderWidth: 1,
+    borderColor: '#E4E4E7',
   },
   searchIcon: {
     marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
-    color: '#000000',
+    fontSize: 15,
+    color: '#18181B',
     paddingVertical: 0,
   },
   clearButton: {
     padding: 4,
   },
+  addButton: {
+    width: 44,
+    height: 44,
+    borderRadius: '100%',
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
   listContent: {
     paddingHorizontal: 16,
+    paddingTop: 12,
     paddingBottom: 32,
   },
   loadingContainer: {

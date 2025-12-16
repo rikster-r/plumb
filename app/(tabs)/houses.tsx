@@ -172,7 +172,7 @@ const HousesPage = () => {
               Дома не найдены
             </GeistText>
             <GeistText weight={400} style={styles.emptySubtext}>
-              Попробуйте изменить фильтры
+              Попробуйте изменить запрос
             </GeistText>
           </View>
         }
