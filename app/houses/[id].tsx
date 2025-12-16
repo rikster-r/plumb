@@ -1,16 +1,17 @@
-import React from 'react';
-import {
-  View,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Linking,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
 import { GeistText } from '@/components/GeistText';
 import { useHouseDetails } from '@/hooks/useHouseDetails';
+import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 const DAYS_OF_WEEK = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
@@ -25,6 +26,41 @@ const HouseDetailPage = () => {
       const url = `https://maps.google.com/?q=${house.lat},${house.long}`;
       Linking.openURL(url);
     }
+  };
+
+  const handleEdit = () => {
+    // Navigate to edit page or show edit modal
+    //router.push(`/house/edit/${id}`);
+  };
+
+  const handleDelete = () => {
+    Alert.alert('Удалить дом', 'Вы уверены, что хотите удалить этот дом?', [
+      {
+        text: 'Отмена',
+        style: 'cancel',
+      },
+      {
+        text: 'Удалить',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const response = await fetch(`/api/houses/${id}`, {
+              method: 'DELETE',
+            });
+
+            if (!response.ok) {
+              throw new Error('Failed to delete house');
+            }
+
+            // After successful deletion, navigate back
+            router.back();
+          } catch (err) {
+            Alert.alert('Ошибка', 'Не удалось удалить дом. Попробуйте снова.');
+            console.error('Delete error:', err);
+          }
+        },
+      },
+    ]);
   };
 
   if (isLoading) {
@@ -447,6 +483,36 @@ const HouseDetailPage = () => {
           </View>
         )}
       </ScrollView>
+
+      {/* Fixed Bottom Action Bar */}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={handleEdit}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="create-outline" size={24} color="#18181B" />
+          <GeistText weight={500} style={styles.actionButtonText}>
+            Редактировать
+          </GeistText>
+        </TouchableOpacity>
+
+        <View style={styles.actionDivider} />
+
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={handleDelete}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="trash-outline" size={24} color="#18181B" />
+          <GeistText
+            weight={500}
+            style={[styles.actionButtonText, styles.deleteText]}
+          >
+            Удалить
+          </GeistText>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -458,7 +524,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 50,
+    paddingBottom: 130, // Extra padding for bottom bar
   },
   header: {
     flexDirection: 'row',
@@ -753,24 +819,44 @@ const styles = StyleSheet.create({
     color: '#27272A',
     lineHeight: 22,
   },
-  detailRow: {
+  // Bottom Action Bar Styles
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-  },
-  detailRowWithBorder: {
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: '#F1F1F1',
-    marginTop: 10,
+    borderTopColor: '#E4E4E7',
+    paddingBottom: 34, // Safe area for iPhone home indicator
+    paddingTop: 12,
+    paddingHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  detailLabel: {
-    fontSize: 14,
-    color: '#52525B',
+  actionButton: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
   },
-  detailValue: {
-    fontSize: 14,
+  actionButtonText: {
+    fontSize: 13,
     color: '#18181B',
+    marginTop: 4,
+  },
+  deleteText: {
+    color: '#18181B',
+  },
+  actionDivider: {
+    width: 1,
+    backgroundColor: '#E4E4E7',
+    marginHorizontal: 16,
   },
 });
 

@@ -495,57 +495,6 @@ const CreateHouseScreen = () => {
         <View style={styles.headerSpacer} />
       </View>
 
-      {/* Step indicator */}
-      {/* <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.stepIndicatorScroll}
-        contentContainerStyle={styles.stepIndicator}
-      >
-        {STEPS.map((step, index) => (
-          <React.Fragment key={step.id}>
-            <TouchableOpacity
-              onPress={() => handleStepClick(index)}
-              disabled={index > currentStep}
-              style={styles.stepItem}
-            >
-              <View
-                style={[
-                  styles.stepCircle,
-                  index === currentStep && styles.stepCircleActive,
-                  index < currentStep && styles.stepCircleCompleted,
-                  index > currentStep && styles.stepCircleDisabled,
-                ]}
-              >
-                {index < currentStep ? (
-                  <Ionicons name="checkmark" size={18} color="#FFFFFF" />
-                ) : (
-                  <GeistText
-                    weight={600}
-                    style={[
-                      styles.stepNumber,
-                      index === currentStep && styles.stepNumberActive,
-                    ]}
-                  >
-                    {index + 1}
-                  </GeistText>
-                )}
-              </View>
-              <GeistText
-                weight={index === currentStep ? 600 : 400}
-                style={[
-                  styles.stepTitle,
-                  index === currentStep && styles.stepTitleActive,
-                ]}
-              >
-                {step.title}
-              </GeistText>
-            </TouchableOpacity>
-            {index < STEPS.length - 1 && <View style={styles.stepConnector} />}
-          </React.Fragment>
-        ))}
-      </ScrollView> */}
-
       {/* Step content */}
       <ScrollView
         style={styles.stepContent}
@@ -671,7 +620,7 @@ const styles = StyleSheet.create({
   },
   navigationContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingBottom: 20,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#E5E5EA',

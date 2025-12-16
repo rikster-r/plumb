@@ -280,7 +280,7 @@ const ReviewItem = ({
 const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
-    paddingVertical: 24,
+    paddingBottom: 24,
     paddingHorizontal: 20,
   },
   title: {
