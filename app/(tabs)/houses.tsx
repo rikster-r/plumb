@@ -15,6 +15,8 @@ import useSWRNative from '@nandorojo/swr-react-native';
 import HouseCard from '@/components/HouseCard';
 import { PageHeader } from '@/components/PageHeader';
 import { useRouter } from 'expo-router';
+import { GeistText } from '@/components/GeistText';
+import { StatusTabs } from '@/components/StatusTabs';
 
 const HousesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -69,7 +71,7 @@ const HousesPage = () => {
       <View style={styles.container}>
         <PageHeader title="Дома" />
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
+          <ActivityIndicator size="large" color="#18181B" />
         </View>
       </View>
     );
@@ -80,11 +82,14 @@ const HousesPage = () => {
       <View style={styles.container}>
         <PageHeader title="Дома" />
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>
-            {error?.message || 'Не удалось загрузить дома'}
-          </Text>
-          <TouchableOpacity onPress={() => mutate()}>
-            <Text style={styles.retryText}>Повторить попытку</Text>
+          <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
+          <GeistText weight={600} style={styles.errorText}>
+            Не удалось загрузить дома
+          </GeistText>
+          <TouchableOpacity onPress={() => mutate()} style={styles.retryButton}>
+            <GeistText weight={600} style={styles.retryText}>
+              Повторить попытку
+            </GeistText>
           </TouchableOpacity>
         </View>
       </View>
@@ -100,12 +105,12 @@ const HousesPage = () => {
       />
 
       {/* Search Bar */}
-      <View style={styles.searchRowContainer}>
+      <View style={styles.searchSection}>
         <View style={styles.searchContainer}>
           <Ionicons
             name="search-outline"
             size={20}
-            color="#8E8E93"
+            color="#71717A"
             style={styles.searchIcon}
           />
           <TextInput
@@ -113,14 +118,14 @@ const HousesPage = () => {
             placeholder="Поиск по адресу..."
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholderTextColor="#8E8E93"
+            placeholderTextColor="#A1A1AA"
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity
               onPress={() => setSearchQuery('')}
               style={styles.clearButton}
             >
-              <Ionicons name="close-circle" size={20} color="#8E8E93" />
+              <Ionicons name="close-circle" size={20} color="#71717A" />
             </TouchableOpacity>
           )}
         </View>
@@ -135,30 +140,11 @@ const HousesPage = () => {
       </View>
 
       {/* City Filter Tabs */}
-      <View style={styles.tabsContainer}>
-        <FlatList
-          horizontal
-          data={cities}
-          keyExtractor={(item) => item}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabsContent}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[styles.tab, selectedCity === item && styles.tabActive]}
-              onPress={() => setSelectedCity(item)}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  selectedCity === item && styles.tabTextActive,
-                ]}
-              >
-                {item}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
-      </View>
+      <StatusTabs
+        tabs={cities}
+        selected={selectedCity}
+        onSelect={setSelectedCity}
+      />
 
       {/* Houses List */}
       <FlatList
@@ -181,9 +167,13 @@ const HousesPage = () => {
         onRefresh={() => mutate()}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="home-outline" size={64} color="#D1D1D6" />
-            <Text style={styles.emptyText}>Дома не найдены</Text>
-            <Text style={styles.emptySubtext}>Попробуйте изменить фильтры</Text>
+            <Ionicons name="home-outline" size={64} color="#D4D4D8" />
+            <GeistText weight={600} style={styles.emptyText}>
+              Дома не найдены
+            </GeistText>
+            <GeistText weight={400} style={styles.emptySubtext}>
+              Попробуйте изменить фильтры
+            </GeistText>
           </View>
         }
       />
@@ -194,51 +184,54 @@ const HousesPage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FCFCFD',
+    backgroundColor: '#FAFAFA',
   },
-  addButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  searchRowContainer: {
-    marginHorizontal: 20,
-    marginTop: 16,
-    marginBottom: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  searchSection: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 12,
     backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F1F1',
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
   },
   searchContainer: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
-    paddingHorizontal: 12,
-    borderRadius: 12,
+    backgroundColor: '#FAFAFA',
+    paddingHorizontal: 14,
+    borderRadius: 100,
     height: 44,
-    flexGrow: 1,
+    borderWidth: 1,
+    borderColor: '#E4E4E7',
   },
   searchIcon: {
     marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
-    color: '#000000',
+    fontSize: 15,
+    color: '#18181B',
     paddingVertical: 0,
   },
   clearButton: {
     padding: 4,
+  },
+  addButton: {
+    width: 44,
+    height: 44,
+    borderRadius: "100%",
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   tabsContainer: {
     backgroundColor: '#FFFFFF',
@@ -248,21 +241,23 @@ const styles = StyleSheet.create({
   tabsContent: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+    gap: 8,
   },
   tab: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    marginHorizontal: 4,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FAFAFA',
+    borderWidth: 1,
+    borderColor: '#E4E4E7',
   },
   tabActive: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#1F5EDB',
+    borderColor: '#D0E0FF',
   },
   tabText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#3C3C43',
+    fontSize: 14,
+    color: '#52525B',
   },
   tabTextActive: {
     color: '#FFFFFF',
@@ -283,31 +278,36 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   errorText: {
-    fontSize: 16,
-    color: '#FF3B30',
+    fontSize: 17,
+    color: '#EF4444',
+    marginTop: 16,
     textAlign: 'center',
-    marginBottom: 16,
+  },
+  retryButton: {
+    marginTop: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: '#1F5EDB',
+    borderRadius: 8,
   },
   retryText: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
+    fontSize: 15,
+    color: '#FFFFFF',
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 60,
+    paddingVertical: 80,
   },
   emptyText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#3C3C43',
+    fontSize: 18,
+    color: '#18181B',
     marginTop: 16,
   },
   emptySubtext: {
-    fontSize: 15,
-    color: '#8E8E93',
+    fontSize: 14,
+    color: '#71717A',
     marginTop: 4,
   },
 });

@@ -1,3 +1,4 @@
+
 import { GeistText } from '@/components/GeistText';
 import { useHouseDetails } from '@/hooks/useHouseDetails';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import BottomActionBar from '@/components/BottomActionBar';
 
 const DAYS_OF_WEEK = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
@@ -485,34 +487,21 @@ const HouseDetailPage = () => {
       </ScrollView>
 
       {/* Fixed Bottom Action Bar */}
-      <View style={styles.bottomBar}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={handleEdit}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="create-outline" size={24} color="#18181B" />
-          <GeistText weight={500} style={styles.actionButtonText}>
-            Редактировать
-          </GeistText>
-        </TouchableOpacity>
-
-        <View style={styles.actionDivider} />
-
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={handleDelete}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="trash-outline" size={24} color="#18181B" />
-          <GeistText
-            weight={500}
-            style={[styles.actionButtonText, styles.deleteText]}
-          >
-            Удалить
-          </GeistText>
-        </TouchableOpacity>
-      </View>
+      <BottomActionBar
+        actions={[
+          {
+            label: 'Редактировать',
+            icon: 'create-outline',
+            onPress: handleEdit,
+          },
+          {
+            label: 'Удалить',
+            icon: 'trash-outline',
+            onPress: handleDelete,
+            destructive: true,
+          },
+        ]}
+      />
     </View>
   );
 };
@@ -818,45 +807,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#27272A',
     lineHeight: 22,
-  },
-  // Bottom Action Bar Styles
-  bottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E4E4E7',
-    paddingBottom: 34, // Safe area for iPhone home indicator
-    paddingTop: 12,
-    paddingHorizontal: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-  },
-  actionButtonText: {
-    fontSize: 13,
-    color: '#18181B',
-    marginTop: 4,
-  },
-  deleteText: {
-    color: '#18181B',
-  },
-  actionDivider: {
-    width: 1,
-    backgroundColor: '#E4E4E7',
-    marginHorizontal: 16,
   },
 });
 

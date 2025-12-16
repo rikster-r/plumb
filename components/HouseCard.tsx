@@ -128,6 +128,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: '#E4E4E7',
   },
   cardHeader: {
     flexDirection: 'row',

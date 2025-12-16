@@ -41,7 +41,7 @@ export default function AdminTabsLayout() {
           shadowOffset: { width: 0, height: -2 },
           shadowOpacity: 0.1,
           shadowRadius: 8,
-          height: 60 + insets.bottom,
+          height: 70 + insets.bottom,
           paddingBottom: insets.bottom + 6,
           paddingTop: 8,
         },

@@ -46,13 +46,15 @@ const OrganizationCard: React.FC<OrganizationCardProps> = ({ item, onPress }) =>
 const styles = StyleSheet.create({
   organizationCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
     marginBottom: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E4E4E7',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 3,
+    elevation: 1,
   },
   cardContent: {
     flexDirection: 'row',
