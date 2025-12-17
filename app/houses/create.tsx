@@ -23,7 +23,6 @@ import HouseTariffStep from '@/components/createHouseSteps/HouseTariffStep';
 import HouseTechnicalStep from '@/components/createHouseSteps/HouseTechnicalStep';
 import { mutate } from 'swr';
 
-// Reference data interfaces
 interface HouseInfo {
   city: string;
   region: string;
@@ -57,16 +56,16 @@ interface HouseOrganization {
 
 interface HouseOther {
   barrier: boolean;
-  barrier_not: string;
+  barrier_not: string | null;
   basement: boolean;
-  basement_not: string;
+  basement_not: string | null;
   technical_floor: boolean;
-  technical_floor_not: string;
-  vru: string;
-  dhw: string;
-  cws: string;
-  heating_unit: string;
-  pump: string;
+  technical_floor_not: string | null;
+  vru: string | null;
+  dhw: string | null;
+  cws: string | null;
+  heating_unit: string | null;
+  pump: string | null;
   resource_organizations: string[]; // Array of resource org IDs
 }
 
@@ -375,9 +374,9 @@ const CreateHouseScreen = () => {
             : null,
           address_type_id: parseInt(formData.info.address_type_id),
           houseTariff: {
-            branch_id: parseInt(formData.info.houseTariff.branch_id),
+            branch_id: parseInt(formData.info.houseTariff.branch_id as string),
             organization_id: parseInt(
-              formData.info.houseTariff.organization_id
+              formData.info.houseTariff.organization_id as string
             ),
             date_maintenance_from:
               formData.info.houseTariff.date_maintenance_from || null,

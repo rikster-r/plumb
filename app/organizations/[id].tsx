@@ -38,8 +38,7 @@ const OrganizationDetailPage = () => {
   };
 
   const handleEdit = () => {
-    // Navigate to edit page
-    // router.push(`/organization/edit/${id}`);
+    router.push({ pathname: `/organizations/[id]/edit`, params: { id } });
   };
 
   const handleDelete = () => {

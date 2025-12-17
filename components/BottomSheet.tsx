@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { GeistText } from './GeistText';
 import { useFocusEffect } from '@react-navigation/native';
 
-interface GenericBottomSheetProps {
+interface BottomSheetProps {
   sheetRef: React.RefObject<BottomSheetModal | null>;
   title?: string;
   children: ReactNode;
@@ -18,13 +18,13 @@ interface GenericBottomSheetProps {
   onDismiss?: () => void;
 }
 
-const GenericBottomSheet = ({
+const BottomSheet = ({
   sheetRef,
   title,
   children,
   snapPoints = ['70%'],
   onDismiss,
-}: GenericBottomSheetProps) => {
+}: BottomSheetProps) => {
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
       <TouchableOpacity
@@ -43,16 +43,14 @@ const GenericBottomSheet = ({
       const onBackPress = () => {
         if (sheetRef.current) {
           sheetRef.current.dismiss();
-          return true; // prevent default back behavior
+          return true;
         }
         return false;
       };
-
       const subscription = BackHandler.addEventListener(
         'hardwareBackPress',
         onBackPress
       );
-
       return () => subscription.remove();
     }, [sheetRef])
   );
@@ -69,17 +67,23 @@ const GenericBottomSheet = ({
       handleIndicatorStyle={styles.handleIndicator}
       onDismiss={onDismiss}
     >
-      <BottomSheetScrollView style={styles.sheet}>
-        <View style={styles.header}>
-          {title && (
-            <GeistText style={styles.title} weight={600}>
-              {title}
-            </GeistText>
-          )}
-          <TouchableOpacity onPress={() => sheetRef.current?.dismiss()}>
-            <Ionicons name="close" size={24} color="#666" />
-          </TouchableOpacity>
-        </View>
+      {/* Sticky Header */}
+      <View style={styles.header}>
+        {title && (
+          <GeistText style={styles.title} weight={600}>
+            {title}
+          </GeistText>
+        )}
+        <TouchableOpacity onPress={() => sheetRef.current?.dismiss()}>
+          <Ionicons name="close" size={24} color="#666" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Scrollable content */}
+      <BottomSheetScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer}
+      >
         <View style={styles.childrenContainer}>{children}</View>
       </BottomSheetScrollView>
     </BottomSheetModal>
@@ -96,10 +100,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
   },
-  childrenContainer: {
-    flex: 1,
-    paddingTop: 16,
-  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -107,14 +107,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
+    backgroundColor: '#fff',
     borderBottomColor: '#eee',
     borderBottomWidth: 1,
+    zIndex: 10,
   },
   title: {
     fontSize: 16,
     fontWeight: '600',
     color: '#000',
   },
+  scrollView: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  contentContainer: {
+    paddingBottom: 40,
+  },
+  childrenContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+  },
 });
 
-export default GenericBottomSheet;
+export default BottomSheet;

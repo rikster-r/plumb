@@ -40,8 +40,7 @@ const HouseDetailPage = () => {
   };
 
   const handleEdit = () => {
-    // Navigate to edit page or show edit modal
-    //router.push(`/house/edit/${id}`);
+    router.push({ pathname: `/houses/[id]/edit`, params: { id } });
   };
 
   const handleDelete = () => {
@@ -117,7 +116,10 @@ const HouseDetailPage = () => {
           <GeistText weight={600} style={styles.errorText}>
             Не удалось загрузить данные
           </GeistText>
-          <TouchableOpacity onPress={() => mutateHouse()} style={styles.retryButton}>
+          <TouchableOpacity
+            onPress={() => mutateHouse()}
+            style={styles.retryButton}
+          >
             <GeistText weight={600} style={styles.retryText}>
               Повторить попытку
             </GeistText>

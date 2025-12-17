@@ -1,6 +1,11 @@
-// components/FormActions.tsx
-import { View, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
 import { GeistText } from '../GeistText';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
   onCancel: () => void;
@@ -8,6 +13,7 @@ type Props = {
   isSubmitting?: boolean;
   submitText?: string;
   cancelText?: string;
+  stickToBottom?: boolean;
 };
 
 export const FormActions = ({
@@ -16,35 +22,66 @@ export const FormActions = ({
   isSubmitting = false,
   submitText = 'Создать',
   cancelText = 'Отмена',
-}: Props) => (
-  <View style={styles.container}>
-    <TouchableOpacity style={styles.cancel} onPress={onCancel} activeOpacity={0.7}>
-      <GeistText weight={600} style={styles.cancelText}>
-        {cancelText}
-      </GeistText>
-    </TouchableOpacity>
-    <TouchableOpacity
-      style={[styles.submit, isSubmitting && styles.submitDisabled]}
-      onPress={onSubmit}
-      disabled={isSubmitting}
-      activeOpacity={0.7}
-    >
-      {isSubmitting ? (
-        <ActivityIndicator color="#FFFFFF" />
-      ) : (
-        <GeistText weight={600} style={styles.submitText}>
-          {submitText}
+  stickToBottom = false,
+}: Props) => {
+  const insets = useSafeAreaInsets();
+
+  const actions = (
+    <View style={styles.actions}>
+      <TouchableOpacity
+        style={styles.cancel}
+        onPress={onCancel}
+        activeOpacity={0.7}
+      >
+        <GeistText weight={600} style={styles.cancelText}>
+          {cancelText}
         </GeistText>
-      )}
-    </TouchableOpacity>
-  </View>
-);
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.submit, isSubmitting && styles.submitDisabled]}
+        onPress={onSubmit}
+        disabled={isSubmitting}
+        activeOpacity={0.7}
+      >
+        {isSubmitting ? (
+          <ActivityIndicator color="#FFFFFF" />
+        ) : (
+          <GeistText weight={600} style={styles.submitText}>
+            {submitText}
+          </GeistText>
+        )}
+      </TouchableOpacity>
+    </View>
+  );
+
+  if (!stickToBottom) {
+    return actions;
+  }
+
+  return (
+    <View style={[styles.stickyWrapper, { paddingBottom: insets.bottom + 12 }]}>
+      {actions}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-  container: {
+  stickyWrapper: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E5EA',
+  },
+  actions: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 24,
+    maxHeight: 80,
   },
   cancel: {
     flex: 1,

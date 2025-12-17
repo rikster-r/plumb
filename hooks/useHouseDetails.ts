@@ -45,7 +45,7 @@ export function useHouseDetails(id: string) {
   const branch = useMemo(() => {
     if (!branches || !house?.house_tariff?.branch_id) return null;
     return branches.find(
-      (b) => b.id === parseInt(house.house_tariff.branch_id)
+      (b) => b.id === parseInt(house.house_tariff.branch_id as string)
     );
   }, [branches, house?.house_tariff?.branch_id]);
 

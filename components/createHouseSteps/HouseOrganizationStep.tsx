@@ -99,7 +99,7 @@ const HouseOrganizationStep = ({ formData, updateFormData, errors, referenceData
                   onPress={() => removePhone(index)}
                   style={styles.removeButton}
                 >
-                  <Ionicons name="trash-outline" size={22} color="#FF3B30" />
+                  <Ionicons name="close-outline" size={24} color="#FF3B30" />
                 </TouchableOpacity>
               )}
             </View>
