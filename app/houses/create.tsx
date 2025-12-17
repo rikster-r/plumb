@@ -351,8 +351,6 @@ const CreateHouseScreen = () => {
     }
   };
 
-  console.log(errors);
-
   // Create house
   const handleCreate = async () => {
     if (!validateCurrentStep()) return;

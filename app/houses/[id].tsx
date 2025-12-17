@@ -44,8 +44,6 @@ const HouseDetailPage = () => {
     //router.push(`/house/edit/${id}`);
   };
 
-  console.log(id);
-
   const handleDelete = () => {
     Alert.alert('Удалить дом', 'Вы уверены, что хотите удалить этот дом?', [
       {
