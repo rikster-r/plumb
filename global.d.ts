@@ -138,6 +138,20 @@ interface OrganizationDetailed extends Organization {
   note: string | null;
 }
 
+interface OrganizationFormData {
+  name: string;
+  phones: string[];
+  schedule_id: string;
+  time_from: string;
+  time_end: string;
+  start_cooperation: string;
+  branch_id: string;
+  full_name: string | null;
+  address: string | null;
+  end_cooperation: string | null;
+  note: string | null;
+}
+
 interface Branch {
   id: number;
   name: string;

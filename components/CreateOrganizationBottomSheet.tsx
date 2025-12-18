@@ -17,32 +17,7 @@ import { useUser } from '@/context/currentUser';
 import useSWRNative from '@nandorojo/swr-react-native';
 import { fetcherWithToken } from '@/lib/fetcher';
 
-interface OrganizationFormData {
-  name: string;
-  full_name: string;
-  address: string;
-  phones: string[];
-  schedule_id: string;
-  time_from: string;
-  time_end: string;
-  start_cooperation: string;
-  end_cooperation: string;
-  branch_id: string;
-  note: string;
-}
 
-interface Branch {
-  id: number;
-  name: string;
-}
-
-interface Schedule {
-  id: number;
-  working: number;
-  day_off: number;
-  start_time: string; // Format: "HH:MM"
-  end_time: string; // Format: "HH:MM"
-}
 
 interface FormErrors {
   [key: string]: string[];

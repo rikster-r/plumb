@@ -17,6 +17,7 @@ interface MultiSelectFieldProps {
   placeholder?: string;
   error?: string[];
   loading?: boolean;
+  emptyStateText?: string;
 }
 
 const MultiSelectField = ({
@@ -27,6 +28,7 @@ const MultiSelectField = ({
   placeholder = 'Выберите элементы',
   error,
   loading = false,
+  emptyStateText = 'Ничего не найдено',
 }: MultiSelectFieldProps) => {
   const sheetRef = useRef<null | any>(null);
 
@@ -80,7 +82,11 @@ const MultiSelectField = ({
         title="Выберите элементы"
         snapPoints={['70%']}
       >
-        {options.length > 0 ? (
+        {options.length === 0 ? (
+          <GeistText style={styles.emptyText}>
+            {loading ? 'Загрузка...' : emptyStateText}
+          </GeistText>
+        ) : (
           options.map((item) => {
             const isSelected = selectedValues.includes(item.value);
             return (
@@ -113,10 +119,6 @@ const MultiSelectField = ({
               </TouchableOpacity>
             );
           })
-        ) : (
-          <GeistText style={styles.emptyText}>
-            {loading ? 'Загрузка...' : 'Ничего не найдено'}
-          </GeistText>
         )}
       </BottomSheet>
     </View>

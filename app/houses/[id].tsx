@@ -31,6 +31,7 @@ const HouseDetailPage = () => {
     isLoading,
     mutate: mutateHouse,
   } = useHouseDetails(id);
+  console.log(house)
 
   const openInMaps = () => {
     if (house?.lat && house?.long) {

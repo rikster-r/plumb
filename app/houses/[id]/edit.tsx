@@ -5,6 +5,7 @@ import { NavigationTabs } from '@/components/formComponents';
 
 import EditHouseInfo from '@/components/editHouseTabs/EditInfo';
 import EditExtra from '@/components/editHouseTabs/EditExtra';
+import EditHouseOrganization from '@/components/editHouseTabs/EditOrganization'
 
 const tabs = [
   { key: 'info', label: 'Инфо' },
@@ -30,7 +31,7 @@ const HouseEditScreen = () => {
       {/* Render content based on activeTab */}
       <View style={styles.formContainer}>
         {activeTab === 'info' && <EditHouseInfo />}
-        {activeTab === 'oo' && <></>}
+        {activeTab === 'oo' && <EditHouseOrganization/>}
         {activeTab === 'other' && <EditExtra />}
         {activeTab === 'files' && <></>}
       </View>
