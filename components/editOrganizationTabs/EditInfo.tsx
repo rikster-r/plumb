@@ -313,7 +313,7 @@ const OrganizationEditScreen = () => {
           </FormSection>
 
           <FormSection title="Контакты">
-            <View style={{ gap: 12, marginTop: 12 }}>
+            <View style={{ gap: 12 }}>
               {formData.phones.map((phone, index) => (
                 <View key={index} style={styles.phoneRow}>
                   <View style={{ flex: 1 }}>
@@ -463,8 +463,9 @@ const styles = StyleSheet.create({
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 8,
     paddingVertical: 8,
+    marginBottom: 16,
   },
   addButtonText: {
     fontSize: 15,

@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigationTabs } from '@/components/formComponents';
 
 import EditOrgInfo from '@/components/editOrganizationTabs/EditInfo';
+import { EditOrgEmployees } from '@/components/editOrganizationTabs/EditEmployees';
 
 const tabs = [
   { key: 'info', label: 'Инфо' },
@@ -28,6 +29,7 @@ const HouseEditScreen = () => {
       {/* Render content based on activeTab */}
       <View style={styles.formContainer}>
         {activeTab === 'info' && <EditOrgInfo />}
+        {activeTab === 'employees' && <EditOrgEmployees />}
       </View>
     </View>
   );
