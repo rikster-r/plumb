@@ -20,10 +20,9 @@ import { GeistText } from '@/components/GeistText';
 import { useHouseDetails } from '@/hooks/useHouseDetails';
 import { useOrganizationDetails } from '@/hooks/useOrganizationDetails';
 import { useUser } from '@/context/currentUser';
-import useSWRNative from '@nandorojo/swr-react-native';
-import { fetcherWithToken } from '@/lib/fetcher';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useDeduplicatedSchedules } from '@/hooks/useDeduplicatedSchedules';
 
 interface HouseOrganizationFormData {
   address: string;
@@ -35,7 +34,7 @@ interface HouseOrganizationFormData {
 const EditHouseOrganization = () => {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { user, token } = useUser();
+  const { token } = useUser();
   const { house, isLoading: houseLoading } = useHouseDetails(id);
   const insets = useSafeAreaInsets();
 
@@ -48,6 +47,7 @@ const EditHouseOrganization = () => {
     employees,
     isLoading: orgLoading,
   } = useOrganizationDetails(organizationId);
+  const { schedules, schedulesLoading } = useDeduplicatedSchedules();
 
   const [formData, setFormData] = useState<HouseOrganizationFormData>({
     address: '',
@@ -58,16 +58,6 @@ const EditHouseOrganization = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
-
-  // Fetch schedules
-  const { data: schedules, isLoading: schedulesLoading } = useSWRNative<
-    Schedule[]
-  >(
-    user && token
-      ? [`${process.env.EXPO_PUBLIC_API_URL}/schedules`, token]
-      : null,
-    ([url, token]) => fetcherWithToken(url, token)
-  );
 
   // Initialize form with organization data
   useEffect(() => {

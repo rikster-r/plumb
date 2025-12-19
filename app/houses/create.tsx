@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import useSWRNative from '@nandorojo/swr-react-native';
 import { useRouter } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Alert,
   ScrollView,
@@ -22,6 +22,7 @@ import HouseReviewStep from '@/components/createHouseSteps/HouseReviewStep';
 import HouseTariffStep from '@/components/createHouseSteps/HouseTariffStep';
 import HouseTechnicalStep from '@/components/createHouseSteps/HouseTechnicalStep';
 import { mutate } from 'swr';
+import { useDeduplicatedSchedules } from '@/hooks/useDeduplicatedSchedules';
 
 interface HouseInfo {
   city: string;
@@ -183,25 +184,7 @@ const CreateHouseScreen = () => {
     ([url, token]) => fetcherWithToken(url, token)
   );
 
-  const { data: schedulesRaw, isLoading: schedulesLoading } = useSWRNative<
-    Schedule[]
-  >(
-    user && token
-      ? [`${process.env.EXPO_PUBLIC_API_URL}/schedules`, token]
-      : null,
-    ([url, token]) => fetcherWithToken(url, token)
-  );
-
-  // Deduplicate schedules
-  const schedules = useMemo(() => {
-    if (!schedulesRaw) return [];
-    const map = new Map<string, Schedule>();
-    for (const s of schedulesRaw) {
-      const key = `${s.working}-${s.day_off}-${s.start_time}-${s.end_time}`;
-      if (!map.has(key)) map.set(key, s);
-    }
-    return Array.from(map.values());
-  }, [schedulesRaw]);
+  const { schedules, schedulesLoading } = useDeduplicatedSchedules();
 
   const { data: resourceOrganizations, isLoading: resourceOrgsLoading } =
     useSWRNative<ResourceOrganization[]>(

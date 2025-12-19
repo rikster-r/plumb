@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
@@ -16,8 +16,7 @@ import {
 import { useUser } from '@/context/currentUser';
 import useSWRNative from '@nandorojo/swr-react-native';
 import { fetcherWithToken } from '@/lib/fetcher';
-
-
+import { useDeduplicatedSchedules } from '@/hooks/useDeduplicatedSchedules';
 
 interface FormErrors {
   [key: string]: string[];
@@ -48,28 +47,7 @@ const CreateOrganizationBottomSheet = ({
     note: '',
   });
   const { user, token } = useUser();
-  const { data: schedulesRaw, isLoading: schedulesLoading } = useSWRNative<
-    Schedule[]
-  >(
-    user && token
-      ? [`${process.env.EXPO_PUBLIC_API_URL}/schedules`, token]
-      : null,
-    ([url, token]) => fetcherWithToken(url, token)
-  );
-  const schedules = useMemo(() => {
-    if (!schedulesRaw) return [];
-
-    const map = new Map<string, Schedule>();
-
-    for (const s of schedulesRaw) {
-      const key = `${s.working}-${s.day_off}-${s.start_time}-${s.end_time}`;
-      if (!map.has(key)) {
-        map.set(key, s);
-      }
-    }
-
-    return Array.from(map.values());
-  }, [schedulesRaw]);
+  const { schedules, schedulesLoading } = useDeduplicatedSchedules();
 
   const { data: branches, isLoading: branchesLoading } = useSWRNative<Branch[]>(
     user && token
@@ -145,7 +123,7 @@ const CreateOrganizationBottomSheet = ({
       'branch_id',
     ];
     requiredFields.forEach((field) => {
-      if (!formData[field].toString().trim()) {
+      if (!formData[field] || !formData[field].toString().trim()) {
         newErrors[field] = ['Обязательное поле.'];
       }
     });
@@ -220,13 +198,13 @@ const CreateOrganizationBottomSheet = ({
           />
           <LabeledInput
             label="Полное юридическое название"
-            value={formData.full_name}
+            value={formData.full_name ?? ''}
             onChangeText={(t) => updateField('full_name', t)}
             placeholder="Общество с ограниченной ответственностью..."
           />
           <LabeledInput
             label="Юридический адрес"
-            value={formData.address}
+            value={formData.address ?? ''}
             onChangeText={(t) => updateField('address', t)}
             placeholder="Москва, ул. Ленина, д. 1"
           />
@@ -260,7 +238,7 @@ const CreateOrganizationBottomSheet = ({
               </View>
             ))}
           </View>
-          
+
           {errors.phones && (
             <GeistText style={styles.errorText}>{errors.phones[0]}</GeistText>
           )}
@@ -320,7 +298,7 @@ const CreateOrganizationBottomSheet = ({
             />
             <LabeledInput
               label="Окончание"
-              value={formData.end_cooperation}
+              value={formData.end_cooperation ?? ""}
               onChangeText={(t) => updateField('end_cooperation', t)}
               placeholder="31.12.2026"
             />
@@ -330,7 +308,7 @@ const CreateOrganizationBottomSheet = ({
         <FormSection title="Дополнительно">
           <LabeledInput
             label="Примечание"
-            value={formData.note}
+            value={formData.note ?? ""}
             onChangeText={(t) => updateField('note', t)}
             placeholder="Дополнительная информация..."
             multiline

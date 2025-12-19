@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -23,6 +23,7 @@ import useSWRNative from '@nandorojo/swr-react-native';
 import { fetcherWithToken } from '@/lib/fetcher';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useDeduplicatedSchedules } from '@/hooks/useDeduplicatedSchedules';
 
 interface OrganizationFormData {
   name: string;
@@ -56,6 +57,7 @@ const OrganizationEditScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user, token } = useUser();
   const { organization, isLoading: orgLoading } = useOrganizationDetails(id);
+  const { schedules, schedulesLoading } = useDeduplicatedSchedules();
   const insets = useSafeAreaInsets();
 
   const [formData, setFormData] = useState<OrganizationFormData>({
@@ -74,16 +76,6 @@ const OrganizationEditScreen = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
-
-  // Fetch schedules
-  const { data: schedulesRaw, isLoading: schedulesLoading } = useSWRNative<
-    Schedule[]
-  >(
-    user && token
-      ? [`${process.env.EXPO_PUBLIC_API_URL}/schedules`, token]
-      : null,
-    ([url, token]) => fetcherWithToken(url, token)
-  );
 
   // Fetch branches
   const { data: branches, isLoading: branchesLoading } = useSWRNative<Branch[]>(
@@ -237,17 +229,6 @@ const OrganizationEditScreen = () => {
       setIsSaving(false);
     }
   };
-
-  // Deduplicate schedules
-  const schedules = useMemo(() => {
-    if (!schedulesRaw) return [];
-    const map = new Map<string, Schedule>();
-    for (const s of schedulesRaw) {
-      const key = `${s.working}-${s.day_off}-${s.start_time}-${s.end_time}`;
-      if (!map.has(key)) map.set(key, s);
-    }
-    return Array.from(map.values());
-  }, [schedulesRaw]);
 
   const scheduleOptions =
     schedules?.map((schedule) => ({
