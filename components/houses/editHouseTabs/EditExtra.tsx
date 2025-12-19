@@ -19,6 +19,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface HouseOther {
@@ -178,7 +179,7 @@ const HouseEditExtrasScreen = () => {
   return (
     <>
       <View style={[styles.container, { paddingBottom: insets.bottom + 100 }]}>
-        <ScrollView
+        <KeyboardAwareScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
         >
@@ -313,7 +314,7 @@ const HouseEditExtrasScreen = () => {
               />
             )}
           </FormSection>
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </View>
       <FormActions
         onCancel={() => router.back()}

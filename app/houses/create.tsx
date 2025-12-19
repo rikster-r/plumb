@@ -2,13 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import useSWRNative from '@nandorojo/swr-react-native';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { GeistText } from '@/components/GeistText';
 import { FormActions } from '@/components/formComponents';
@@ -23,6 +17,8 @@ import HouseTariffStep from '@/components/houses/createHouseSteps/HouseTariffSte
 import HouseTechnicalStep from '@/components/houses/createHouseSteps/HouseTechnicalStep';
 import { mutate } from 'swr';
 import { useDeduplicatedSchedules } from '@/hooks/useDeduplicatedSchedules';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface HouseInfo {
   city: string;
@@ -101,6 +97,7 @@ const CreateHouseScreen = () => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [isCreating, setIsCreating] = useState(false);
+  const insets = useSafeAreaInsets();
 
   // Initialize form data with empty values
   const [formData, setFormData] = useState<HouseFormData>({
@@ -518,7 +515,7 @@ const CreateHouseScreen = () => {
       </View>
 
       {/* Step content */}
-      <ScrollView
+      <KeyboardAwareScrollView
         style={styles.stepContent}
         contentContainerStyle={styles.stepContentContainer}
         showsVerticalScrollIndicator={false}
@@ -531,10 +528,15 @@ const CreateHouseScreen = () => {
         />
 
         <View style={{ height: 20 }} />
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* Navigation buttons */}
-      <View style={styles.navigationContainer}>
+      <View
+        style={[
+          styles.navigationContainer,
+          { paddingBottom: insets.bottom + 20 },
+        ]}
+      >
         <FormActions
           onCancel={handleCancel}
           onSubmit={
@@ -642,7 +644,7 @@ const styles = StyleSheet.create({
   },
   navigationContainer: {
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingTop: 12,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#E5E5EA',

@@ -21,6 +21,7 @@ import { useUser } from '@/context/currentUser';
 import useSWRNative from '@nandorojo/swr-react-native';
 import { fetcherWithToken } from '@/lib/fetcher';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 interface HouseInfo {
   city: string;
@@ -286,7 +287,7 @@ const EditHouseInfo = () => {
   return (
     <>
       <View style={{ flex: 1, paddingBottom: insets.bottom + 80 }}>
-        <ScrollView
+        <KeyboardAwareScrollView
           style={[styles.scrollView]}
           showsVerticalScrollIndicator={false}
         >
@@ -489,7 +490,7 @@ const EditHouseInfo = () => {
               numberOfLines={4}
             />
           </FormSection>
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </View>
       <FormActions
         onCancel={() => router.back()}

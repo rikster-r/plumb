@@ -24,6 +24,7 @@ import { fetcherWithToken } from '@/lib/fetcher';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useDeduplicatedSchedules } from '@/hooks/useDeduplicatedSchedules';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 interface OrganizationFormData {
   name: string;
@@ -254,7 +255,7 @@ const OrganizationEditScreen = () => {
   return (
     <>
       <View style={[styles.container, { paddingBottom: insets.bottom + 100 }]}>
-        <ScrollView
+        <KeyboardAwareScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
         >
@@ -385,7 +386,7 @@ const OrganizationEditScreen = () => {
               numberOfLines={4}
             />
           </FormSection>
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </View>
       <FormActions
         onCancel={() => router.back()}

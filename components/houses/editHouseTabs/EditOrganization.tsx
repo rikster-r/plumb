@@ -23,6 +23,7 @@ import { useUser } from '@/context/currentUser';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useDeduplicatedSchedules } from '@/hooks/useDeduplicatedSchedules';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 interface HouseOrganizationFormData {
   address: string;
@@ -216,7 +217,7 @@ const EditHouseOrganization = () => {
   return (
     <>
       <View style={[styles.container, { paddingBottom: insets.bottom + 80 }]}>
-        <ScrollView
+        <KeyboardAwareScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
         >
@@ -296,7 +297,7 @@ const EditHouseOrganization = () => {
               <GeistText style={styles.errorText}>{errors.employees}</GeistText>
             )}
           </FormSection>
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </View>
       <FormActions
         onCancel={() => router.back()}

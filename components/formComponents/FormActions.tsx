@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { GeistText } from '../GeistText';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
 
 type Props = {
   onCancel: () => void;
@@ -27,7 +28,7 @@ export const FormActions = ({
   const insets = useSafeAreaInsets();
 
   const actions = (
-    <View style={styles.actions}>
+    <KeyboardStickyView style={styles.actions}>
       <TouchableOpacity
         style={styles.cancel}
         onPress={onCancel}
@@ -52,7 +53,7 @@ export const FormActions = ({
           </GeistText>
         )}
       </TouchableOpacity>
-    </View>
+    </KeyboardStickyView>
   );
 
   if (!stickToBottom) {

@@ -298,7 +298,7 @@ const CreateOrganizationBottomSheet = ({
             />
             <LabeledInput
               label="Окончание"
-              value={formData.end_cooperation ?? ""}
+              value={formData.end_cooperation ?? ''}
               onChangeText={(t) => updateField('end_cooperation', t)}
               placeholder="31.12.2026"
             />
@@ -308,7 +308,7 @@ const CreateOrganizationBottomSheet = ({
         <FormSection title="Дополнительно">
           <LabeledInput
             label="Примечание"
-            value={formData.note ?? ""}
+            value={formData.note ?? ''}
             onChangeText={(t) => updateField('note', t)}
             placeholder="Дополнительная информация..."
             multiline
@@ -323,17 +323,13 @@ const CreateOrganizationBottomSheet = ({
           submitText="Создать"
           cancelText="Отмена"
         />
-
-        <View style={{ height: 40 }} />
       </View>
     </BottomSheet>
   );
 };
 
 const styles = StyleSheet.create({
-  formContainer: {
-    paddingHorizontal: 20,
-  },
+  formContainer: {},
   label: {
     fontSize: 14,
     color: '#3C3C43',

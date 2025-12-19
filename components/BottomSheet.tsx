@@ -3,12 +3,12 @@ import { StyleSheet, View, TouchableOpacity, BackHandler } from 'react-native';
 import {
   BottomSheetBackdropProps,
   BottomSheetModal,
-  BottomSheetScrollView,
 } from '@gorhom/bottom-sheet';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { GeistText } from './GeistText';
 import { useFocusEffect } from '@react-navigation/native';
+import BottomSheetKeyboardAwareScrollView from '@/components/BottomSheetKeyboardAwareScrollView';
 
 interface BottomSheetProps {
   sheetRef: React.RefObject<BottomSheetModal | null>;
@@ -80,12 +80,15 @@ const BottomSheet = ({
       </View>
 
       {/* Scrollable content */}
-      <BottomSheetScrollView
+      <BottomSheetKeyboardAwareScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}
+        keyboardDismissMode="interactive"
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={24}
       >
         <View style={styles.childrenContainer}>{children}</View>
-      </BottomSheetScrollView>
+      </BottomSheetKeyboardAwareScrollView>
     </BottomSheetModal>
   );
 };
