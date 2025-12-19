@@ -10,15 +10,15 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { statusConfig } from '../../constants/requests';
 
 // Import components
-import RequestDetailsSkeleton from '@/components/RequestDetailsSkeleton';
+import RequestDetailsSkeleton from '@/components/requests/requestDetailsSections/RequestDetailsSkeleton';
 import { formatDateTime } from '@/utils/dates';
-import BottomAction from '../../components/BottomAction';
-import ImagesSection from '../../components/ImagesSection';
-import { InfoRow, InfoSection } from '../../components/InfoSection';
-import NotesSection from '../../components/NotesSection';
-import ProblemSection from '../../components/ProblemSection';
-import RequestHeader from '../../components/RequestHeader';
-import TimelineSection from '../../components/TimelineSection';
+import BottomAction from '../../components/requests/BottomRequestAction';
+import ImagesSection from '../../components/requests/requestDetailsSections/ImagesSection';
+import { InfoRow, InfoSection } from '../../components/requests/requestDetailsSections/InfoSection';
+import NotesSection from '../../components/requests/requestDetailsSections/NotesSection';
+import ProblemSection from '../../components/requests/requestDetailsSections/ProblemSection';
+import RequestHeader from '../../components/requests/RequestHeader';
+import TimelineSection from '../../components/requests/requestDetailsSections/TimelineSection';
 
 const RequestDetailsPage = () => {
   const { id: requestId } = useLocalSearchParams();

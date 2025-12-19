@@ -3,8 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigationTabs } from '@/components/formComponents';
 
-import EditOrgInfo from '@/components/editOrganizationTabs/EditInfo';
-import { EditOrgEmployees } from '@/components/editOrganizationTabs/EditEmployees';
+import EditOrgInfo from '@/components/organizations/editOrganizationTabs/EditInfo';
+import { EditOrgEmployees } from '@/components/organizations/editOrganizationTabs/EditEmployees';
 
 const tabs = [
   { key: 'info', label: 'Инфо' },

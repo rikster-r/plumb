@@ -1,13 +1,13 @@
-import React, { useMemo, useState } from 'react';
-import { StyleSheet, View, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
-import { statusConfig, statusTabs, priorityColors } from '@/constants/requests';
+import { priorityColors, statusConfig, statusTabs } from '@/constants/requests';
 import { useAdminRequests } from '@/hooks/useAdminRequests';
+import { useRouter } from 'expo-router';
+import React, { useMemo, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
-import { StatusTabs } from '@/components/StatusTabs';
-import { PageHeader } from '@/components/PageHeader';
-import { RequestCardsList } from '@/components/RequestCardsList';
 import { GeistText } from '@/components/GeistText';
+import { PageHeader } from '@/components/PageHeader';
+import { RequestCardsList } from '@/components/requests/RequestCardsList';
+import { StatusTabs } from '@/components/StatusTabs';
 
 const AdminRequestsPage = () => {
   const [selectedStatus, setSelectedStatus] = useState('Актуальные');

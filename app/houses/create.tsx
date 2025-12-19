@@ -16,11 +16,11 @@ import { useUser } from '@/context/currentUser';
 import { fetcherWithToken } from '@/lib/fetcher';
 
 // Import step components (to be created)
-import HouseInfoStep from '@/components/createHouseSteps/HouseInfoStep';
-import HouseOrganizationStep from '@/components/createHouseSteps/HouseOrganizationStep';
-import HouseReviewStep from '@/components/createHouseSteps/HouseReviewStep';
-import HouseTariffStep from '@/components/createHouseSteps/HouseTariffStep';
-import HouseTechnicalStep from '@/components/createHouseSteps/HouseTechnicalStep';
+import HouseInfoStep from '@/components/houses/createHouseSteps/HouseInfoStep';
+import HouseOrganizationStep from '@/components/houses/createHouseSteps/HouseOrganizationStep';
+import HouseReviewStep from '@/components/houses/createHouseSteps/HouseReviewStep';
+import HouseTariffStep from '@/components/houses/createHouseSteps/HouseTariffStep';
+import HouseTechnicalStep from '@/components/houses/createHouseSteps/HouseTechnicalStep';
 import { mutate } from 'swr';
 import { useDeduplicatedSchedules } from '@/hooks/useDeduplicatedSchedules';
 

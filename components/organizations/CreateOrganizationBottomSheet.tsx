@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
-import BottomSheet from './BottomSheet';
-import { GeistText } from './GeistText';
+import BottomSheet from '../BottomSheet';
+import { GeistText } from '../GeistText';
 
 import {
   LabeledInput,
@@ -12,7 +12,7 @@ import {
   FormSection,
   FormActions,
   BareInput,
-} from './formComponents';
+} from '../formComponents';
 import { useUser } from '@/context/currentUser';
 import useSWRNative from '@nandorojo/swr-react-native';
 import { fetcherWithToken } from '@/lib/fetcher';

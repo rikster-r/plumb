@@ -1,6 +1,6 @@
+import { GeistText } from '@/components/GeistText';
 import React, { useRef } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
-import { GeistText } from '@/components/GeistText';
 import { RequestCard } from './RequestCard';
 
 interface RequestsListProps {

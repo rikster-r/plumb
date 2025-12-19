@@ -1,5 +1,5 @@
-import CreateOrganizationBottomSheet from '@/components/CreateOrganizationBottomSheet';
-import OrganizationCard from '@/components/OrganizationCard';
+import CreateOrganizationBottomSheet from '@/components/organizations/CreateOrganizationBottomSheet';
+import OrganizationCard from '@/components/organizations/OrganizationCard';
 import { PageHeader } from '@/components/PageHeader';
 import { useUser } from '@/context/currentUser';
 import { fetcherWithToken } from '@/lib/fetcher';

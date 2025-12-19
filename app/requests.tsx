@@ -1,11 +1,11 @@
+import { priorityColors, statusConfig, statusTabs } from '@/constants/requests';
+import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useRouter } from 'expo-router';
-import { statusConfig, statusTabs, priorityColors } from '@/constants/requests';
 
-import { StatusTabs } from '@/components/StatusTabs';
 import { PageHeader } from '@/components/PageHeader';
-import { RequestCardsList } from '@/components/RequestCardsList';
+import { RequestCardsList } from '@/components/requests/RequestCardsList';
+import { StatusTabs } from '@/components/StatusTabs';
 import { useRequests } from '@/hooks/useRequests';
 
 const RequestsPage = () => {

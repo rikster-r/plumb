@@ -11,7 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '@/context/currentUser';
 import { fetcherWithToken } from '@/lib/fetcher';
 import useSWRNative from '@nandorojo/swr-react-native';
-import HouseCard from '@/components/HouseCard';
+import HouseCard from '@/components/houses/HouseCard';
 import { PageHeader } from '@/components/PageHeader';
 import { useRouter } from 'expo-router';
 import { GeistText } from '@/components/GeistText';

@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { GeistText } from './GeistText';
+import { GeistText } from '../GeistText';
 
 interface Organization {
   id: number;

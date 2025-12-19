@@ -3,9 +3,9 @@ import { View, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigationTabs } from '@/components/formComponents';
 
-import EditHouseInfo from '@/components/editHouseTabs/EditInfo';
-import EditExtra from '@/components/editHouseTabs/EditExtra';
-import EditHouseOrganization from '@/components/editHouseTabs/EditOrganization'
+import EditHouseInfo from '@/components/houses/editHouseTabs/EditInfo';
+import EditExtra from '@/components/houses/editHouseTabs/EditExtra';
+import EditHouseOrganization from '@/components/houses/editHouseTabs/EditOrganization'
 
 const tabs = [
   { key: 'info', label: 'Инфо' },
