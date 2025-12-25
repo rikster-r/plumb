@@ -10,7 +10,7 @@ export const useOrganizationDetails = (id: string) => {
     data: organization,
     error: organizationError,
     isLoading,
-    mutate,
+    mutate: mutateOrganization,
   } = useSWRNative<OrganizationDetailed>(
     canFetch
       ? [`${process.env.EXPO_PUBLIC_API_URL}/organizations/${id}`, token]
@@ -30,7 +30,9 @@ export const useOrganizationDetails = (id: string) => {
   );
 
   // employees
-  const { data: employees = [] } = useSWRNative<Employee[]>(
+  const { data: employees = [], mutate: mutateEmployees } = useSWRNative<
+    Employee[]
+  >(
     canFetch
       ? [
           `${process.env.EXPO_PUBLIC_API_URL}/organizations/${id}/employees`,
@@ -41,7 +43,7 @@ export const useOrganizationDetails = (id: string) => {
   );
 
   // houses ids
-  const { data: housesIds = [] } = useSWRNative<number[]>(
+  const { data: housesIds = [], mutate: mutateHouses } = useSWRNative<number[]>(
     canFetch
       ? [`${process.env.EXPO_PUBLIC_API_URL}/organizations/${id}/houses`, token]
       : null,
@@ -66,6 +68,8 @@ export const useOrganizationDetails = (id: string) => {
     houses,
     isLoading,
     error: organizationError,
-    mutateOrganization: mutate,
+    mutateOrganization,
+    mutateHouses,
+    mutateEmployees,
   };
 };

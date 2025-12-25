@@ -19,14 +19,14 @@ interface EmployeeFormData {
 
 interface Props {
   bottomSheetRef: React.RefObject<BottomSheetModal>;
-  mutateOrganization: KeyedMutator<OrganizationDetailed>;
+  mutate: KeyedMutator<Employee[]>;
   onClose: () => void;
 }
 
 const AddEmployeeBottomSheet = ({
   bottomSheetRef,
   onClose,
-  mutateOrganization,
+  mutate,
 }: Props) => {
   const [formData, setFormData] = useState<EmployeeFormData>({
     full_name: '',
@@ -105,7 +105,7 @@ const AddEmployeeBottomSheet = ({
           setErrors(errorData.errors);
         }
 
-        await mutateOrganization();
+        await mutate();
         resetForm();
         onClose();
       } catch (error: any) {

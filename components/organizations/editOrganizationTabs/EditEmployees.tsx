@@ -18,7 +18,7 @@ import {
 export const EditOrgEmployees = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [searchQuery, setSearchQuery] = useState('');
-  const { employees, isLoading, mutateOrganization } = useOrganizationDetails(id);
+  const { employees, isLoading, mutateEmployees } = useOrganizationDetails(id);
   const bottomSheetRef = useRef<BottomSheetModal>(
     null
   ) as React.RefObject<BottomSheetModal>;
@@ -38,8 +38,6 @@ export const EditOrgEmployees = () => {
 
     return employees;
   }, [searchQuery, employees]);
-
-  const handleDeleteEmployee = () => {};
 
   if (isLoading) {
     return (
@@ -92,7 +90,9 @@ export const EditOrgEmployees = () => {
       <FlatList
         data={filteredEmployees}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <EmployeeCard item={item} />}
+        renderItem={({ item }) => (
+          <EmployeeCard item={item} mutateEmployees={mutateEmployees} />
+        )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
@@ -112,7 +112,7 @@ export const EditOrgEmployees = () => {
       {bottomSheetRef && (
         <CreateEmployeeBottomSheet
           bottomSheetRef={bottomSheetRef}
-          mutateOrganization={mutateOrganization}
+          mutate={mutateEmployees}
           onClose={() => bottomSheetRef.current?.dismiss()}
         />
       )}

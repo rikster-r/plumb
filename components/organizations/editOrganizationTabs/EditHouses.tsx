@@ -1,8 +1,7 @@
-import HouseCard from '@/components/houses/HouseCard';
 import { GeistText } from '@/components/GeistText';
 import { useOrganizationDetails } from '@/hooks/useOrganizationDetails';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -12,11 +11,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import OrganizationHouseCard from '../OrganizationHouseCard';
 
 export const EditOrgHouses = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [searchQuery, setSearchQuery] = useState('');
-  const { houses, isLoading } = useOrganizationDetails(id);
+  const { houses, isLoading, mutateHouses } = useOrganizationDetails(id);
+  const router = useRouter();
 
   const filteredHouses = useMemo(() => {
     if (!houses) return [];
@@ -33,11 +34,6 @@ export const EditOrgHouses = () => {
 
     return houses;
   }, [searchQuery, houses]);
-
-  const handleAddHouse = () => {
-    // Add house functionality will be implemented later
-    console.log('Add house clicked');
-  };
 
   if (isLoading) {
     return (
@@ -79,7 +75,7 @@ export const EditOrgHouses = () => {
 
         <TouchableOpacity
           style={styles.addButton}
-          onPress={handleAddHouse}
+          onPress={() => router.push({ pathname: '/houses/create' })}
           activeOpacity={0.7}
         >
           <Ionicons name="add" size={24} color="#FFFFFF" />
@@ -90,7 +86,9 @@ export const EditOrgHouses = () => {
       <FlatList
         data={filteredHouses}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <HouseCard item={item} hideStatsGrid={true} />}
+        renderItem={({ item }) => (
+          <OrganizationHouseCard item={item} mutateHouses={mutateHouses}/>
+        )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={

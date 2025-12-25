@@ -1,42 +1,115 @@
 import { GeistText } from '@/components/GeistText';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { useUser } from '@/context/currentUser';
+import { KeyedMutator } from 'swr';
 
-export const EmployeeCard = ({ item }: { item: Employee }) => (
-  <View style={styles.card}>
-    <View style={styles.cardHeader}>
-      <View style={styles.iconContainer}>
-        <Ionicons name="person" size={20} color="#007AFF" />
-      </View>
-      <View style={styles.cardContent}>
-        <GeistText weight={600} style={styles.employeeName}>
-          {item.full_name}
-        </GeistText>
-        <GeistText weight={400} style={styles.employeePosition}>
-          {item.position}
-        </GeistText>
-      </View>
-    </View>
+type EmployeeCardProps = {
+  item: Employee;
+  mutateEmployees: KeyedMutator<Employee[]>;
+};
 
-    <View style={styles.cardDetails}>
-      <View style={styles.detailRow}>
-        <Ionicons name="call-outline" size={16} color="#71717A" />
-        <GeistText weight={400} style={styles.detailText}>
-          {item.phone}
-        </GeistText>
+export const EmployeeCard: React.FC<EmployeeCardProps> = ({
+  item,
+  mutateEmployees,
+}) => {
+  const { token } = useUser();
+
+  const handleDeletePress = () => {
+    Alert.alert(
+      'Удалить сотрудника',
+      'Вы уверены, что хотите удалить этого сотрудника?',
+      [
+        { text: 'Отмена', style: 'cancel' },
+        {
+          text: 'Удалить',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const res = await fetch(
+                `${process.env.EXPO_PUBLIC_API_URL}/employees/${item.id}`,
+                {
+                  method: 'DELETE',
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                  },
+                }
+              );
+
+              if (!res.ok) {
+                throw new Error('Delete failed');
+              }
+
+              await mutateEmployees();
+            } catch (e) {
+              Alert.alert(
+                'Ошибка',
+                'Не удалось удалить сотрудника. Попробуйте снова.'
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  return (
+    <View style={styles.card}>
+      {/* Header */}
+      <View style={styles.cardHeader}>
+        <View style={styles.leftHeader}>
+          <View style={styles.iconContainer}>
+            <Ionicons name="person" size={20} color="#007AFF" />
+          </View>
+
+          <View style={styles.cardContent}>
+            <GeistText weight={600} style={styles.employeeName}>
+              {item.full_name}
+            </GeistText>
+            <GeistText weight={400} style={styles.employeePosition}>
+              {item.position}
+            </GeistText>
+          </View>
+        </View>
+
+        {/* Actions */}
+        <View style={styles.actionButtons}>
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              handleDeletePress();
+            }}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="trash-outline" size={16} color="#FF3B30" />
+          </TouchableOpacity>
+        </View>
       </View>
-      {item.note && (
-        <View style={[styles.detailRow, { alignItems: 'flex-start' }]}>
-          <Ionicons name="document-text-outline" size={16} color="#71717A" />
+
+      {/* Details */}
+      <View style={styles.cardDetails}>
+        <View style={styles.detailRow}>
+          <Ionicons name="call-outline" size={16} color="#71717A" />
           <GeistText weight={400} style={styles.detailText}>
-            {item.note}
+            {item.phone}
           </GeistText>
         </View>
-      )}
+
+        {item.note && (
+          <View style={[styles.detailRow, { alignItems: 'flex-start' }]}>
+            <Ionicons name="document-text-outline" size={16} color="#71717A" />
+            <GeistText weight={400} style={styles.detailText}>
+              {item.note}
+            </GeistText>
+          </View>
+        )}
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   card: {
@@ -54,8 +127,15 @@ const styles = StyleSheet.create({
   },
   cardHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
     marginBottom: 12,
+    gap: 12,
+  },
+  leftHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
   iconContainer: {
     width: 40,
@@ -77,6 +157,18 @@ const styles = StyleSheet.create({
   employeePosition: {
     fontSize: 14,
     color: '#71717A',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  iconButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#F2F2F7',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardDetails: {
     gap: 8,
