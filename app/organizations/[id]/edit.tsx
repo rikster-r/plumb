@@ -5,6 +5,7 @@ import { NavigationTabs } from '@/components/formComponents';
 
 import EditOrgInfo from '@/components/organizations/editOrganizationTabs/EditInfo';
 import { EditOrgEmployees } from '@/components/organizations/editOrganizationTabs/EditEmployees';
+import { EditOrgHouses } from '@/components/organizations/editOrganizationTabs/EditHouses';
 
 const tabs = [
   { key: 'info', label: 'Инфо' },
@@ -30,6 +31,7 @@ const HouseEditScreen = () => {
       <View style={styles.formContainer}>
         {activeTab === 'info' && <EditOrgInfo />}
         {activeTab === 'employees' && <EditOrgEmployees />}
+        {activeTab === 'houses' && <EditOrgHouses />}
       </View>
     </View>
   );

@@ -1,4 +1,3 @@
-// components/HouseCard.tsx
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,9 +6,14 @@ import { GeistText } from '../GeistText';
 type HouseCardProps = {
   item: House;
   onPress?: () => void;
+  hideStatsGrid?: boolean;
 };
 
-const HouseCard: React.FC<HouseCardProps> = ({ item, onPress }) => {
+const HouseCard: React.FC<HouseCardProps> = ({
+  item,
+  onPress,
+  hideStatsGrid,
+}) => {
   return (
     <TouchableOpacity
       style={styles.houseCard}
@@ -17,7 +21,7 @@ const HouseCard: React.FC<HouseCardProps> = ({ item, onPress }) => {
       onPress={onPress}
     >
       {/* Header with address */}
-      <View style={styles.cardHeader}>
+      <View style={[styles.cardHeader, hideStatsGrid && { marginBottom: 0 }]}>
         <View style={styles.addressContainer}>
           <Ionicons
             name="location"
@@ -44,47 +48,49 @@ const HouseCard: React.FC<HouseCardProps> = ({ item, onPress }) => {
       </View>
 
       {/* Stats Grid */}
-      <View style={styles.statsGrid}>
-        <View style={styles.statItem}>
-          <Ionicons name="business-outline" size={18} color="#8E8E93" />
-          <GeistText weight={500} style={styles.statLabel}>
-            Подъезды
-          </GeistText>
-          <GeistText weight={600} style={styles.statValue}>
-            {item.count_entrance || '—'}
-          </GeistText>
+      {!hideStatsGrid && (
+        <View style={styles.statsGrid}>
+          <View style={styles.statItem}>
+            <Ionicons name="business-outline" size={18} color="#8E8E93" />
+            <GeistText weight={500} style={styles.statLabel}>
+              Подъезды
+            </GeistText>
+            <GeistText weight={600} style={styles.statValue}>
+              {item.count_entrance || '—'}
+            </GeistText>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Ionicons name="layers-outline" size={18} color="#8E8E93" />
+            <GeistText weight={500} style={styles.statLabel}>
+              Этажи
+            </GeistText>
+            <GeistText weight={600} style={styles.statValue}>
+              {item.count_floor || '—'}
+            </GeistText>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Ionicons name="home-outline" size={18} color="#8E8E93" />
+            <GeistText weight={500} style={styles.statLabel}>
+              Квартиры
+            </GeistText>
+            <GeistText weight={600} style={styles.statValue}>
+              {item.count_apartment || '—'}
+            </GeistText>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Ionicons name="resize-outline" size={18} color="#8E8E93" />
+            <GeistText weight={500} style={styles.statLabel}>
+              Площадь
+            </GeistText>
+            <GeistText weight={600} style={styles.statValue}>
+              {item.square ? `${parseFloat(item.square).toFixed(0)} м²` : '—'}
+            </GeistText>
+          </View>
         </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Ionicons name="layers-outline" size={18} color="#8E8E93" />
-          <GeistText weight={500} style={styles.statLabel}>
-            Этажи
-          </GeistText>
-          <GeistText weight={600} style={styles.statValue}>
-            {item.count_floor || '—'}
-          </GeistText>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Ionicons name="home-outline" size={18} color="#8E8E93" />
-          <GeistText weight={500} style={styles.statLabel}>
-            Квартиры
-          </GeistText>
-          <GeistText weight={600} style={styles.statValue}>
-            {item.count_apartment || '—'}
-          </GeistText>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Ionicons name="resize-outline" size={18} color="#8E8E93" />
-          <GeistText weight={500} style={styles.statLabel}>
-            Площадь
-          </GeistText>
-          <GeistText weight={600} style={styles.statValue}>
-            {item.square ? `${parseFloat(item.square).toFixed(0)} м²` : '—'}
-          </GeistText>
-        </View>
-      </View>
+      )}
 
       {/* Additional Info */}
       <View style={styles.infoSection}>

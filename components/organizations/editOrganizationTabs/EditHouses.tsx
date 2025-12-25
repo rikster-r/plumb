@@ -1,4 +1,4 @@
-import { EmployeeCard } from '@/components/employees/EmployeeCard';
+import HouseCard from '@/components/houses/HouseCard';
 import { GeistText } from '@/components/GeistText';
 import { useOrganizationDetails } from '@/hooks/useOrganizationDetails';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,30 +13,30 @@ import {
   View,
 } from 'react-native';
 
-export const EditOrgEmployees = () => {
+export const EditOrgHouses = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [searchQuery, setSearchQuery] = useState('');
-  const { employees, isLoading } = useOrganizationDetails(id);
+  const { houses, isLoading } = useOrganizationDetails(id);
 
-  const filteredEmployees = useMemo(() => {
-    if (!employees) return [];
+  const filteredHouses = useMemo(() => {
+    if (!houses) return [];
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      return employees.filter(
-        (employee: Employee) =>
-          employee.full_name.toLowerCase().includes(query) ||
-          employee.position.toLowerCase().includes(query) ||
-          employee.phone.toLowerCase().includes(query)
+      return houses.filter(
+        (house: House) =>
+          (house.full_address?.toLowerCase().includes(query) ?? false) ||
+          (house.street?.toLowerCase().includes(query) ?? false) ||
+          (house.number?.toLowerCase().includes(query) ?? false)
       );
     }
 
-    return employees;
-  }, [searchQuery, employees]);
+    return houses;
+  }, [searchQuery, houses]);
 
-  const handleAddEmployee = () => {
-    // Add employee functionality will be implemented later
-    console.log('Add employee clicked');
+  const handleAddHouse = () => {
+    // Add house functionality will be implemented later
+    console.log('Add house clicked');
   };
 
   if (isLoading) {
@@ -79,18 +79,18 @@ export const EditOrgEmployees = () => {
 
         <TouchableOpacity
           style={styles.addButton}
-          onPress={handleAddEmployee}
+          onPress={handleAddHouse}
           activeOpacity={0.7}
         >
           <Ionicons name="add" size={24} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 
-      {/* Employees List */}
+      {/* Houses List */}
       <FlatList
-        data={filteredEmployees}
+        data={filteredHouses}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <EmployeeCard item={item} />}
+        renderItem={({ item }) => <HouseCard item={item} hideStatsGrid={true} />}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
