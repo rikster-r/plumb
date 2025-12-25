@@ -23,7 +23,7 @@ const OrganizationCard: React.FC<OrganizationCardProps> = ({ item, onPress }) =>
     >
       <View style={styles.cardContent}>
         <View style={styles.iconContainer}>
-          <Ionicons name="briefcase" size={24} color="#007AFF" />
+          <Ionicons name="briefcase-outline" size={24} color="#007AFF" />
         </View>
         
         <View style={styles.infoContainer}>
@@ -64,8 +64,6 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 48,
     height: 48,
-    borderRadius: 12,
-    backgroundColor: '#F2F2F7',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,

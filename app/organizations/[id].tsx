@@ -1,5 +1,6 @@
 import BottomActionBar from '@/components/BottomActionBar';
 import { GeistText } from '@/components/GeistText';
+import OrganizationHousesList from '@/components/organizations/OrganizationHousesList';
 import { useUser } from '@/context/currentUser';
 import { useOrganizationDetails } from '@/hooks/useOrganizationDetails';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,7 +8,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ActivityIndicator,
   Alert,
-  FlatList,
   Linking,
   ScrollView,
   StyleSheet,
@@ -161,7 +161,7 @@ const OrganizationDetailPage = () => {
         <View style={styles.card}>
           <View style={styles.orgHeader}>
             <View style={styles.iconContainer}>
-              <Ionicons name="business" size={24} color="#18181B" />
+              <Ionicons name="briefcase-outline" size={24} color="#007AFF" />
             </View>
             <View style={styles.orgTexts}>
               <GeistText weight={600} style={styles.orgName}>
@@ -370,43 +370,7 @@ const OrganizationDetailPage = () => {
             <GeistText weight={600} style={styles.sectionTitle}>
               Дома ({houses.length})
             </GeistText>
-            <FlatList
-              data={houses}
-              keyExtractor={(house: House) => house.id.toString()}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}
-              renderItem={({ item: house }: { item: House }) => (
-                <TouchableOpacity
-                  style={styles.houseCard}
-                  onPress={() => router.push(`/houses/${house.id}`)}
-                >
-                  <View style={styles.houseMain}>
-                    <View style={styles.houseHeader}>
-                      <View style={styles.houseInfo}>
-                        <GeistText weight={600} style={styles.houseAddress}>
-                          {house.street}, {house.number}
-                        </GeistText>
-                        <GeistText weight={400} style={styles.houseCity}>
-                          {house.city}
-                        </GeistText>
-                      </View>
-
-                      {house.commercial && (
-                        <View style={styles.commercialBadgeSmall}>
-                          <GeistText
-                            weight={500}
-                            style={styles.commercialTextSmall}
-                          >
-                            Коммерция
-                          </GeistText>
-                        </View>
-                      )}
-                    </View>
-                  </View>
-
-                  <Ionicons name="chevron-forward" size={20} color="#A1A1AA" />
-                </TouchableOpacity>
-              )}
-            />
+            <OrganizationHousesList houses={houses} />
           </View>
         )}
 
@@ -641,7 +605,7 @@ const styles = StyleSheet.create({
     color: '#18181B',
   },
   employeeCard: {
-    paddingVertical: 12,
+    paddingVertical: 4,
   },
   employeeCardWithBorder: {
     borderTopWidth: 1,
@@ -696,47 +660,7 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth * 2,
     backgroundColor: '#E5E7EB',
   },
-  houseCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-  },
-  houseMain: {
-    flex: 1,
-    marginRight: 12,
-  },
-  houseHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingVertical: 4,
-  },
-  houseInfo: {
-    flex: 1,
-    marginRight: 8,
-  },
-  houseAddress: {
-    fontSize: 15,
-    color: '#18181B',
-    marginBottom: 2,
-  },
-  houseCity: {
-    fontSize: 13,
-    color: '#71717A',
-  },
-  commercialBadgeSmall: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-  },
-  commercialTextSmall: {
-    fontSize: 11,
-    color: '#92400E',
-  },
+
   houseStats: {
     flexDirection: 'row',
     gap: 12,

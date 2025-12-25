@@ -1,25 +1,16 @@
-import React, { useState, useMemo } from 'react';
-import {
-  View,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useOrganizationDetails } from '@/hooks/useOrganizationDetails';
 import { GeistText } from '@/components/GeistText';
+import { useOrganizationDetails } from '@/hooks/useOrganizationDetails';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
-
-interface Employee {
-  id: number;
-  organization_id: number;
-  full_name: string;
-  position: string;
-  phone: string;
-  note: string | null;
-}
+import React, { useMemo, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 const EmployeeCard = ({ item }: { item: Employee }) => (
   <View style={styles.card}>
@@ -45,7 +36,7 @@ const EmployeeCard = ({ item }: { item: Employee }) => (
         </GeistText>
       </View>
       {item.note && (
-        <View style={styles.detailRow}>
+        <View style={[styles.detailRow, { alignItems: 'flex-start' }]}>
           <Ionicons name="document-text-outline" size={16} color="#71717A" />
           <GeistText weight={400} style={styles.detailText}>
             {item.note}

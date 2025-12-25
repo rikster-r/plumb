@@ -40,12 +40,23 @@ export const useOrganizationDetails = (id: string) => {
     ([url, token]) => fetcherWithToken(url, token)
   );
 
-  // houses (count only)
-  const { data: houses = [] } = useSWRNative<House[]>(
+  // houses ids
+  const { data: housesIds = [] } = useSWRNative<number[]>(
     canFetch
       ? [`${process.env.EXPO_PUBLIC_API_URL}/organizations/${id}/houses`, token]
       : null,
     ([url, token]) => fetcherWithToken(url, token)
+  );
+
+  const houseKeys: [string, string][] = housesIds.map((houseId) => [
+    `${process.env.EXPO_PUBLIC_API_URL}/houses/${houseId}`,
+    token!,
+  ]);
+
+  const { data: houses = [] } = useSWRNative<House[]>(
+    houseKeys.length ? houseKeys : null,
+    (keys: [string, string][]) =>
+      Promise.all(keys.map(([url, token]) => fetcherWithToken(url, token)))
   );
 
   return {
