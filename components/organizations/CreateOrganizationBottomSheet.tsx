@@ -2,21 +2,19 @@ import React, { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
-import BottomSheet from '../BottomSheet';
 import { GeistText } from '../GeistText';
-
 import {
   LabeledInput,
   LabeledDropdown,
   FormRow,
   FormSection,
-  FormActions,
   BareInput,
 } from '../formComponents';
 import { useUser } from '@/context/currentUser';
 import useSWRNative from '@nandorojo/swr-react-native';
 import { fetcherWithToken } from '@/lib/fetcher';
 import { useDeduplicatedSchedules } from '@/hooks/useDeduplicatedSchedules';
+import BottomSheetForm from '../BottomSheetForm';
 
 interface FormErrors {
   [key: string]: string[];
@@ -181,11 +179,15 @@ const CreateOrganizationBottomSheet = ({
     : [];
 
   return (
-    <BottomSheet
+    <BottomSheetForm
       sheetRef={bottomSheetRef}
       title="Создать организацию"
       snapPoints={['90%']}
       onDismiss={handleDismiss}
+      handleFormSubmit={handleCreate}
+      isFormSubmitting={isCreating}
+      submitText="Создать"
+      cancelText="Отмена"
     >
       <View style={styles.formContainer}>
         <FormSection title="Основная информация">
@@ -315,16 +317,8 @@ const CreateOrganizationBottomSheet = ({
             numberOfLines={3}
           />
         </FormSection>
-
-        <FormActions
-          onCancel={handleDismiss}
-          onSubmit={handleCreate}
-          isSubmitting={isCreating}
-          submitText="Создать"
-          cancelText="Отмена"
-        />
       </View>
-    </BottomSheet>
+    </BottomSheetForm>
   );
 };
 

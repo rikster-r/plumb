@@ -57,7 +57,7 @@ export const FormActions = ({
   );
 
   if (!stickToBottom) {
-    return actions;
+    return <View style={{ paddingBottom: insets.bottom + 12 }}>{actions}</View>;
   }
 
   return (

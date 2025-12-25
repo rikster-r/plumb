@@ -1,9 +1,11 @@
+import CreateEmployeeBottomSheet from '@/components/employees/CreateEmployeeBottomSheet';
 import { EmployeeCard } from '@/components/employees/EmployeeCard';
 import { GeistText } from '@/components/GeistText';
 import { useOrganizationDetails } from '@/hooks/useOrganizationDetails';
 import { Ionicons } from '@expo/vector-icons';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useLocalSearchParams } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -16,7 +18,10 @@ import {
 export const EditOrgEmployees = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [searchQuery, setSearchQuery] = useState('');
-  const { employees, isLoading } = useOrganizationDetails(id);
+  const { employees, isLoading, mutateOrganization } = useOrganizationDetails(id);
+  const bottomSheetRef = useRef<BottomSheetModal>(
+    null
+  ) as React.RefObject<BottomSheetModal>;
 
   const filteredEmployees = useMemo(() => {
     if (!employees) return [];
@@ -34,10 +39,7 @@ export const EditOrgEmployees = () => {
     return employees;
   }, [searchQuery, employees]);
 
-  const handleAddEmployee = () => {
-    // Add employee functionality will be implemented later
-    console.log('Add employee clicked');
-  };
+  const handleDeleteEmployee = () => {};
 
   if (isLoading) {
     return (
@@ -79,7 +81,7 @@ export const EditOrgEmployees = () => {
 
         <TouchableOpacity
           style={styles.addButton}
-          onPress={handleAddEmployee}
+          onPress={() => bottomSheetRef.current?.present()}
           activeOpacity={0.7}
         >
           <Ionicons name="add" size={24} color="#FFFFFF" />
@@ -105,6 +107,15 @@ export const EditOrgEmployees = () => {
           </View>
         }
       />
+
+      {/* Create employee */}
+      {bottomSheetRef && (
+        <CreateEmployeeBottomSheet
+          bottomSheetRef={bottomSheetRef}
+          mutateOrganization={mutateOrganization}
+          onClose={() => bottomSheetRef.current?.dismiss()}
+        />
+      )}
     </View>
   );
 };
