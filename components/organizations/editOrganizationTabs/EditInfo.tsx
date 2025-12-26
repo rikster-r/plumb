@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
-  ScrollView,
   Alert,
   ActivityIndicator,
   TouchableOpacity,
@@ -38,19 +37,6 @@ interface OrganizationFormData {
   end_cooperation: string;
   branch_id: string;
   note: string;
-}
-
-interface Schedule {
-  id: number;
-  working: number;
-  day_off: number;
-  start_time: string;
-  end_time: string;
-}
-
-interface Branch {
-  id: number;
-  name: string;
 }
 
 const OrganizationEditScreen = () => {
