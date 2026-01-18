@@ -69,7 +69,7 @@ const OrganizationEditScreen = () => {
     user && token
       ? [`${process.env.EXPO_PUBLIC_API_URL}/branches`, token]
       : null,
-    ([url, token]) => fetcherWithToken(url, token)
+    ([url, token]) => fetcherWithToken(url, token),
   );
 
   // Initialize form with organization data
@@ -160,7 +160,7 @@ const OrganizationEditScreen = () => {
     try {
       // Filter out empty phone numbers
       const validPhones = formData.phones.filter(
-        (phone) => phone.trim() !== ''
+        (phone) => phone.trim() !== '',
       );
 
       const response = await fetch(
@@ -184,7 +184,7 @@ const OrganizationEditScreen = () => {
             branch_id: parseInt(formData.branch_id),
             note: formData.note || null,
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -389,6 +389,8 @@ const OrganizationEditScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingVertical: 10,
+    borderRadius: 32,
     backgroundColor: '#FFFFFF',
   },
   loadingContainer: {

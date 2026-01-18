@@ -1,5 +1,6 @@
 import BottomActionBar from '@/components/BottomActionBar';
 import { GeistText } from '@/components/GeistText';
+import ItemDetailsHeader from '@/components/ui/ItemDetailsHeader';
 import { useUser } from '@/context/currentUser';
 import { useHouseDetails } from '@/hooks/useHouseDetails';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,18 +16,19 @@ import {
   View,
 } from 'react-native';
 import { mutate as mutateGlobal } from 'swr';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const DAYS_OF_WEEK = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
 const HouseDetailPage = () => {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { token } = useUser();
   const {
     house,
     branch,
     organization,
-    addressType,
     error,
     isLoading,
     mutate: mutateHouse,
@@ -62,7 +64,7 @@ const HouseDetailPage = () => {
                   Authorization: `Bearer ${token}`,
                   'Content-Type': 'application/json',
                 },
-              }
+              },
             );
 
             if (!response.ok) {
@@ -84,15 +86,8 @@ const HouseDetailPage = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-          >
-            <Ionicons name="chevron-back" size={28} color="#18181B" />
-          </TouchableOpacity>
-        </View>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <ItemDetailsHeader title="Детали дома" />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#18181B" />
         </View>
@@ -102,15 +97,8 @@ const HouseDetailPage = () => {
 
   if (error || !house) {
     return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-          >
-            <Ionicons name="chevron-back" size={28} color="#18181B" />
-          </TouchableOpacity>
-        </View>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <ItemDetailsHeader title="Детали дома" />
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
           <GeistText weight={600} style={styles.errorText}>
@@ -141,20 +129,8 @@ const HouseDetailPage = () => {
   ].filter((f) => f.value !== null);
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <Ionicons name="chevron-back" size={28} color="#18181B" />
-        </TouchableOpacity>
-        <GeistText weight={600} style={styles.headerTitle}>
-          Детали дома
-        </GeistText>
-        <View style={styles.placeholder} />
-      </View>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <ItemDetailsHeader title="Детали дома" />
 
       <ScrollView
         style={styles.scrollView}

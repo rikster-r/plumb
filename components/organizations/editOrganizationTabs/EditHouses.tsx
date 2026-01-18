@@ -93,12 +93,12 @@ export const EditOrgHouses = () => {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="people-outline" size={64} color="#D4D4D8" />
+            <Ionicons name="business-outline" size={64} color="#D4D4D8" />
             <GeistText weight={600} style={styles.emptyText}>
-              Отсутствуют данные
+              Отсутствуют дома
             </GeistText>
             <GeistText weight={400} style={styles.emptySubtext}>
-              Нажмите +, чтобы добавить сотрудника
+              Нажмите +, чтобы добавить дом
             </GeistText>
           </View>
         }
