@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
-  ScrollView,
   Alert,
   ActivityIndicator,
   TouchableOpacity,
@@ -32,7 +31,12 @@ interface HouseOrganizationFormData {
   employees: string[];
 }
 
-const EditHouseOrganization = () => {
+type Props = {
+  hasUnsavedChanges: boolean;
+  setHasUnsavedChanges: (hasChanges: boolean) => void;
+};
+
+const EditHouseOrganization = ({ setHasUnsavedChanges }: Props) => {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { token } = useUser();
@@ -72,11 +76,15 @@ const EditHouseOrganization = () => {
         schedule_id: organization.schedule_id?.toString() || '',
         employees: [], // Will be populated from house-specific employee assignments
       });
+
+      setHasUnsavedChanges(false);
     }
-  }, [organization]);
+  }, [organization, setHasUnsavedChanges]);
 
   const updateField = (field: keyof HouseOrganizationFormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
+
     // Clear error for this field
     if (errors[field]) {
       setErrors((prev) => {
@@ -132,7 +140,7 @@ const EditHouseOrganization = () => {
     try {
       // Filter out empty phone numbers
       const validPhones = formData.phones.filter(
-        (phone) => phone.trim() !== ''
+        (phone) => phone.trim() !== '',
       );
 
       const response = await fetch(
@@ -154,7 +162,7 @@ const EditHouseOrganization = () => {
                   : null,
             },
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -179,7 +187,13 @@ const EditHouseOrganization = () => {
       }
 
       Alert.alert('Успешно', 'Данные организации обновлены', [
-        { text: 'OK', onPress: () => router.back() },
+        {
+          text: 'OK',
+          onPress: () => {
+            setHasUnsavedChanges(false);
+            router.back();
+          },
+        },
       ]);
     } catch (error) {
       console.error('Error saving house organization:', error);

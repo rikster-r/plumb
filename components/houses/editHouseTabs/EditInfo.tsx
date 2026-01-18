@@ -47,7 +47,12 @@ interface HouseInfo {
   commercial: boolean;
 }
 
-const EditHouseInfo = () => {
+type Props = {
+  hasUnsavedChanges: boolean;
+  setHasUnsavedChanges: (hasChanges: boolean) => void;
+};
+
+const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user, token } = useUser();
@@ -92,7 +97,7 @@ const EditHouseInfo = () => {
     user && token
       ? [`${process.env.EXPO_PUBLIC_API_URL}/address-types`, token]
       : null,
-    ([url, token]) => fetcherWithToken(url, token)
+    ([url, token]) => fetcherWithToken(url, token),
   );
 
   // Initialize form with house data
@@ -127,11 +132,15 @@ const EditHouseInfo = () => {
         },
         exceptServiceTime: [],
       });
+
+      setHasUnsavedChanges(false);
     }
-  }, [house]);
+  }, [house, setHasUnsavedChanges]);
 
   const updateField = (field: keyof HouseInfo, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
+
     // Clear error for this field
     if (errors[field]) {
       setErrors((prev) => {
@@ -142,7 +151,7 @@ const EditHouseInfo = () => {
     }
   };
 
-  const updateTariffField = (field: keyof HouseTariffCreate, value: any) => {
+  const updateTariffField = (field: keyof HouseTariffUpdate, value: any) => {
     setFormData((prev) => ({
       ...prev,
       houseTariff: {
@@ -150,6 +159,7 @@ const EditHouseInfo = () => {
         [field]: value,
       },
     }));
+    setHasUnsavedChanges(true);
   };
 
   const validateForm = (): boolean => {
@@ -236,7 +246,7 @@ const EditHouseInfo = () => {
               },
             },
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -259,7 +269,13 @@ const EditHouseInfo = () => {
       }
 
       Alert.alert('Успешно', 'Информация о доме обновлена', [
-        { text: 'OK', onPress: () => router.back() },
+        {
+          text: 'OK',
+          onPress: () => {
+            setHasUnsavedChanges(false);
+            router.back();
+          },
+        },
       ]);
     } catch (error) {
       console.error('Error saving house info:', error);

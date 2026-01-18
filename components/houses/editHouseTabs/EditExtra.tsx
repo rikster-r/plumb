@@ -37,7 +37,12 @@ interface HouseOther {
   resource_organizations: string[]; // Array of resource org IDs
 }
 
-const HouseEditExtrasScreen = () => {
+type Props = {
+  hasUnsavedChanges: boolean;
+  setHasUnsavedChanges: (hasChanges: boolean) => void;
+};
+
+const HouseEditExtrasScreen = ({ setHasUnsavedChanges }: Props) => {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user, token } = useUser();
@@ -68,7 +73,7 @@ const HouseEditExtrasScreen = () => {
       user && token
         ? [`${process.env.EXPO_PUBLIC_API_URL}/resource-organizations`, token]
         : null,
-      ([url, token]) => fetcherWithToken(url, token)
+      ([url, token]) => fetcherWithToken(url, token),
     );
 
   // Initialize form with house data
@@ -88,11 +93,15 @@ const HouseEditExtrasScreen = () => {
         pump: house.pump || '',
         resource_organizations: [],
       });
+
+      setHasUnsavedChanges(false);
     }
-  }, [house]);
+  }, [house, setHasUnsavedChanges]);
 
   const updateField = (field: keyof HouseOther, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
+
     // Clear error for this field
     if (errors[field]) {
       setErrors((prev) => {
@@ -134,7 +143,7 @@ const HouseEditExtrasScreen = () => {
                   : null,
             },
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -157,7 +166,13 @@ const HouseEditExtrasScreen = () => {
       }
 
       Alert.alert('Успешно', 'Дополнительная информация обновлена', [
-        { text: 'OK', onPress: () => router.back() },
+        {
+          text: 'OK',
+          onPress: () => {
+            setHasUnsavedChanges(false);
+            router.back();
+          },
+        },
       ]);
     } catch (error) {
       console.error('Error saving house extras:', error);

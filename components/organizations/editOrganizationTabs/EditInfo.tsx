@@ -39,7 +39,12 @@ interface OrganizationFormData {
   note: string;
 }
 
-const OrganizationEditScreen = () => {
+type Props = {
+  hasUnsavedChanges: boolean;
+  setHasUnsavedChanges: (hasChanges: boolean) => void;
+};
+
+const OrganizationEditScreen = ({ setHasUnsavedChanges }: Props) => {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user, token } = useUser();
@@ -91,11 +96,15 @@ const OrganizationEditScreen = () => {
         branch_id: organization.branch_id?.toString() || '',
         note: organization.note || '',
       });
+
+      setHasUnsavedChanges(false);
     }
-  }, [organization]);
+  }, [organization, setHasUnsavedChanges]);
 
   const updateField = (field: keyof OrganizationFormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
+
     // Clear error for this field
     if (errors[field]) {
       setErrors((prev) => {
@@ -207,7 +216,13 @@ const OrganizationEditScreen = () => {
       }
 
       Alert.alert('Успешно', 'Информация об организации обновлена', [
-        { text: 'OK', onPress: () => router.back() },
+        {
+          text: 'OK',
+          onPress: () => {
+            setHasUnsavedChanges(false);
+            router.back();
+          },
+        },
       ]);
     } catch (error) {
       console.error('Error saving organization:', error);
