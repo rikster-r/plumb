@@ -1,15 +1,15 @@
-import React, { useCallback, ReactNode } from 'react';
-import { StyleSheet, View, TouchableOpacity, BackHandler } from 'react-native';
+import BottomSheetKeyboardAwareScrollView from '@/components/BottomSheetKeyboardAwareScrollView';
+import { Ionicons } from '@expo/vector-icons';
 import {
   BottomSheetBackdropProps,
   BottomSheetModal,
 } from '@gorhom/bottom-sheet';
-import { BlurView } from 'expo-blur';
-import { Ionicons } from '@expo/vector-icons';
-import { GeistText } from './GeistText';
 import { useFocusEffect } from '@react-navigation/native';
-import BottomSheetKeyboardAwareScrollView from '@/components/BottomSheetKeyboardAwareScrollView';
+import { BlurView } from 'expo-blur';
+import React, { ReactNode, useCallback, useState } from 'react';
+import { BackHandler, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { FormActions } from './formComponents';
+import { GeistText } from './GeistText';
 
 interface BottomSheetFormProps {
   sheetRef: React.RefObject<BottomSheetModal | null>;
@@ -37,6 +37,8 @@ const BottomSheetForm = ({
   submitText,
   cancelText,
 }: BottomSheetFormProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
       <TouchableOpacity
@@ -47,22 +49,30 @@ const BottomSheetForm = ({
         <BlurView intensity={80} tint="dark" style={StyleSheet.absoluteFill} />
       </TouchableOpacity>
     ),
-    [sheetRef]
+    [sheetRef],
   );
 
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
-        sheetRef.current?.dismiss();
-        return true;
+        if (isOpen) {
+          sheetRef.current?.dismiss();
+          return true; // consume back to close sheet
+        }
+        return false; // allow navigation back normally
       };
+
       const sub = BackHandler.addEventListener(
         'hardwareBackPress',
-        onBackPress
+        onBackPress,
       );
       return () => sub.remove();
-    }, [sheetRef])
+    }, [isOpen, sheetRef]),
   );
+
+  const handleSheetPositionChange = useCallback((position: number) => {
+    setIsOpen(position === 0);
+  }, []);
 
   return (
     <BottomSheetModal
@@ -74,6 +84,7 @@ const BottomSheetForm = ({
       backdropComponent={renderBackdrop}
       handleIndicatorStyle={styles.handleIndicator}
       onDismiss={onDismiss}
+      onChange={handleSheetPositionChange}
     >
       {/* Header */}
       <View style={styles.header}>
@@ -118,7 +129,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
   },
-
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
