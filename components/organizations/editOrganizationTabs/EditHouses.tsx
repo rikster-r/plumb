@@ -28,7 +28,7 @@ export const EditOrgHouses = () => {
         (house: House) =>
           (house.full_address?.toLowerCase().includes(query) ?? false) ||
           (house.street?.toLowerCase().includes(query) ?? false) ||
-          (house.number?.toLowerCase().includes(query) ?? false)
+          (house.number?.toLowerCase().includes(query) ?? false),
       );
     }
 
@@ -87,7 +87,7 @@ export const EditOrgHouses = () => {
         data={filteredHouses}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <OrganizationHouseCard item={item} mutateHouses={mutateHouses}/>
+          <OrganizationHouseCard item={item} mutateHouses={mutateHouses} />
         )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
@@ -118,12 +118,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   searchSection: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F1F1',
+    padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
@@ -132,7 +127,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 14,
     borderRadius: 100,
     height: 44,
@@ -165,7 +160,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   listContent: {
-    padding: 16,
+    paddingHorizontal: 16,
     paddingBottom: 32,
   },
   emptyContainer: {

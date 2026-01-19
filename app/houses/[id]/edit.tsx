@@ -7,6 +7,7 @@ import { useNavigation } from 'expo-router';
 import EditHouseInfo from '@/components/houses/editHouseTabs/EditInfo';
 import EditExtra from '@/components/houses/editHouseTabs/EditExtra';
 import EditHouseOrganization from '@/components/houses/editHouseTabs/EditOrganization';
+import EditFiles from '@/components/houses/editHouseTabs/EditFiles';
 import { EditTabs } from '@/components/ui/EditTabs';
 import ItemDetailsHeader from '@/components/ui/ItemDetailsHeader';
 
@@ -93,7 +94,7 @@ const HouseEditScreen = () => {
             setHasUnsavedChanges={setHasUnsavedChanges}
           />
         )}
-        {activeTab === 'files' && <></>}
+        {activeTab === 'files' && <EditFiles />}
       </View>
     </View>
   );
@@ -110,7 +111,6 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     flex: 1,
-    paddingTop: 8,
     backgroundColor: '#FFFFFF',
   },
 });

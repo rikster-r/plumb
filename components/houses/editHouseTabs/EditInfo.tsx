@@ -302,7 +302,7 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
 
   return (
     <>
-      <View style={{ flex: 1, paddingBottom: insets.bottom + 80 }}>
+      <View style={[styles.container, { paddingBottom: insets.bottom + 80 }]}>
         <KeyboardAwareScrollView
           style={[styles.scrollView]}
           showsVerticalScrollIndicator={false}
@@ -524,6 +524,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+    paddingTop: 8,
   },
   loadingContainer: {
     flex: 1,

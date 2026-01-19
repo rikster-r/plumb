@@ -20,7 +20,7 @@ export const EditOrgEmployees = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { employees, isLoading, mutateEmployees } = useOrganizationDetails(id);
   const bottomSheetRef = useRef<BottomSheetModal>(
-    null
+    null,
   ) as React.RefObject<BottomSheetModal>;
 
   const filteredEmployees = useMemo(() => {
@@ -32,7 +32,7 @@ export const EditOrgEmployees = () => {
         (employee: Employee) =>
           employee.full_name.toLowerCase().includes(query) ||
           employee.position.toLowerCase().includes(query) ||
-          employee.phone.toLowerCase().includes(query)
+          employee.phone.toLowerCase().includes(query),
       );
     }
 
@@ -131,12 +131,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   searchSection: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F1F1',
+    padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
@@ -145,7 +140,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 14,
     borderRadius: 100,
     height: 44,
@@ -178,7 +173,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   listContent: {
-    padding: 16,
+    paddingHorizontal: 16,
     paddingBottom: 32,
   },
   emptyContainer: {

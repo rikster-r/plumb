@@ -329,6 +329,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+    paddingTop: 8,
   },
   loadingContainer: {
     flex: 1,
@@ -348,7 +349,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    padding: 16,
+    paddingHorizontal: 16,
   },
   sectionLabel: {
     fontSize: 14,

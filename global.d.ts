@@ -56,6 +56,12 @@ interface Request {
   files: File[];
 }
 
+interface HouseFile {
+  name: string;
+  url: string;
+  format: string;
+}
+
 interface House {
   id: number;
   city: string;
@@ -100,6 +106,7 @@ interface House {
   created_at: string; // ISO 8601 format
   updated_at: string; // ISO 8601 format
   deleted_at: string | null; // ISO 8601 format or null
+  files: HouseFile[]
 }
 
 interface HouseDetailed extends House {
