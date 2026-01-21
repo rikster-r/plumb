@@ -15,10 +15,10 @@ import HouseOrganizationStep from '@/components/houses/createHouseSteps/HouseOrg
 import HouseReviewStep from '@/components/houses/createHouseSteps/HouseReviewStep';
 import HouseTariffStep from '@/components/houses/createHouseSteps/HouseTariffStep';
 import HouseTechnicalStep from '@/components/houses/createHouseSteps/HouseTechnicalStep';
-import { mutate } from 'swr';
 import { useDeduplicatedSchedules } from '@/hooks/useDeduplicatedSchedules';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { mutate } from 'swr';
 
 interface HouseInfo {
   city: string;
@@ -162,14 +162,14 @@ const CreateHouseScreen = () => {
     user && token
       ? [`${process.env.EXPO_PUBLIC_API_URL}/address-types`, token]
       : null,
-    ([url, token]) => fetcherWithToken(url, token)
+    ([url, token]) => fetcherWithToken(url, token),
   );
 
   const { data: branches, isLoading: branchesLoading } = useSWRNative<Branch[]>(
     user && token
       ? [`${process.env.EXPO_PUBLIC_API_URL}/branches`, token]
       : null,
-    ([url, token]) => fetcherWithToken(url, token)
+    ([url, token]) => fetcherWithToken(url, token),
   );
 
   const { data: organizations, isLoading: organizationsLoading } = useSWRNative<
@@ -178,7 +178,7 @@ const CreateHouseScreen = () => {
     user && token
       ? [`${process.env.EXPO_PUBLIC_API_URL}/organizations`, token]
       : null,
-    ([url, token]) => fetcherWithToken(url, token)
+    ([url, token]) => fetcherWithToken(url, token),
   );
 
   const { schedules, schedulesLoading } = useDeduplicatedSchedules();
@@ -188,7 +188,7 @@ const CreateHouseScreen = () => {
       user && token
         ? [`${process.env.EXPO_PUBLIC_API_URL}/resource-organizations`, token]
         : null,
-      ([url, token]) => fetcherWithToken(url, token)
+      ([url, token]) => fetcherWithToken(url, token),
     );
 
   // Fetch employees for selected organization
@@ -202,7 +202,7 @@ const CreateHouseScreen = () => {
           token,
         ]
       : null,
-    ([url, token]) => fetcherWithToken(url, token)
+    ([url, token]) => fetcherWithToken(url, token),
   );
 
   // Update form data
@@ -284,7 +284,7 @@ const CreateHouseScreen = () => {
 
       case 2: // Organization step
         const filledPhones = formData.organization.phones.filter(
-          (p) => p.trim().length > 0
+          (p) => p.trim().length > 0,
         );
         if (filledPhones.length === 0) {
           if (!newErrors.organization) newErrors.organization = {};
@@ -356,7 +356,7 @@ const CreateHouseScreen = () => {
           houseTariff: {
             branch_id: parseInt(formData.info.houseTariff.branch_id as string),
             organization_id: parseInt(
-              formData.info.houseTariff.organization_id as string
+              formData.info.houseTariff.organization_id as string,
             ),
             date_maintenance_from:
               formData.info.houseTariff.date_maintenance_from || null,
@@ -371,7 +371,7 @@ const CreateHouseScreen = () => {
         organization: {
           ...formData.organization,
           phones: formData.organization.phones.filter(
-            (p) => p.trim().length > 0
+            (p) => p.trim().length > 0,
           ),
           schedule_id: parseInt(formData.organization.schedule_id),
           employees: formData.organization.employees.map((e) => parseInt(e)),
@@ -379,7 +379,7 @@ const CreateHouseScreen = () => {
         other: {
           ...formData.other,
           resource_organizations: formData.other.resource_organizations.map(
-            (r) => parseInt(r)
+            (r) => parseInt(r),
           ),
         },
       };
@@ -393,7 +393,7 @@ const CreateHouseScreen = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -407,41 +407,64 @@ const CreateHouseScreen = () => {
               {"info": {"houseTariff": {"branch_id": [""]}}}
             */
             const formattedErrors: FormErrors = Object.entries(
-              errorData.errors
+              errorData.errors,
             ).reduce((acc: FormErrors, [path, value]) => {
               const keys = path.split('.');
               const errorValue = value as string[];
 
               let current: any = acc;
 
-              for (let i = 0; i < keys.length; i++) {
-                const key = keys[i];
+              keys.forEach((key, index) => {
+                const isLast = index === keys.length - 1;
+                const isArrayIndex = !isNaN(Number(key));
 
-                // last key → assign value
-                if (i === keys.length - 1) {
-                  current[key] = errorValue;
+                if (isLast) {
+                  if (isArrayIndex) {
+                    current[Number(key)] = errorValue;
+                  } else {
+                    current[key] = errorValue;
+                  }
+                  return;
+                }
+
+                if (isArrayIndex) {
+                  const idx = Number(key);
+                  if (!Array.isArray(current)) {
+                    // convert parent into array if needed
+                    current = [];
+                  }
+                  if (!current[idx]) {
+                    current[idx] = {};
+                  }
+                  current = current[idx];
                 } else {
-                  // create object if missing
                   if (!current[key]) {
-                    current[key] = {};
+                    // lookahead: next key decides object vs array
+                    const nextKey = keys[index + 1];
+                    current[key] = !isNaN(Number(nextKey)) ? [] : {};
                   }
                   current = current[key];
                 }
-              }
+              });
 
               return acc;
             }, {});
+
             setErrors(formattedErrors);
 
             // Navigate to first step with errors
-            if ('houseTariff' in formattedErrors.info) {
-              setCurrentStep(1);
-            } else if (formattedErrors.info) {
-              setCurrentStep(0);
-            } else if (formattedErrors.organization) {
+            if (formattedErrors.organization) {
               setCurrentStep(2);
             } else if (formattedErrors.other) {
               setCurrentStep(3);
+            } else if (
+              typeof formattedErrors.info === 'object' &&
+              formattedErrors.info !== null &&
+              'houseTariff' in formattedErrors.info
+            ) {
+              setCurrentStep(1);
+            } else if (formattedErrors.info) {
+              setCurrentStep(0);
             }
           }
           throw new Error('Validation error');

@@ -16,7 +16,12 @@ interface HouseOrganizationStepProps {
   referenceData: any;
 }
 
-const HouseOrganizationStep = ({ formData, updateFormData, errors, referenceData }: HouseOrganizationStepProps) => {
+const HouseOrganizationStep = ({
+  formData,
+  updateFormData,
+  errors,
+  referenceData,
+}: HouseOrganizationStepProps) => {
   const organization = formData.organization;
   const orgErrors = errors.organization || {};
 
@@ -36,7 +41,9 @@ const HouseOrganizationStep = ({ formData, updateFormData, errors, referenceData
 
   const removePhone = (index: number) => {
     if (organization.phones.length > 1) {
-      const newPhones = organization.phones.filter((_: any, i: number) => i !== index);
+      const newPhones = organization.phones.filter(
+        (_: any, i: number) => i !== index,
+      );
       updateOrganization('phones', newPhones);
     }
   };
@@ -44,11 +51,14 @@ const HouseOrganizationStep = ({ formData, updateFormData, errors, referenceData
   const toggleEmployee = (employeeId: string) => {
     const currentEmployees = organization.employees || [];
     const index = currentEmployees.indexOf(employeeId);
-    
+
     if (index === -1) {
       updateOrganization('employees', [...currentEmployees, employeeId]);
     } else {
-      updateOrganization('employees', currentEmployees.filter((id: string) => id !== employeeId));
+      updateOrganization(
+        'employees',
+        currentEmployees.filter((id: string) => id !== employeeId),
+      );
     }
   };
 
@@ -78,37 +88,52 @@ const HouseOrganizationStep = ({ formData, updateFormData, errors, referenceData
         >
           Телефоны*
         </GeistText>
+
         <GeistText style={styles.helpText}>
           Укажите контактные телефоны организации
         </GeistText>
-        
-        <View style={{ gap: 12, marginTop: 12 }}>
-          {organization.phones.map((phone: string, index: number) => (
-            <View key={index} style={styles.phoneRow}>
-              <View style={{ flex: 1 }}>
-                <BareInput
-                  value={phone}
-                  onChangeText={(t) => updatePhone(index, t)}
-                  placeholder="+7 (___) ___-__-__"
-                  keyboardType="default"
-                  style={orgErrors.phones ? styles.inputError : undefined}
-                />
-              </View>
-              {organization.phones.length > 1 && (
-                <TouchableOpacity
-                  onPress={() => removePhone(index)}
-                  style={styles.removeButton}
-                >
-                  <Ionicons name="close-outline" size={24} color="#FF3B30" />
-                </TouchableOpacity>
-              )}
-            </View>
-          ))}
-        </View>
 
-        {orgErrors.phones && (
-          <GeistText style={styles.errorText}>{orgErrors.phones[0]}</GeistText>
-        )}
+        <View style={{ gap: 12, marginTop: 12 }}>
+          {organization.phones.map((phone: string, index: number) => {
+            const phoneErrors = orgErrors.phones?.[index];
+
+            return (
+              <View key={index}>
+                <View style={styles.phoneRow}>
+                  <View style={{ flex: 1 }}>
+                    <BareInput
+                      value={phone}
+                      onChangeText={(t) => updatePhone(index, t)}
+                      placeholder="+7 (___) ___-__-__"
+                      keyboardType="default"
+                      style={phoneErrors ? styles.inputError : undefined}
+                    />
+                  </View>
+
+                  {organization.phones.length > 1 && (
+                    <TouchableOpacity
+                      onPress={() => removePhone(index)}
+                      style={styles.removeButton}
+                    >
+                      <Ionicons
+                        name="close-outline"
+                        size={24}
+                        color="#FF3B30"
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                {/* error under the exact input */}
+                {phoneErrors && (
+                  <GeistText style={styles.errorText}>
+                    {phoneErrors[0]}
+                  </GeistText>
+                )}
+              </View>
+            );
+          })}
+        </View>
 
         <TouchableOpacity style={styles.addButton} onPress={addPhone}>
           <Ionicons name="add-circle-outline" size={20} color="#007AFF" />
@@ -142,7 +167,9 @@ const HouseOrganizationStep = ({ formData, updateFormData, errors, referenceData
         {referenceData.loading.employees ? (
           <View style={styles.emptyContainer}>
             <Ionicons name="hourglass-outline" size={32} color="#8E8E93" />
-            <GeistText style={styles.emptyText}>Загрузка сотрудников...</GeistText>
+            <GeistText style={styles.emptyText}>
+              Загрузка сотрудников...
+            </GeistText>
           </View>
         ) : !formData.info.houseTariff.organization_id ? (
           <View style={styles.emptyContainer}>
@@ -161,11 +188,16 @@ const HouseOrganizationStep = ({ formData, updateFormData, errors, referenceData
         ) : (
           <View style={styles.employeeList}>
             {referenceData.employees.map((employee: any) => {
-              const isSelected = organization.employees?.includes(employee.id.toString());
+              const isSelected = organization.employees?.includes(
+                employee.id.toString(),
+              );
               return (
                 <TouchableOpacity
                   key={employee.id}
-                  style={[styles.employeeItem, isSelected && styles.employeeItemSelected]}
+                  style={[
+                    styles.employeeItem,
+                    isSelected && styles.employeeItemSelected,
+                  ]}
                   onPress={() => toggleEmployee(employee.id.toString())}
                   activeOpacity={0.7}
                 >
