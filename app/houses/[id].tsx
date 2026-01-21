@@ -172,15 +172,18 @@ const HouseDetailPage = () => {
             </>
           )}
 
-          <View style={styles.divider} />
-
-          <TouchableOpacity style={styles.mapButton} onPress={openInMaps}>
-            <Ionicons name="map-outline" size={18} color="#18181B" />
-            <GeistText weight={500} style={styles.mapButtonText}>
-              Открыть на карте
-            </GeistText>
-            <Ionicons name="chevron-forward" size={18} color="#A1A1AA" />
-          </TouchableOpacity>
+          {house?.lat && house?.long && (
+            <>
+              <View style={styles.divider} />
+              <TouchableOpacity style={styles.mapButton} onPress={openInMaps}>
+                <Ionicons name="map-outline" size={18} color="#18181B" />
+                <GeistText weight={500} style={styles.mapButtonText}>
+                  Открыть на карте
+                </GeistText>
+                <Ionicons name="chevron-forward" size={18} color="#A1A1AA" />
+              </TouchableOpacity>
+            </>
+          )}
         </View>
 
         {/* Building Stats */}
