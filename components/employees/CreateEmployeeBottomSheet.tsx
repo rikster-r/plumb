@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { LabeledInput, FormSection } from '../formComponents';
 import { useUser } from '@/context/currentUser';
 import { KeyedMutator } from 'swr';
 import BottomSheetForm from '../BottomSheetForm';
+import { formatErrors } from '@/lib/errors';
+import { useLocalSearchParams } from 'expo-router';
 
 interface FormErrors {
   [key: string]: string[];
 }
 
 interface EmployeeFormData {
-  full_name: string;
+  name: string;
   position: string;
   phone: string;
   note: string;
@@ -23,17 +25,14 @@ interface Props {
   onClose: () => void;
 }
 
-const AddEmployeeBottomSheet = ({
-  bottomSheetRef,
-  onClose,
-  mutate,
-}: Props) => {
+const AddEmployeeBottomSheet = ({ bottomSheetRef, onClose, mutate }: Props) => {
   const [formData, setFormData] = useState<EmployeeFormData>({
-    full_name: '',
+    name: '',
     position: '',
     phone: '',
     note: '',
   });
+  const { id } = useLocalSearchParams<{ id: string }>();
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isCreating, setIsCreating] = useState(false);
@@ -41,7 +40,7 @@ const AddEmployeeBottomSheet = ({
 
   const updateField = <K extends keyof EmployeeFormData>(
     key: K,
-    value: EmployeeFormData[K]
+    value: EmployeeFormData[K],
   ) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
     // Clear error when field is modified
@@ -56,7 +55,7 @@ const AddEmployeeBottomSheet = ({
 
   const resetForm = () => {
     setFormData({
-      full_name: '',
+      name: '',
       position: '',
       phone: '',
       note: '',
@@ -69,7 +68,7 @@ const AddEmployeeBottomSheet = ({
     const newErrors: FormErrors = {};
 
     const requiredFields: (keyof EmployeeFormData)[] = [
-      'full_name',
+      'name',
       'position',
       'phone',
     ];
@@ -87,40 +86,34 @@ const AddEmployeeBottomSheet = ({
 
     setIsCreating(true);
     try {
-      try {
-        const response = await fetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/organizations`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(formData),
-          }
-        );
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/organizations/${id}/employees`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(formData),
+        },
+      );
 
-        if (!response.ok) {
+      if (!response.ok) {
+        if (response.status === 422) {
           const errorData = await response.json();
-          setErrors(errorData.errors);
+          const formattedErrors: FormErrors = formatErrors(errorData.errors);
+          setErrors(formattedErrors);
+          return;
         }
 
-        await mutate();
-        resetForm();
-        onClose();
-      } catch (error: any) {
-        alert(error.message || 'Ошибка при создании организации');
-        throw error;
+        throw new Error('Failed to create employee.');
       }
+
+      await mutate();
       resetForm();
       onClose();
     } catch (err: any) {
-      // Handle server errors
-      if (err.response?.status === 422 && err.response?.data?.errors) {
-        setErrors(err.response.data.errors);
-      } else {
-        alert('Произошла ошибка при создании сотрудника');
-      }
+      Alert.alert('Ошибка', err.message || 'Не удалось добавить сотрудника.');
     } finally {
       setIsCreating(false);
     }
@@ -145,10 +138,10 @@ const AddEmployeeBottomSheet = ({
         <FormSection title="Информация о сотруднике">
           <LabeledInput
             label="ФИО*"
-            value={formData.full_name}
-            onChangeText={(t) => updateField('full_name', t)}
+            value={formData.name}
+            onChangeText={(t) => updateField('name', t)}
             placeholder="Иванов Иван Иванович"
-            error={errors.full_name?.[0]}
+            error={errors.name?.[0]}
           />
           <LabeledInput
             label="Должность*"

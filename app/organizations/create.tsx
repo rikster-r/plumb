@@ -176,7 +176,6 @@ const CreateOrganizationScreen = () => {
           const errorData = await response.json();
           if (errorData.errors) {
             const formattedErrors: FormErrors = formatErrors(errorData.errors);
-
             setErrors(formattedErrors);
 
             throw new Error('Validation error');
