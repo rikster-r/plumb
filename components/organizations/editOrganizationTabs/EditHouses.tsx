@@ -23,7 +23,7 @@ export const EditOrgHouses = () => {
     if (!houses) return [];
 
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+      const query = searchQuery.toLowerCase().trim();
       return houses.filter(
         (house: House) =>
           (house.full_address?.toLowerCase().includes(query) ?? false) ||

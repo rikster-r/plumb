@@ -1,21 +1,21 @@
-import React, { useState, useMemo, useRef } from 'react';
-import {
-  View,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-  TextInput,
-} from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import FileUploadBottomSheet from '@/components/FileUploadBottomSheet';
 import { GeistText } from '@/components/GeistText';
-import { useHouseDetails } from '@/hooks/useHouseDetails';
 import { useUser } from '@/context/currentUser';
+import { useHouseDetails } from '@/hooks/useHouseDetails';
 import { Ionicons } from '@expo/vector-icons';
-import * as DocumentPicker from 'expo-document-picker';
-import FileUploadBottomSheet from "@/components/FileUploadBottomSheet";
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
+import * as DocumentPicker from 'expo-document-picker';
+import { useLocalSearchParams } from 'expo-router';
+import React, { useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 interface HouseFile {
   name: string;
@@ -54,7 +54,7 @@ const EditHouseFiles = () => {
   const filteredFiles = useMemo(() => {
     if (!searchQuery.trim()) return files;
 
-    const query = searchQuery.toLowerCase();
+    const query = searchQuery.toLowerCase().trim();
     return files.filter(
       (file) =>
         file.name.toLowerCase().includes(query) ||

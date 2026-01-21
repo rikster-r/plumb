@@ -30,7 +30,7 @@ const OrganizationsPage = () => {
     user && token
       ? [`${process.env.EXPO_PUBLIC_API_URL}/organizations`, token]
       : null,
-    ([url, token]) => fetcherWithToken(url, token)
+    ([url, token]) => fetcherWithToken(url, token),
   );
 
   const filteredOrganizations = useMemo(() => {
@@ -38,15 +38,15 @@ const OrganizationsPage = () => {
 
     if (!searchQuery.trim()) return organizations;
 
-    const query = searchQuery.toLowerCase();
+    const query = searchQuery.toLowerCase().trim();
     return organizations.filter((org) =>
-      org.name.toLowerCase().includes(query)
+      org.name.toLowerCase().includes(query),
     );
   }, [searchQuery, organizations]);
 
   const handleCreateOrganization = () => {
     router.push('/organizations/create');
-  }
+  };
 
   if (isLoading) {
     return (

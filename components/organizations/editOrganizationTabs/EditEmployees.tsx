@@ -7,12 +7,12 @@ import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
-  FlatList,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    FlatList,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 export const EditOrgEmployees = () => {
@@ -27,7 +27,7 @@ export const EditOrgEmployees = () => {
     if (!employees) return [];
 
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+      const query = searchQuery.toLowerCase().trim();
       return employees.filter(
         (employee: Employee) =>
           employee.full_name.toLowerCase().includes(query) ||

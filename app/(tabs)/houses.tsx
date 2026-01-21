@@ -1,21 +1,21 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import {
-  View,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useUser } from '@/context/currentUser';
-import { fetcherWithToken } from '@/lib/fetcher';
-import useSWRNative from '@nandorojo/swr-react-native';
+import { GeistText } from '@/components/GeistText';
 import HouseCard from '@/components/houses/HouseCard';
 import { PageHeader } from '@/components/PageHeader';
-import { useRouter } from 'expo-router';
-import { GeistText } from '@/components/GeistText';
 import { StatusTabs } from '@/components/StatusTabs';
+import { useUser } from '@/context/currentUser';
+import { fetcherWithToken } from '@/lib/fetcher';
+import { Ionicons } from '@expo/vector-icons';
+import useSWRNative from '@nandorojo/swr-react-native';
+import { useRouter } from 'expo-router';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 const HousesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,7 +29,7 @@ const HousesPage = () => {
     mutate,
   } = useSWRNative<House[]>(
     user && token ? [`${process.env.EXPO_PUBLIC_API_URL}/houses`, token] : null,
-    ([url, token]) => fetcherWithToken(url, token)
+    ([url, token]) => fetcherWithToken(url, token),
   );
 
   // Get unique cities
@@ -49,12 +49,12 @@ const HousesPage = () => {
     }
 
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+      const query = searchQuery.toLowerCase().trim();
       filtered = filtered.filter(
         (h) =>
           (h.full_address?.toLowerCase().includes(query) ?? false) ||
           (h.street?.toLowerCase().includes(query) ?? false) ||
-          (h.number?.toLowerCase().includes(query) ?? false)
+          (h.number?.toLowerCase().includes(query) ?? false),
       );
     }
 
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   addButton: {
     width: 44,
     height: 44,
-    borderRadius: "100%",
+    borderRadius: '100%',
     backgroundColor: '#007AFF',
     justifyContent: 'center',
     alignItems: 'center',
