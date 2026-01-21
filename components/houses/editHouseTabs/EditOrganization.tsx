@@ -191,7 +191,6 @@ const EditHouseOrganization = ({ setHasUnsavedChanges }: Props) => {
           text: 'OK',
           onPress: () => {
             setHasUnsavedChanges(false);
-            router.back();
           },
         },
       ]);

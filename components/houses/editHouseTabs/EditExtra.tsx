@@ -170,7 +170,6 @@ const HouseEditExtrasScreen = ({ setHasUnsavedChanges }: Props) => {
           text: 'OK',
           onPress: () => {
             setHasUnsavedChanges(false);
-            router.back();
           },
         },
       ]);

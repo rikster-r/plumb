@@ -107,14 +107,6 @@ const HouseCard: React.FC<HouseCardProps> = ({ item, mutateHouses }) => {
               <Ionicons name="trash-outline" size={16} color="#FF3B30" />
             </TouchableOpacity>
           </View>
-
-          {item.commercial && (
-            <View style={styles.commercialBadge}>
-              <GeistText weight={600} style={styles.commercialText}>
-                Коммерция
-              </GeistText>
-            </View>
-          )}
         </View>
       </View>
     </TouchableOpacity>

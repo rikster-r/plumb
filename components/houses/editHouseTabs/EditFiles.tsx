@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -7,8 +7,6 @@ import {
   Alert,
   ActivityIndicator,
   TextInput,
-  Modal,
-  ScrollView,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { GeistText } from '@/components/GeistText';
@@ -16,6 +14,8 @@ import { useHouseDetails } from '@/hooks/useHouseDetails';
 import { useUser } from '@/context/currentUser';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
+import FileUploadBottomSheet from "@/components/FileUploadBottomSheet";
+import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 
 interface HouseFile {
   name: string;
@@ -33,12 +33,12 @@ const EditHouseFiles = () => {
   const { house, isLoading, mutate } = useHouseDetails(id);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [isUploading, setIsUploading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
   const [newFiles, setNewFiles] = useState<
     DocumentPicker.DocumentPickerAsset[]
   >([]);
+
+  const bottomSheetRef = useRef<BottomSheetModal>(null);
 
   // Convert house files to FileItem format with unique IDs
   const files: FileItem[] = useMemo(() => {
@@ -84,7 +84,7 @@ const EditHouseFiles = () => {
       if (result.canceled) return;
 
       setNewFiles(result.assets);
-      setModalVisible(true);
+      bottomSheetRef.current?.present();
     } catch (error) {
       console.error('Error selecting file:', error);
       Alert.alert('Ошибка', 'Не удалось выбрать файл');
@@ -132,7 +132,7 @@ const EditHouseFiles = () => {
       }
 
       Alert.alert('Успешно', 'Файлы загружены');
-      setModalVisible(false);
+      bottomSheetRef.current?.dismiss();
       setNewFiles([]);
       mutate();
     } catch (error) {
@@ -143,70 +143,11 @@ const EditHouseFiles = () => {
     }
   };
 
-  const handleDeleteFiles = async () => {
-    if (selectedFiles.size === 0) return;
-
-    Alert.alert(
-      'Удалить файлы',
-      `Удалить выбранные файлы (${selectedFiles.size})?`,
-      [
-        { text: 'Отмена', style: 'cancel' },
-        {
-          text: 'Удалить',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const currentFiles = house?.files || [];
-              const indicesToDelete = Array.from(selectedFiles).map((id) =>
-                parseInt(id.replace('file_', '')),
-              );
-
-              const updatedFiles = currentFiles.filter(
-                (_, index) => !indicesToDelete.includes(index),
-              );
-
-              const response = await fetch(
-                `${process.env.EXPO_PUBLIC_API_URL}/houses/${id}/files`,
-                {
-                  method: 'PUT',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({
-                    files: updatedFiles,
-                  }),
-                },
-              );
-
-              if (!response.ok) {
-                throw new Error('Ошибка при удалении файлов');
-              }
-
-              Alert.alert('Успешно', 'Файлы удалены');
-              setSelectedFiles(new Set());
-              mutate();
-            } catch (error) {
-              console.error('Error deleting files:', error);
-              Alert.alert('Ошибка', 'Не удалось удалить файлы');
-            }
-          },
-        },
-      ],
-    );
-  };
-
-  const toggleFileSelection = (fileId: string) => {
-    const newSelection = new Set(selectedFiles);
-    if (newSelection.has(fileId)) {
-      newSelection.delete(fileId);
-    } else {
-      newSelection.add(fileId);
-    }
-    setSelectedFiles(newSelection);
-  };
-
   const removeFileFromModal = (index: number) => {
+    if (newFiles.length === 0) return;
+    if (newFiles.length === 1 && index === 0) {
+      bottomSheetRef.current?.dismiss();
+    }
     setNewFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -232,15 +173,10 @@ const EditHouseFiles = () => {
   };
 
   const renderFileItem = ({ item }: { item: FileItem }) => {
-    const isSelected = selectedFiles.has(item.id);
     const iconName = getFileIcon(item.format);
 
     return (
-      <TouchableOpacity
-        style={[styles.fileCard, isSelected && styles.fileCardSelected]}
-        onPress={() => toggleFileSelection(item.id)}
-        activeOpacity={0.7}
-      >
+      <View style={styles.fileCard}>
         <View style={styles.fileIconContainer}>
           <Ionicons name={iconName} size={24} color="#007AFF" />
         </View>
@@ -253,12 +189,14 @@ const EditHouseFiles = () => {
             {item.format.toUpperCase()}
           </GeistText>
         </View>
-
-        {isSelected && (
-          <Ionicons name="checkmark-circle" size={24} color="#007AFF" />
-        )}
-      </TouchableOpacity>
+      </View>
     );
+  };
+
+  const handleDismissBottomSheet = () => {
+    if (!isUploading) {
+      setNewFiles([]);
+    }
   };
 
   if (isLoading) {
@@ -273,7 +211,7 @@ const EditHouseFiles = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header Section with Search and Select Files */}
+      {/* Header Section with Search */}
       <View style={styles.headerSection}>
         <View style={styles.searchContainer}>
           <Ionicons
@@ -334,122 +272,15 @@ const EditHouseFiles = () => {
         />
       </View>
 
-      {/* Delete Button (shown when files are selected) */}
-      {selectedFiles.size > 0 && (
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={handleDeleteFiles}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="trash-outline" size={20} color="#FFFFFF" />
-          <GeistText weight={600} style={styles.deleteButtonText}>
-            Удалить ({selectedFiles.size})
-          </GeistText>
-        </TouchableOpacity>
-      )}
-
-      {/* File Upload Modal */}
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => {
-          if (!isUploading) {
-            setModalVisible(false);
-            setNewFiles([]);
-          }
-        }}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <GeistText weight={600} style={styles.modalTitle}>
-                Выбранные файлы ({newFiles.length})
-              </GeistText>
-              <TouchableOpacity
-                onPress={() => {
-                  if (!isUploading) {
-                    setModalVisible(false);
-                    setNewFiles([]);
-                  }
-                }}
-                disabled={isUploading}
-              >
-                <Ionicons name="close" size={28} color="#18181B" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={styles.modalFileList}>
-              {newFiles.map((file, index) => {
-                const extension =
-                  file.name.split('.').pop()?.toUpperCase() || 'FILE';
-                const iconName = getFileIcon(extension);
-
-                return (
-                  <View key={index} style={styles.modalFileCard}>
-                    <View style={styles.fileIconContainer}>
-                      <Ionicons name={iconName} size={24} color="#007AFF" />
-                    </View>
-
-                    <View style={styles.fileInfo}>
-                      <GeistText weight={600} style={styles.fileName}>
-                        {file.name}
-                      </GeistText>
-                      <GeistText weight={400} style={styles.fileFormat}>
-                        {extension} •{' '}
-                        {((file.size ?? 0) / 1024 / 1024).toFixed(2)} МБ
-                      </GeistText>
-                    </View>
-
-                    {!isUploading && (
-                      <TouchableOpacity
-                        onPress={() => removeFileFromModal(index)}
-                      >
-                        <Ionicons
-                          name="close-circle"
-                          size={24}
-                          color="#EF4444"
-                        />
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                );
-              })}
-            </ScrollView>
-
-            <View style={styles.modalFooter}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => {
-                  if (!isUploading) {
-                    setModalVisible(false);
-                    setNewFiles([]);
-                  }
-                }}
-                disabled={isUploading}
-              >
-                <GeistText weight={600} style={styles.cancelButtonText}>
-                  Отмена
-                </GeistText>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.modalButton, styles.submitButton]}
-                onPress={handleSubmitFiles}
-                disabled={isUploading || newFiles.length === 0}
-              >
-                {isUploading ? (
-                  <ActivityIndicator size="small" color="#FFFFFF" />
-                ) : (
-                  <GeistText weight={600} style={styles.submitButtonText}>
-                    Загрузить
-                  </GeistText>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {/* File Upload Bottom Sheet */}
+      <FileUploadBottomSheet
+        sheetRef={bottomSheetRef}
+        files={newFiles}
+        isUploading={isUploading}
+        onDismiss={handleDismissBottomSheet}
+        onSubmit={handleSubmitFiles}
+        onRemoveFile={removeFileFromModal}
+      />
     </View>
   );
 };
@@ -516,7 +347,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   listContent: {
-    paddingBottom: 100,
+    paddingBottom: 20,
   },
   fileCard: {
     flexDirection: 'row',
@@ -527,10 +358,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: '#E4E4E7',
-  },
-  fileCardSelected: {
-    borderColor: '#007AFF',
-    backgroundColor: '#F0F7FF',
   },
   fileIconContainer: {
     width: 48,
@@ -566,92 +393,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#71717A',
     marginTop: 4,
-  },
-  deleteButton: {
-    position: 'absolute',
-    bottom: 20,
-    left: 16,
-    right: 16,
-    backgroundColor: '#EF4444',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    borderRadius: 12,
-    gap: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  deleteButtonText: {
-    fontSize: 16,
-    color: '#FFFFFF',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '80%',
-    paddingBottom: 34,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F1F1',
-  },
-  modalTitle: {
-    fontSize: 18,
-    color: '#18181B',
-  },
-  modalFileList: {
-    maxHeight: 400,
-    padding: 20,
-  },
-  modalFileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#E4E4E7',
-  },
-  modalFooter: {
-    flexDirection: 'row',
-    padding: 20,
-    gap: 12,
-  },
-  modalButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelButton: {
-    backgroundColor: '#F4F4F5',
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    color: '#18181B',
-  },
-  submitButton: {
-    backgroundColor: '#007AFF',
-  },
-  submitButtonText: {
-    fontSize: 16,
-    color: '#FFFFFF',
   },
 });
 

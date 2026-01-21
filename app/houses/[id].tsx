@@ -291,38 +291,15 @@ const HouseDetailPage = () => {
                 Время работы
               </GeistText>
             </View>
-            <GeistText weight={600} style={styles.scheduleValue}>
-              {house.maintenance_from} - {house.maintenance_to}
-            </GeistText>
+            <View style={{ flexDirection: 'column', alignItems: 'flex-end' }}>
+              <GeistText weight={600} style={styles.infoValue}>
+                С {house.exist_time}
+              </GeistText>
+              <GeistText weight={600} style={styles.infoValue}>
+                По {house.arrival_time}
+              </GeistText>
+            </View>
           </View>
-
-          {house.exist_time && (
-            <View style={[styles.scheduleItem, styles.scheduleItemWithBorder]}>
-              <View style={styles.scheduleLeft}>
-                <Ionicons name="calendar-outline" size={18} color="#52525B" />
-                <GeistText weight={400} style={styles.scheduleLabel}>
-                  Время нахождения
-                </GeistText>
-              </View>
-              <GeistText weight={600} style={styles.scheduleValue}>
-                {house.exist_time}
-              </GeistText>
-            </View>
-          )}
-
-          {house.arrival_time && (
-            <View style={[styles.scheduleItem, styles.scheduleItemWithBorder]}>
-              <View style={styles.scheduleLeft}>
-                <Ionicons name="navigate-outline" size={18} color="#52525B" />
-                <GeistText weight={400} style={styles.scheduleLabel}>
-                  Время прибытия
-                </GeistText>
-              </View>
-              <GeistText weight={600} style={styles.scheduleValue}>
-                {house.arrival_time}
-              </GeistText>
-            </View>
-          )}
 
           {house.execpt_service_times &&
             house.execpt_service_times.length > 0 && (

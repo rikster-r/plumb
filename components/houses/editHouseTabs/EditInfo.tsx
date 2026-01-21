@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
+import { View, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import {
   LabeledInput,
@@ -22,6 +16,7 @@ import useSWRNative from '@nandorojo/swr-react-native';
 import { fetcherWithToken } from '@/lib/fetcher';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { splitDatetime } from '@/utils/dates';
 
 interface HouseInfo {
   city: string;
@@ -118,15 +113,16 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
         square: house.square || '',
         intercom_code: house.intercom_code || '',
         key_location: house.key_location || '',
-        maintenance_from: house.maintenance_from || '',
-        maintenance_to: house.maintenance_to || '',
+        maintenance_from: splitDatetime(house.exist_time).time || '',
+        maintenance_to: splitDatetime(house.arrival_time).time || '',
         address_type_id: house.address_type_id?.toString() || '',
         commercial: house.commercial || false,
         note: house.note || '',
         houseTariff: {
           date_maintenance_from:
-            house.house_tariff?.date_maintenance_from || '',
-          date_maintenance_to: house.house_tariff?.date_maintenance_to || '',
+            splitDatetime(house.house_tariff.date_maintenance_from).date || '',
+          date_maintenance_to:
+            splitDatetime(house.house_tariff.date_maintenance_to).date || '',
           rate: house.house_tariff?.rate ?? false,
           sum_rate: house.house_tariff?.sum_rate ?? null,
         },
@@ -253,15 +249,67 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
 
       if (!response.ok) {
         if (response.status === 422 && data.errors) {
-          // Handle validation errors
+          // Handle validation errors - normalize the error keys
           const newErrors: Record<string, string> = {};
+
           Object.entries(data.errors).forEach(([key, messages]) => {
             if (Array.isArray(messages) && messages.length > 0) {
-              newErrors[key] = messages[0];
+              // Normalize error keys to match form field names
+              let fieldName = key;
+
+              // Handle nested errors
+              if (key.startsWith('info.')) {
+                fieldName = key.replace('info.', '');
+
+                // Handle houseTariff nested errors
+                if (fieldName.startsWith('houseTariff.')) {
+                  fieldName = fieldName.replace('houseTariff.', '');
+                }
+              }
+
+              // Map backend error messages to form fields
+              switch (fieldName) {
+                case 'date_maintenance_from':
+                  newErrors['houseTariff.date_maintenance_from'] = messages[0];
+                  break;
+                case 'date_maintenance_to':
+                  newErrors['houseTariff.date_maintenance_to'] = messages[0];
+                  break;
+                case 'organization_id':
+                  newErrors['houseTariff.organization_id'] = messages[0];
+                  break;
+                default:
+                  newErrors[fieldName] = messages[0];
+              }
             }
           });
+
+          // Check for duplicate house error (non-field error)
+          if (data.errors.info && Array.isArray(data.errors.info)) {
+            const duplicateError = data.errors.info.find(
+              (msg: string) =>
+                msg.includes('уже существует') ||
+                msg.includes('already exists'),
+            );
+            if (duplicateError) {
+              Alert.alert(
+                'Ошибка',
+                'Дом с таким адресом уже существует. Пожалуйста, проверьте адрес.',
+                [{ text: 'OK' }],
+              );
+              return;
+            }
+          }
+
           setErrors(newErrors);
-          Alert.alert('Ошибка валидации', 'Проверьте введенные данные');
+
+          // Show alert with first error for better UX
+          const firstError = Object.values(newErrors)[0];
+          if (firstError) {
+            Alert.alert('Ошибка валидации', firstError);
+          } else {
+            Alert.alert('Ошибка', 'Произошла ошибка при сохранении');
+          }
         } else {
           throw new Error(data.message || 'Ошибка при сохранении');
         }
@@ -273,13 +321,15 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
           text: 'OK',
           onPress: () => {
             setHasUnsavedChanges(false);
-            router.back();
           },
         },
       ]);
     } catch (error) {
       console.error('Error saving house info:', error);
-      Alert.alert('Ошибка', 'Не удалось сохранить изменения');
+      Alert.alert(
+        'Ошибка',
+        'Не удалось сохранить изменения. Проверьте подключение к интернету.',
+      );
     } finally {
       setIsSaving(false);
     }
@@ -322,12 +372,14 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
                 value={formData.region}
                 onChangeText={(t) => updateField('region', t)}
                 placeholder="Московская обл."
+                error={errors.region}
               />
               <LabeledInput
                 label="Район"
                 value={formData.area}
                 onChangeText={(t) => updateField('area', t)}
                 placeholder="Левобережный"
+                error={errors.area}
               />
             </FormRow>
 
@@ -336,6 +388,7 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
               value={formData.complex}
               onChangeText={(t) => updateField('complex', t)}
               placeholder="Северный парк"
+              error={errors.complex}
             />
 
             <LabeledInput
@@ -359,6 +412,7 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
                 value={formData.frame}
                 onChangeText={(t) => updateField('frame', t)}
                 placeholder="А"
+                error={errors.frame}
               />
             </FormRow>
 
@@ -367,6 +421,7 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
               value={formData.building}
               onChangeText={(t) => updateField('building', t)}
               placeholder="1"
+              error={errors.building}
             />
           </FormSection>
 
@@ -378,6 +433,7 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
                 onChangeText={(t) => updateField('count_entrance', t)}
                 placeholder="6"
                 keyboardType="numeric"
+                error={errors.count_entrance}
               />
               <LabeledInput
                 label="Этажи"
@@ -385,6 +441,7 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
                 onChangeText={(t) => updateField('count_floor', t)}
                 placeholder="16"
                 keyboardType="numeric"
+                error={errors.count_floor}
               />
             </FormRow>
 
@@ -395,6 +452,7 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
                 onChangeText={(t) => updateField('count_apartment', t)}
                 placeholder="96"
                 keyboardType="numeric"
+                error={errors.count_apartment}
               />
               <LabeledInput
                 label="Площадь (м²)"
@@ -402,6 +460,7 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
                 onChangeText={(t) => updateField('square', t)}
                 placeholder="4500.50"
                 keyboardType="decimal-pad"
+                error={errors.square}
               />
             </FormRow>
           </FormSection>
@@ -412,6 +471,7 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
               value={formData.intercom_code}
               onChangeText={(t) => updateField('intercom_code', t)}
               placeholder="148K"
+              error={errors.intercom_code}
             />
 
             <LabeledInput
@@ -419,6 +479,7 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
               value={formData.key_location}
               onChangeText={(t) => updateField('key_location', t)}
               placeholder="Консьерж"
+              error={errors.key_location}
             />
           </FormSection>
 
@@ -431,6 +492,7 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
                   updateTariffField('date_maintenance_from', t)
                 }
                 placeholder="2024-01-01"
+                error={errors['houseTariff.date_maintenance_from']}
               />
 
               <LabeledInput
@@ -440,6 +502,7 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
                   updateTariffField('date_maintenance_to', t)
                 }
                 placeholder="2024-12-31"
+                error={errors['houseTariff.date_maintenance_to']}
               />
             </FormRow>
 
@@ -475,7 +538,17 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
                 onChangeText={(t) => updateTariffField('sum_rate', t || null)}
                 placeholder="15000"
                 keyboardType="numeric"
+                error={errors['houseTariff.sum_rate']}
               />
+            )}
+
+            {/* Hidden organization_id field for error display */}
+            {errors['houseTariff.organization_id'] && (
+              <View style={styles.errorContainer}>
+                <GeistText style={styles.errorText}>
+                  {errors['houseTariff.organization_id']}
+                </GeistText>
+              </View>
             )}
           </FormSection>
 
@@ -504,6 +577,7 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
               placeholder="Дом с улучшенной планировкой..."
               multiline
               numberOfLines={4}
+              error={errors.note}
             />
           </FormSection>
         </KeyboardAwareScrollView>
@@ -540,6 +614,18 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     paddingHorizontal: 16,
+  },
+  errorContainer: {
+    backgroundColor: '#FFE5E5',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#FF3B30',
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 14,
   },
   buttonContainer: {
     flexDirection: 'row',
