@@ -19,6 +19,7 @@ import { useDeduplicatedSchedules } from '@/hooks/useDeduplicatedSchedules';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { mutate } from 'swr';
+import { formatErrors } from '@/lib/errors';
 
 interface HouseInfo {
   city: string;
@@ -400,55 +401,7 @@ const CreateHouseScreen = () => {
         if (response.status === 422) {
           const errorData = await response.json();
           if (errorData.errors) {
-            /*
-            Map over returned object like this 
-              {"info.houseTariff.branch_id": [""]]} 
-            and turn into like this 
-              {"info": {"houseTariff": {"branch_id": [""]}}}
-            */
-            const formattedErrors: FormErrors = Object.entries(
-              errorData.errors,
-            ).reduce((acc: FormErrors, [path, value]) => {
-              const keys = path.split('.');
-              const errorValue = value as string[];
-
-              let current: any = acc;
-
-              keys.forEach((key, index) => {
-                const isLast = index === keys.length - 1;
-                const isArrayIndex = !isNaN(Number(key));
-
-                if (isLast) {
-                  if (isArrayIndex) {
-                    current[Number(key)] = errorValue;
-                  } else {
-                    current[key] = errorValue;
-                  }
-                  return;
-                }
-
-                if (isArrayIndex) {
-                  const idx = Number(key);
-                  if (!Array.isArray(current)) {
-                    // convert parent into array if needed
-                    current = [];
-                  }
-                  if (!current[idx]) {
-                    current[idx] = {};
-                  }
-                  current = current[idx];
-                } else {
-                  if (!current[key]) {
-                    // lookahead: next key decides object vs array
-                    const nextKey = keys[index + 1];
-                    current[key] = !isNaN(Number(nextKey)) ? [] : {};
-                  }
-                  current = current[key];
-                }
-              });
-
-              return acc;
-            }, {});
+            const formattedErrors: FormErrors = formatErrors(errorData.errors);
 
             setErrors(formattedErrors);
 
@@ -525,7 +478,7 @@ const CreateHouseScreen = () => {
   const CurrentStepComponent = STEPS[currentStep].component;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleCancel} style={styles.backButton}>
@@ -554,12 +507,7 @@ const CreateHouseScreen = () => {
       </KeyboardAwareScrollView>
 
       {/* Navigation buttons */}
-      <View
-        style={[
-          styles.navigationContainer,
-          { paddingBottom: insets.bottom + 20 },
-        ]}
-      >
+      <View style={[styles.navigationContainer]}>
         <FormActions
           onCancel={handleCancel}
           onSubmit={
@@ -584,8 +532,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 60,
     paddingBottom: 16,
+    paddingTop: 8,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E5E5EA',
@@ -663,7 +611,7 @@ const styles = StyleSheet.create({
   },
   stepContentContainer: {
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 8,
   },
   navigationContainer: {
     paddingHorizontal: 20,

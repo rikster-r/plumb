@@ -81,7 +81,7 @@ const HouseOrganizationStep = ({
         />
       </FormSection>
 
-      <FormSection title="Контактные телефоны">
+      <FormSection title="Контакты">
         <GeistText
           weight={500}
           style={[styles.label, orgErrors.phones && styles.labelError]}

@@ -1,4 +1,4 @@
-import React, { useCallback, ReactNode } from 'react';
+import React, { useCallback, ReactNode, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, BackHandler } from 'react-native';
 import {
   BottomSheetBackdropProps,
@@ -25,6 +25,8 @@ const BottomSheet = ({
   snapPoints = ['70%'],
   onDismiss,
 }: BottomSheetProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
       <TouchableOpacity
@@ -35,25 +37,30 @@ const BottomSheet = ({
         <BlurView intensity={80} tint="dark" style={StyleSheet.absoluteFill} />
       </TouchableOpacity>
     ),
-    [sheetRef]
+    [sheetRef],
   );
 
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
-        if (sheetRef.current) {
-          sheetRef.current.dismiss();
-          return true;
+        if (isOpen) {
+          sheetRef.current?.dismiss();
+          return true; // consume back to close sheet
         }
-        return false;
+        return false; // allow navigation back normally
       };
-      const subscription = BackHandler.addEventListener(
+
+      const sub = BackHandler.addEventListener(
         'hardwareBackPress',
-        onBackPress
+        onBackPress,
       );
-      return () => subscription.remove();
-    }, [sheetRef])
+      return () => sub.remove();
+    }, [isOpen, sheetRef]),
   );
+
+  const handleSheetPositionChange = useCallback((position: number) => {
+    setIsOpen(position === 0);
+  }, []);
 
   return (
     <BottomSheetModal
@@ -61,11 +68,12 @@ const BottomSheet = ({
       index={0}
       snapPoints={snapPoints}
       enablePanDownToClose
+      enableDismissOnClose
       backdropComponent={renderBackdrop}
-      enableDismissOnClose={true}
       enableDynamicSizing={false}
       handleIndicatorStyle={styles.handleIndicator}
       onDismiss={onDismiss}
+      onChange={handleSheetPositionChange}
     >
       {/* Sticky Header */}
       <View style={styles.header}>

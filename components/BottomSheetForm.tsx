@@ -80,6 +80,7 @@ const BottomSheetForm = ({
       index={0}
       snapPoints={snapPoints}
       enablePanDownToClose
+      enableDismissOnClose
       enableDynamicSizing={false}
       backdropComponent={renderBackdrop}
       handleIndicatorStyle={styles.handleIndicator}

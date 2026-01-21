@@ -25,7 +25,6 @@ export const formatDateTime = (dateTimeString: string) => {
 /**
  * Splits a datetime string like "21.01.2026 05:09"
  * into { date, time } or detailed parts.
- * @param {string} datetime
  */
 export function splitDatetime(datetime: string) {
   const [date, time] = datetime.trim().split(' ');

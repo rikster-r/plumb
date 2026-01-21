@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -34,6 +34,8 @@ const FileUploadBottomSheet: React.FC<FileUploadBottomSheetProps> = ({
   onSubmit,
   onRemoveFile,
 }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const getFileIcon = (fileName: string) => {
     const ext = fileName.split('.').pop()?.toLowerCase() || '';
 
@@ -71,19 +73,24 @@ const FileUploadBottomSheet: React.FC<FileUploadBottomSheetProps> = ({
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
-        if (sheetRef.current) {
-          sheetRef.current.dismiss();
-          return true;
+        if (isOpen) {
+          sheetRef.current?.dismiss();
+          return true; // consume back to close sheet
         }
-        return false;
+        return false; // allow navigation back normally
       };
-      const subscription = BackHandler.addEventListener(
+
+      const sub = BackHandler.addEventListener(
         'hardwareBackPress',
         onBackPress,
       );
-      return () => subscription.remove();
-    }, [sheetRef]),
+      return () => sub.remove();
+    }, [isOpen, sheetRef]),
   );
+
+  const handleSheetPositionChange = useCallback((position: number) => {
+    setIsOpen(position === 0);
+  }, []);
 
   return (
     <BottomSheetModal
@@ -91,11 +98,12 @@ const FileUploadBottomSheet: React.FC<FileUploadBottomSheetProps> = ({
       index={0}
       snapPoints={files.length > 5 ? ['70%'] : ['60%']}
       enablePanDownToClose
-      backdropComponent={renderBackdrop}
-      enableDismissOnClose={true}
+      enableDismissOnClose
       enableDynamicSizing={false}
+      backdropComponent={renderBackdrop}
       handleIndicatorStyle={styles.handleIndicator}
       onDismiss={onDismiss}
+      onChange={handleSheetPositionChange}
     >
       {/* Fixed Header */}
       <View style={styles.header}>

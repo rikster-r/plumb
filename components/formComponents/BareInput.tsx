@@ -19,7 +19,6 @@ export const BareInput = ({
   maxHeight = 120,
   ...rest
 }: Props) => {
-
   return (
     <View style={styles.container}>
       <TextInput
@@ -43,7 +42,7 @@ export const BareInput = ({
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
+    flexGrow: 1,
   },
   input: {
     backgroundColor: '#F2F2F7',

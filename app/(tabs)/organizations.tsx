@@ -1,13 +1,11 @@
-import CreateOrganizationBottomSheet from '@/components/organizations/CreateOrganizationBottomSheet';
 import OrganizationCard from '@/components/organizations/OrganizationCard';
 import { PageHeader } from '@/components/PageHeader';
 import { useUser } from '@/context/currentUser';
 import { fetcherWithToken } from '@/lib/fetcher';
 import { Ionicons } from '@expo/vector-icons';
-import { type BottomSheetModal } from '@gorhom/bottom-sheet';
 import useSWRNative from '@nandorojo/swr-react-native';
 import { useRouter } from 'expo-router';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -21,9 +19,6 @@ import {
 const OrganizationsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { user, token } = useUser();
-  const bottomSheetRef = useRef<BottomSheetModal>(
-    null
-  ) as React.RefObject<BottomSheetModal>;
   const router = useRouter();
 
   const {
@@ -38,7 +33,6 @@ const OrganizationsPage = () => {
     ([url, token]) => fetcherWithToken(url, token)
   );
 
-  // Filter organizations
   const filteredOrganizations = useMemo(() => {
     if (!organizations) return [];
 
@@ -50,41 +44,9 @@ const OrganizationsPage = () => {
     );
   }, [searchQuery, organizations]);
 
-  const handleOpenBottomSheet = useCallback(() => {
-    bottomSheetRef.current?.present();
-  }, []);
-
-  const handleCreateOrganization = async (formData: any) => {
-    if (!formData.name) {
-      alert('Введите название организации');
-      return;
-    }
-
-    try {
-      const payload = {
-        name: formData.name,
-      };
-
-      const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/organizations`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!response.ok) throw new Error('Не удалось создать организацию');
-
-      await mutate();
-    } catch (error: any) {
-      alert(error.message || 'Ошибка при создании организации');
-      throw error;
-    }
-  };
+  const handleCreateOrganization = () => {
+    router.push('/organizations/create');
+  }
 
   if (isLoading) {
     return (
@@ -149,7 +111,7 @@ const OrganizationsPage = () => {
 
         <TouchableOpacity
           style={styles.addButton}
-          onPress={handleOpenBottomSheet}
+          onPress={handleCreateOrganization}
           activeOpacity={0.7}
         >
           <Ionicons name="add" size={24} color="#FFFFFF" />
@@ -187,15 +149,6 @@ const OrganizationsPage = () => {
           </View>
         }
       />
-
-      {/* Bottom Sheet for Creating Organization */}
-      {bottomSheetRef && (
-        <CreateOrganizationBottomSheet
-          bottomSheetRef={bottomSheetRef}
-          onCreate={handleCreateOrganization}
-          onClose={() => bottomSheetRef.current?.dismiss()}
-        />
-      )}
     </View>
   );
 };
