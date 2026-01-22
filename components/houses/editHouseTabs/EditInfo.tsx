@@ -17,6 +17,7 @@ import { fetcherWithToken } from '@/lib/fetcher';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { splitDatetime } from '@/utils/dates';
+import { formatErrors } from '@/lib/errors';
 
 interface HouseInfo {
   city: string;
@@ -249,67 +250,9 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
 
       if (!response.ok) {
         if (response.status === 422 && data.errors) {
-          // Handle validation errors - normalize the error keys
-          const newErrors: Record<string, string> = {};
-
-          Object.entries(data.errors).forEach(([key, messages]) => {
-            if (Array.isArray(messages) && messages.length > 0) {
-              // Normalize error keys to match form field names
-              let fieldName = key;
-
-              // Handle nested errors
-              if (key.startsWith('info.')) {
-                fieldName = key.replace('info.', '');
-
-                // Handle houseTariff nested errors
-                if (fieldName.startsWith('houseTariff.')) {
-                  fieldName = fieldName.replace('houseTariff.', '');
-                }
-              }
-
-              // Map backend error messages to form fields
-              switch (fieldName) {
-                case 'date_maintenance_from':
-                  newErrors['houseTariff.date_maintenance_from'] = messages[0];
-                  break;
-                case 'date_maintenance_to':
-                  newErrors['houseTariff.date_maintenance_to'] = messages[0];
-                  break;
-                case 'organization_id':
-                  newErrors['houseTariff.organization_id'] = messages[0];
-                  break;
-                default:
-                  newErrors[fieldName] = messages[0];
-              }
-            }
-          });
-
-          // Check for duplicate house error (non-field error)
-          if (data.errors.info && Array.isArray(data.errors.info)) {
-            const duplicateError = data.errors.info.find(
-              (msg: string) =>
-                msg.includes('уже существует') ||
-                msg.includes('already exists'),
-            );
-            if (duplicateError) {
-              Alert.alert(
-                'Ошибка',
-                'Дом с таким адресом уже существует. Пожалуйста, проверьте адрес.',
-                [{ text: 'OK' }],
-              );
-              return;
-            }
-          }
-
-          setErrors(newErrors);
-
-          // Show alert with first error for better UX
-          const firstError = Object.values(newErrors)[0];
-          if (firstError) {
-            Alert.alert('Ошибка валидации', firstError);
-          } else {
-            Alert.alert('Ошибка', 'Произошла ошибка при сохранении');
-          }
+          const formattedErrors = formatErrors(data.errors);
+          setErrors(formattedErrors.info);
+          Alert.alert('Ошибка валидации', 'Проверьте введенные данные');
         } else {
           throw new Error(data.message || 'Ошибка при сохранении');
         }

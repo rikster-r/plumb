@@ -113,23 +113,6 @@ const EditHouseOrganization = ({ setHasUnsavedChanges }: Props) => {
     }
   };
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    // Filter valid phones
-    const validPhones = formData.phones.filter((phone) => phone.trim() !== '');
-    if (validPhones.length === 0) {
-      newErrors.phones = 'Необходимо указать хотя бы один телефон';
-    }
-
-    if (!formData.schedule_id) {
-      newErrors.schedule_id = 'График работы обязателен для выбора';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSave = async () => {
     const validPhones = formData.phones.filter((p) => p.trim().length > 0);
 
@@ -184,7 +167,7 @@ const EditHouseOrganization = ({ setHasUnsavedChanges }: Props) => {
       if (!response.ok) {
         if (response.status === 422 && data.errors) {
           const formattedErrors = formatErrors(data.errors);
-          setErrors(formattedErrors);
+          setErrors(formattedErrors.organization);
           Alert.alert('Ошибка валидации', 'Проверьте введенные данные');
         } else {
           throw new Error(data.message || 'Ошибка при сохранении');

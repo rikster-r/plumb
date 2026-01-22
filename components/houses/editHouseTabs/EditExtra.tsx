@@ -8,6 +8,7 @@ import {
 import { GeistText } from '@/components/GeistText';
 import { useUser } from '@/context/currentUser';
 import { useHouseDetails } from '@/hooks/useHouseDetails';
+import { formatErrors } from '@/lib/errors';
 import { fetcherWithToken } from '@/lib/fetcher';
 import useSWRNative from '@nandorojo/swr-react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -15,7 +16,6 @@ import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
@@ -64,7 +64,7 @@ const HouseEditExtrasScreen = ({ setHasUnsavedChanges }: Props) => {
     resource_organizations: [],
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, any>>({});
   const [isSaving, setIsSaving] = useState(false);
 
   // Fetch resource organizations
@@ -150,14 +150,8 @@ const HouseEditExtrasScreen = ({ setHasUnsavedChanges }: Props) => {
 
       if (!response.ok) {
         if (response.status === 422 && data.errors) {
-          // Handle validation errors
-          const newErrors: Record<string, string> = {};
-          Object.entries(data.errors).forEach(([key, messages]) => {
-            if (Array.isArray(messages) && messages.length > 0) {
-              newErrors[key] = messages[0];
-            }
-          });
-          setErrors(newErrors);
+          const formattedErrors = formatErrors(data.errors);
+          setErrors(formattedErrors.other);
           Alert.alert('Ошибка валидации', 'Проверьте введенные данные');
         } else {
           throw new Error(data.message || 'Ошибка при сохранении');
@@ -214,6 +208,7 @@ const HouseEditExtrasScreen = ({ setHasUnsavedChanges }: Props) => {
                 placeholder="Шлагбаум на въезде"
                 multiline
                 numberOfLines={3}
+                error={errors.barrier_not}
               />
             )}
 
@@ -233,6 +228,7 @@ const HouseEditExtrasScreen = ({ setHasUnsavedChanges }: Props) => {
                 placeholder="Отапливаемый подвал"
                 multiline
                 numberOfLines={3}
+                error={errors.basement_not}
               />
             )}
 
@@ -252,6 +248,7 @@ const HouseEditExtrasScreen = ({ setHasUnsavedChanges }: Props) => {
                 placeholder="Технический этаж между 8 и 9 этажами"
                 multiline
                 numberOfLines={3}
+                error={errors.technical_floor_not}
               />
             )}
           </FormSection>
@@ -264,6 +261,7 @@ const HouseEditExtrasScreen = ({ setHasUnsavedChanges }: Props) => {
               placeholder="ВРУ-1"
               multiline
               numberOfLines={3}
+              error={errors.vru}
             />
 
             <LabeledInput
@@ -273,6 +271,7 @@ const HouseEditExtrasScreen = ({ setHasUnsavedChanges }: Props) => {
               placeholder="Элеваторный узел"
               multiline
               numberOfLines={3}
+              error={errors.dhw}
             />
 
             <LabeledInput
@@ -282,6 +281,7 @@ const HouseEditExtrasScreen = ({ setHasUnsavedChanges }: Props) => {
               placeholder="Централизованное"
               multiline
               numberOfLines={3}
+              error={errors.cws}
             />
 
             <LabeledInput
@@ -291,6 +291,7 @@ const HouseEditExtrasScreen = ({ setHasUnsavedChanges }: Props) => {
               placeholder="Индивидуальный тепловой пункт"
               multiline
               numberOfLines={3}
+              error={errors.heating_unit}
             />
 
             <LabeledInput
@@ -300,6 +301,7 @@ const HouseEditExtrasScreen = ({ setHasUnsavedChanges }: Props) => {
               placeholder="Grundfos UPS 32-60"
               multiline
               numberOfLines={3}
+              error={errors.pump}
             />
           </FormSection>
 
@@ -325,6 +327,7 @@ const HouseEditExtrasScreen = ({ setHasUnsavedChanges }: Props) => {
                 }
                 placeholder="Выберите организации"
                 loading={resourceOrgsLoading}
+                error={errors.resource_organizations}
               />
             )}
           </FormSection>
