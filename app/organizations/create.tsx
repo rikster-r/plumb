@@ -157,8 +157,6 @@ const CreateOrganizationScreen = () => {
         branch_id: parseInt(formData.branch_id),
       };
 
-      console.log(payload);
-
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_API_URL}/organizations`,
         {

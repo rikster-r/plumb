@@ -1,29 +1,30 @@
-import React, { useState, useEffect } from 'react';
 import {
-  View,
-  StyleSheet,
-  Alert,
-  ActivityIndicator,
-  TouchableOpacity,
-} from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import {
-  LabeledInput,
-  LabeledDropdown,
+  BareInput,
+  FormActions,
   FormRow,
   FormSection,
-  FormActions,
-  BareInput,
+  LabeledDropdown,
+  LabeledInput,
 } from '@/components/formComponents';
 import { GeistText } from '@/components/GeistText';
-import { useOrganizationDetails } from '@/hooks/useOrganizationDetails';
 import { useUser } from '@/context/currentUser';
-import useSWRNative from '@nandorojo/swr-react-native';
-import { fetcherWithToken } from '@/lib/fetcher';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { useDeduplicatedSchedules } from '@/hooks/useDeduplicatedSchedules';
+import { useOrganizationDetails } from '@/hooks/useOrganizationDetails';
+import { formatErrors } from '@/lib/errors';
+import { fetcherWithToken } from '@/lib/fetcher';
+import { Ionicons } from '@expo/vector-icons';
+import useSWRNative from '@nandorojo/swr-react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface OrganizationFormData {
   name: string;
@@ -132,45 +133,51 @@ const OrganizationEditScreen = ({ setHasUnsavedChanges }: Props) => {
     }
   };
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Название обязательно для заполнения';
-    }
-    if (!formData.branch_id) {
-      newErrors.branch_id = 'Филиал обязателен для выбора';
-    }
-    if (!formData.schedule_id) {
-      newErrors.schedule_id = 'График работы обязателен для выбора';
-    }
-    if (!formData.time_from.trim()) {
-      newErrors.time_from = 'Время начала работы обязательно';
-    }
-    if (!formData.time_end.trim()) {
-      newErrors.time_end = 'Время окончания работы обязательно';
-    }
-    if (!formData.start_cooperation.trim()) {
-      newErrors.start_cooperation = 'Дата начала сотрудничества обязательна';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSave = async () => {
-    if (!validateForm()) {
-      Alert.alert('Ошибка', 'Пожалуйста, заполните все обязательные поля');
+    const validPhones = formData.phones.filter((p) => p.trim().length > 0);
+
+    // Client-side validation
+    const newErrors: Record<string, any> = {};
+    const requiredFields = [
+      'name',
+      'branch_id',
+      'schedule_id',
+      'time_from',
+      'time_end',
+      'start_cooperation',
+    ] as const;
+
+    requiredFields.forEach((field) => {
+      if (!formData[field]?.toString().trim()) {
+        newErrors[field] = ['Обязательное поле'];
+      }
+    });
+
+    if (validPhones.length === 0) {
+      newErrors.phones = [['Обязательное поле.']];
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
     setIsSaving(true);
 
     try {
-      // Filter out empty phone numbers
-      const validPhones = formData.phones.filter(
-        (phone) => phone.trim() !== '',
-      );
+      const payload = {
+        name: formData.name,
+        full_name: formData.full_name || null,
+        address: formData.address || null,
+        phones: validPhones.length > 0 ? validPhones : null,
+        schedule_id: parseInt(formData.schedule_id),
+        time_from: formData.time_from,
+        time_end: formData.time_end,
+        start_cooperation: formData.start_cooperation,
+        end_cooperation: formData.end_cooperation || null,
+        branch_id: parseInt(formData.branch_id),
+        note: formData.note || null,
+      };
 
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_API_URL}/organizations/${id}`,
@@ -180,19 +187,7 @@ const OrganizationEditScreen = ({ setHasUnsavedChanges }: Props) => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            name: formData.name,
-            full_name: formData.full_name || null,
-            address: formData.address || null,
-            phones: validPhones.length > 0 ? validPhones : null,
-            schedule_id: parseInt(formData.schedule_id),
-            time_from: formData.time_from,
-            time_end: formData.time_end,
-            start_cooperation: formData.start_cooperation,
-            end_cooperation: formData.end_cooperation || null,
-            branch_id: parseInt(formData.branch_id),
-            note: formData.note || null,
-          }),
+          body: JSON.stringify(payload),
         },
       );
 
@@ -200,17 +195,11 @@ const OrganizationEditScreen = ({ setHasUnsavedChanges }: Props) => {
 
       if (!response.ok) {
         if (response.status === 422 && data.errors) {
-          // Handle validation errors
-          const newErrors: Record<string, string> = {};
-          Object.entries(data.errors).forEach(([key, messages]) => {
-            if (Array.isArray(messages) && messages.length > 0) {
-              newErrors[key] = messages[0];
-            }
-          });
-          setErrors(newErrors);
+          const formattedErrors = formatErrors(data.errors);
+          setErrors(formattedErrors);
           Alert.alert('Ошибка валидации', 'Проверьте введенные данные');
         } else {
-          throw new Error(data.message || 'Ошибка при сохранении');
+          throw new Error(data || 'Ошибка при сохранении');
         }
         return;
       }
@@ -220,13 +209,12 @@ const OrganizationEditScreen = ({ setHasUnsavedChanges }: Props) => {
           text: 'OK',
           onPress: () => {
             setHasUnsavedChanges(false);
-            router.back();
           },
         },
       ]);
     } catch (error) {
       console.error('Error saving organization:', error);
-      Alert.alert('Ошибка', 'Не удалось сохранить изменения');
+      Alert.alert('Ошибка сервера', 'Не удалось сохранить изменения');
     } finally {
       setIsSaving(false);
     }
@@ -296,36 +284,55 @@ const OrganizationEditScreen = ({ setHasUnsavedChanges }: Props) => {
           </FormSection>
 
           <FormSection title="Контакты">
+            <GeistText
+              weight={500}
+              style={[styles.label, errors.phones && styles.labelError]}
+            >
+              Телефоны*
+            </GeistText>
+
             <View style={{ gap: 12 }}>
-              {formData.phones.map((phone, index) => (
-                <View key={index} style={styles.phoneRow}>
-                  <View style={{ flex: 1 }}>
-                    <BareInput
-                      value={phone}
-                      onChangeText={(t) => updatePhone(index, t)}
-                      placeholder="+7 (___) ___-__-__"
-                      keyboardType="default"
-                    />
-                  </View>
-                  {formData.phones.length > 1 && (
-                    <TouchableOpacity
-                      onPress={() => removePhone(index)}
-                      style={styles.removeButton}
-                    >
-                      <Ionicons
-                        name="close-outline"
-                        size={24}
-                        color="#FF3B30"
+              {formData.phones.map((phone, index) => {
+                const phoneErrors = errors.phones?.[index];
+
+                return (
+                  <View key={index}>
+                    <View style={styles.phoneRow}>
+                      <BareInput
+                        value={phone}
+                        onChangeText={(t) => updatePhone(index, t)}
+                        placeholder="+7 (___) ___-__-__"
+                        keyboardType="phone-pad"
+                        style={phoneErrors ? styles.inputError : undefined}
                       />
-                    </TouchableOpacity>
-                  )}
-                </View>
-              ))}
+
+                      {formData.phones.length > 1 && (
+                        <TouchableOpacity
+                          onPress={() => removePhone(index)}
+                          style={styles.removePhoneButton}
+                        >
+                          <Ionicons
+                            name="close-outline"
+                            size={24}
+                            color="#FF3B30"
+                          />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+
+                    {phoneErrors && (
+                      <GeistText style={styles.errorText}>
+                        {phoneErrors[0]}
+                      </GeistText>
+                    )}
+                  </View>
+                );
+              })}
             </View>
 
-            <TouchableOpacity style={styles.addButton} onPress={addPhone}>
+            <TouchableOpacity style={styles.addPhoneButton} onPress={addPhone}>
               <Ionicons name="add-circle-outline" size={20} color="#007AFF" />
-              <GeistText weight={500} style={styles.addButtonText}>
+              <GeistText weight={500} style={styles.addPhoneText}>
                 Добавить телефон
               </GeistText>
             </TouchableOpacity>
@@ -429,33 +436,41 @@ const styles = StyleSheet.create({
     color: '#000000',
     marginBottom: 8,
   },
+  label: {
+    fontSize: 14,
+    color: '#3C3C43',
+    marginBottom: 8,
+  },
+  labelError: {
+    color: '#FF3B30',
+  },
   phoneRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    alignItems: 'flex-end',
+    gap: 12,
   },
-  phoneInput: {
-    flex: 1,
+  removePhoneButton: {
+    paddingBottom: 12,
   },
-  removeButton: {
-    padding: 8,
-  },
-  removeButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  addButton: {
+  addPhoneButton: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 8,
-    paddingVertical: 8,
     marginBottom: 16,
   },
-  addButtonText: {
-    fontSize: 15,
+  addPhoneText: {
+    fontSize: 16,
     color: '#007AFF',
     marginLeft: 8,
+  },
+  inputError: {
+    borderColor: '#FF3B30',
+    borderWidth: 1,
+  },
+  errorText: {
+    fontSize: 12,
+    color: '#FF3B30',
+    marginTop: 4,
   },
   buttonContainer: {
     flexDirection: 'row',

@@ -23,6 +23,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useDeduplicatedSchedules } from '@/hooks/useDeduplicatedSchedules';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { formatErrors } from '@/lib/errors';
 
 interface HouseOrganizationFormData {
   address: string;
@@ -61,7 +62,7 @@ const EditHouseOrganization = ({ setHasUnsavedChanges }: Props) => {
     employees: [],
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, any>>({});
   const [isSaving, setIsSaving] = useState(false);
 
   // Initialize form with organization data
@@ -130,18 +131,41 @@ const EditHouseOrganization = ({ setHasUnsavedChanges }: Props) => {
   };
 
   const handleSave = async () => {
-    if (!validateForm()) {
-      Alert.alert('Ошибка', 'Пожалуйста, заполните все обязательные поля');
+    const validPhones = formData.phones.filter((p) => p.trim().length > 0);
+
+    // Client-side validation
+    const newErrors: Record<string, any> = {};
+    const requiredFields = ['schedule_id'] as const;
+
+    requiredFields.forEach((field) => {
+      if (!formData[field]?.toString().trim()) {
+        newErrors[field] = ['Обязательное поле'];
+      }
+    });
+
+    if (validPhones.length === 0) {
+      newErrors.phones = [['Обязательное поле.']];
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
     setIsSaving(true);
 
     try {
-      // Filter out empty phone numbers
-      const validPhones = formData.phones.filter(
-        (phone) => phone.trim() !== '',
-      );
+      const payload = {
+        organization: {
+          address: formData.address || null,
+          phones: validPhones,
+          schedule_id: parseInt(formData.schedule_id),
+          employees:
+            formData.employees.length > 0
+              ? formData.employees.map((id) => parseInt(id))
+              : null,
+        },
+      };
 
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_API_URL}/houses/${id}/organization`,
@@ -151,17 +175,7 @@ const EditHouseOrganization = ({ setHasUnsavedChanges }: Props) => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            organization: {
-              address: formData.address || null,
-              phones: validPhones,
-              schedule_id: parseInt(formData.schedule_id),
-              employees:
-                formData.employees.length > 0
-                  ? formData.employees.map((id) => parseInt(id))
-                  : null,
-            },
-          }),
+          body: JSON.stringify(payload),
         },
       );
 
@@ -169,16 +183,8 @@ const EditHouseOrganization = ({ setHasUnsavedChanges }: Props) => {
 
       if (!response.ok) {
         if (response.status === 422 && data.errors) {
-          // Handle validation errors
-          const newErrors: Record<string, string> = {};
-          Object.entries(data.errors).forEach(([key, messages]) => {
-            if (Array.isArray(messages) && messages.length > 0) {
-              // Remove 'organization.' prefix from error keys
-              const cleanKey = key.replace('organization.', '');
-              newErrors[cleanKey] = messages[0];
-            }
-          });
-          setErrors(newErrors);
+          const formattedErrors = formatErrors(data.errors);
+          setErrors(formattedErrors);
           Alert.alert('Ошибка валидации', 'Проверьте введенные данные');
         } else {
           throw new Error(data.message || 'Ошибка при сохранении');
@@ -239,40 +245,51 @@ const EditHouseOrganization = ({ setHasUnsavedChanges }: Props) => {
               weight={500}
               style={[styles.label, errors.phones && styles.labelError]}
             >
-              Телефоны
+              Телефоны*
             </GeistText>
+
             <View style={{ gap: 12 }}>
-              {formData.phones.map((phone, index) => (
-                <View key={index} style={styles.phoneRow}>
-                  <View style={{ flex: 1 }}>
-                    <BareInput
-                      value={phone}
-                      onChangeText={(t) => updatePhone(index, t)}
-                      placeholder="+7 (___) ___-__-__"
-                      keyboardType="default"
-                    />
-                  </View>
-                  {formData.phones.length > 1 && (
-                    <TouchableOpacity
-                      onPress={() => removePhone(index)}
-                      style={styles.removeButton}
-                    >
-                      <Ionicons
-                        name="close-outline"
-                        size={24}
-                        color="#FF3B30"
+              {formData.phones.map((phone, index) => {
+                const phoneErrors = errors.phones?.[index];
+
+                return (
+                  <View key={index}>
+                    <View style={styles.phoneRow}>
+                      <BareInput
+                        value={phone}
+                        onChangeText={(t) => updatePhone(index, t)}
+                        placeholder="+7 (___) ___-__-__"
+                        keyboardType="phone-pad"
+                        style={phoneErrors ? styles.inputError : undefined}
                       />
-                    </TouchableOpacity>
-                  )}
-                </View>
-              ))}
+
+                      {formData.phones.length > 1 && (
+                        <TouchableOpacity
+                          onPress={() => removePhone(index)}
+                          style={styles.removePhoneButton}
+                        >
+                          <Ionicons
+                            name="close-outline"
+                            size={24}
+                            color="#FF3B30"
+                          />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+
+                    {phoneErrors && (
+                      <GeistText style={styles.errorText}>
+                        {phoneErrors[0]}
+                      </GeistText>
+                    )}
+                  </View>
+                );
+              })}
             </View>
-            {errors.phones && (
-              <GeistText style={styles.errorText}>{errors.phones}</GeistText>
-            )}
-            <TouchableOpacity style={styles.addButton} onPress={addPhone}>
+
+            <TouchableOpacity style={styles.addPhoneButton} onPress={addPhone}>
               <Ionicons name="add-circle-outline" size={20} color="#007AFF" />
-              <GeistText weight={500} style={styles.addButtonText}>
+              <GeistText weight={500} style={styles.addPhoneText}>
                 Добавить телефон
               </GeistText>
             </TouchableOpacity>
@@ -282,6 +299,7 @@ const EditHouseOrganization = ({ setHasUnsavedChanges }: Props) => {
               value={formData.address}
               onChangeText={(t) => updateField('address', t)}
               placeholder="г. Москва, ул. Центральная, д. 21"
+              error={errors.address}
             />
 
             <LabeledDropdown
@@ -305,10 +323,8 @@ const EditHouseOrganization = ({ setHasUnsavedChanges }: Props) => {
               loading={orgLoading}
               placeholder="Выберите сотрудников"
               emptyStateText="У данной организации нет сотрудников"
+              error={errors.employees}
             />
-            {errors.employees && (
-              <GeistText style={styles.errorText}>{errors.employees}</GeistText>
-            )}
           </FormSection>
         </KeyboardAwareScrollView>
       </View>
@@ -341,11 +357,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#8E8E93',
   },
-  errorText: {
-    fontSize: 14,
-    color: '#FF3B30',
-    marginTop: 4,
-  },
   scrollView: {
     flex: 1,
     paddingHorizontal: 16,
@@ -372,31 +383,31 @@ const styles = StyleSheet.create({
   },
   phoneRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    alignItems: 'flex-end',
+    gap: 12,
   },
-  phoneInput: {
-    flex: 1,
+  removePhoneButton: {
+    paddingBottom: 12,
   },
-  removeButton: {
-    padding: 8,
-  },
-  removeButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  addButton: {
+  addPhoneButton: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 8,
-    paddingVertical: 8,
     marginBottom: 16,
   },
-  addButtonText: {
-    fontSize: 15,
+  addPhoneText: {
+    fontSize: 16,
     color: '#007AFF',
     marginLeft: 8,
+  },
+  inputError: {
+    borderColor: '#FF3B30',
+    borderWidth: 1,
+  },
+  errorText: {
+    fontSize: 12,
+    color: '#FF3B30',
+    marginTop: 4,
   },
   employeeContainer: {
     gap: 12,
