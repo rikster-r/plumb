@@ -428,7 +428,7 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
           <FormSection title="Характеристики здания">
             <FormRow>
               <LabeledInput
-                label="Подъезды"
+                label="Подъезд"
                 value={formData.count_entrance}
                 onChangeText={(t) => updateField('count_entrance', t)}
                 placeholder="6"
@@ -436,7 +436,7 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
                 error={errors.count_entrance}
               />
               <LabeledInput
-                label="Этажи"
+                label="Этаж"
                 value={formData.count_floor}
                 onChangeText={(t) => updateField('count_floor', t)}
                 placeholder="16"
@@ -447,7 +447,7 @@ const EditHouseInfo = ({ setHasUnsavedChanges }: Props) => {
 
             <FormRow>
               <LabeledInput
-                label="Квартиры"
+                label="Квартира"
                 value={formData.count_apartment}
                 onChangeText={(t) => updateField('count_apartment', t)}
                 placeholder="96"

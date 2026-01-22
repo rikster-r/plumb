@@ -117,13 +117,13 @@ const HouseReviewStep = ({ formData, referenceData }: Props) => {
 
       <FormSection title="Характеристики">
         {info.count_entrance && (
-          <ReviewItem label="Подъезды" value={info.count_entrance} />
+          <ReviewItem label="Подъезд" value={info.count_entrance} />
         )}
         {info.count_floor && (
-          <ReviewItem label="Этажи" value={info.count_floor} />
+          <ReviewItem label="Этаж" value={info.count_floor} />
         )}
         {info.count_apartment && (
-          <ReviewItem label="Квартиры" value={info.count_apartment} />
+          <ReviewItem label="Квартира" value={info.count_apartment} />
         )}
         {info.square && (
           <ReviewItem label="Площадь" value={`${info.square} м²`} />

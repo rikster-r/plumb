@@ -96,14 +96,14 @@ const HouseInfoStep = ({ formData, updateFormData, errors, referenceData }: Hous
       <FormSection title="Характеристики здания">
         <FormRow>
           <LabeledInput
-            label="Подъезды"
+            label="Подъезд"
             value={info.count_entrance}
             onChangeText={(t) => updateInfo('count_entrance', t)}
             placeholder="6"
             keyboardType="numeric"
           />
           <LabeledInput
-            label="Этажи"
+            label="Этаж"
             value={info.count_floor}
             onChangeText={(t) => updateInfo('count_floor', t)}
             placeholder="16"
@@ -113,7 +113,7 @@ const HouseInfoStep = ({ formData, updateFormData, errors, referenceData }: Hous
 
         <FormRow>
           <LabeledInput
-            label="Квартиры"
+            label="Квартира"
             value={info.count_apartment}
             onChangeText={(t) => updateInfo('count_apartment', t)}
             placeholder="96"

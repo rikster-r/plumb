@@ -53,7 +53,7 @@ const HouseCard: React.FC<HouseCardProps> = ({
           <View style={styles.statItem}>
             <Ionicons name="business-outline" size={18} color="#8E8E93" />
             <GeistText weight={500} style={styles.statLabel}>
-              Подъезды
+              Подъезд
             </GeistText>
             <GeistText weight={600} style={styles.statValue}>
               {item.count_entrance || '—'}
@@ -63,7 +63,7 @@ const HouseCard: React.FC<HouseCardProps> = ({
           <View style={styles.statItem}>
             <Ionicons name="layers-outline" size={18} color="#8E8E93" />
             <GeistText weight={500} style={styles.statLabel}>
-              Этажи
+              Этаж
             </GeistText>
             <GeistText weight={600} style={styles.statValue}>
               {item.count_floor || '—'}
@@ -73,7 +73,7 @@ const HouseCard: React.FC<HouseCardProps> = ({
           <View style={styles.statItem}>
             <Ionicons name="home-outline" size={18} color="#8E8E93" />
             <GeistText weight={500} style={styles.statLabel}>
-              Квартиры
+              Квартира
             </GeistText>
             <GeistText weight={600} style={styles.statValue}>
               {item.count_apartment || '—'}

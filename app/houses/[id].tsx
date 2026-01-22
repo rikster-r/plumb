@@ -195,7 +195,7 @@ const HouseDetailPage = () => {
             <View style={styles.statItem}>
               <Ionicons name="business-outline" size={20} color="#52525B" />
               <GeistText weight={400} style={styles.statLabel}>
-                Подъезды
+                Подъезд
               </GeistText>
               <GeistText weight={600} style={styles.statValue}>
                 {house.count_entrance || '—'}
@@ -204,7 +204,7 @@ const HouseDetailPage = () => {
             <View style={styles.statItem}>
               <Ionicons name="layers-outline" size={20} color="#52525B" />
               <GeistText weight={400} style={styles.statLabel}>
-                Этажи
+                Этаж
               </GeistText>
               <GeistText weight={600} style={styles.statValue}>
                 {house.count_floor || '—'}
@@ -213,7 +213,7 @@ const HouseDetailPage = () => {
             <View style={styles.statItem}>
               <Ionicons name="home-outline" size={20} color="#52525B" />
               <GeistText weight={400} style={styles.statLabel}>
-                Квартиры
+                Квартира
               </GeistText>
               <GeistText weight={600} style={styles.statValue}>
                 {house.count_apartment || '—'}
