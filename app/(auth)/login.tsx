@@ -6,12 +6,12 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -32,19 +32,16 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const res = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/auth/login`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            login: email,
-            password,
-          }),
-        }
-      );
+      const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          login: email,
+          password,
+        }),
+      });
 
       const data = await res.json();
 
@@ -61,7 +58,7 @@ const Login = () => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${data.token}`,
           },
-        }
+        },
       );
 
       const profileData = await profileRes.json();
@@ -69,7 +66,7 @@ const Login = () => {
       if (!profileRes.ok) {
         Alert.alert(
           'Ошибка',
-          profileData.message || 'Ошибка получения профиля'
+          profileData.message || 'Ошибка получения профиля',
         );
         return;
       }

@@ -1,11 +1,11 @@
 import { useUser } from '@/context/currentUser';
-import { Redirect, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 
 export default function AuthLayout() {
   const { user, isLoading } = useUser();
 
-  if (!isLoading && user) {
-    return <Redirect href="/requests" />;
+  if (user && !isLoading) {
+    return;
   }
 
   return (

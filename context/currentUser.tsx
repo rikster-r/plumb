@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { useRouter } from 'expo-router';
 import useSWRNative from '@nandorojo/swr-react-native';
 import { KeyedMutator } from 'swr';
+import { adminRoles, routes } from '@/constants/roles';
 
 interface UserContextType {
   user: User | undefined;
@@ -45,7 +46,7 @@ export const UserProvider = ({ children }: ProviderProps) => {
     isLoading,
   } = useSWRNative<User>(
     [`${process.env.EXPO_PUBLIC_API_URL}/auth/profile`, token],
-    ([url, token]) => fetcher(url, token)
+    ([url, token]) => fetcher(url, token),
   );
 
   useEffect(() => {
@@ -63,14 +64,11 @@ export const UserProvider = ({ children }: ProviderProps) => {
     setToken(newToken);
     mutateUser(user);
 
-    // index redirects accordingly
-    // user role check
-    // if (user.role === 'admin') {
-    //   router.replace('/(tabs)/requests');
-    // } else {
-    //   router.replace('/requests');
-    // }
-    router.replace('/requests');
+    router.replace(
+      adminRoles.includes(user.role.toLowerCase())
+        ? routes.adminInitial.fs
+        : routes.userInitial.fs,
+    );
   };
 
   const logout = async () => {

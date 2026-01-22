@@ -2,7 +2,7 @@ import { Redirect, Tabs } from 'expo-router';
 import { useUser } from '@/context/currentUser';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Pressable, View } from 'react-native';
+import { Pressable } from 'react-native';
 
 const TabBarButton = ({ children, onPress }: any) => (
   <Pressable
@@ -25,8 +25,12 @@ export default function AdminTabsLayout() {
   const { user, isLoading } = useUser();
   const insets = useSafeAreaInsets();
 
-  if (isLoading) return null;
-  if (!user) return <Redirect href="/(auth)/login" />;
+  if (isLoading) {
+    return null;
+  }
+  if (!user) {
+    return <Redirect href="/(auth)/login" />;
+  }
 
   return (
     <Tabs
