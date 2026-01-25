@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   BackHandler,
+  Image,
 } from 'react-native';
 import {
   BottomSheetBackdropProps,
@@ -38,10 +39,15 @@ const FileUploadBottomSheet: React.FC<FileUploadBottomSheetProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  const isImageFile = (fileName: string) => {
+    const ext = fileName.split('.').pop()?.toLowerCase() || '';
+    return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+  };
+
   const getFileIcon = (fileName: string) => {
     const ext = fileName.split('.').pop()?.toLowerCase() || '';
 
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+    if (isImageFile(fileName)) {
       return 'image-outline';
     }
     if (ext === 'pdf') {
@@ -134,11 +140,20 @@ const FileUploadBottomSheet: React.FC<FileUploadBottomSheetProps> = ({
             const extension =
               file.name.split('.').pop()?.toUpperCase() || 'FILE';
             const iconName = getFileIcon(file.name);
+            const isImage = isImageFile(file.name);
 
             return (
               <View key={`${file.name}-${index}`} style={styles.fileCard}>
                 <View style={styles.fileIconContainer}>
-                  <Ionicons name={iconName} size={24} color="#007AFF" />
+                  {isImage ? (
+                    <Image
+                      source={{ uri: file.uri }}
+                      style={styles.filePreview}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <Ionicons name={iconName} size={24} color="#007AFF" />
+                  )}
                 </View>
 
                 <View style={styles.fileInfo}>
@@ -267,11 +282,17 @@ const styles = StyleSheet.create({
   fileIconContainer: {
     width: 48,
     height: 48,
-    borderRadius: 24,
+    borderRadius: 8,
     backgroundColor: '#F0F7FF',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
+    overflow: 'hidden',
+  },
+  filePreview: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
   },
   fileInfo: {
     flex: 1,
