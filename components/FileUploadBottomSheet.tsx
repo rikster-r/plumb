@@ -24,6 +24,7 @@ interface FileUploadBottomSheetProps {
   onDismiss: () => void;
   onSubmit: () => void;
   onRemoveFile: (index: number) => void;
+  onAddMoreFiles?: () => void;
 }
 
 const FileUploadBottomSheet: React.FC<FileUploadBottomSheetProps> = ({
@@ -33,6 +34,7 @@ const FileUploadBottomSheet: React.FC<FileUploadBottomSheetProps> = ({
   onDismiss,
   onSubmit,
   onRemoveFile,
+  onAddMoreFiles,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -75,9 +77,9 @@ const FileUploadBottomSheet: React.FC<FileUploadBottomSheetProps> = ({
       const onBackPress = () => {
         if (isOpen) {
           sheetRef.current?.dismiss();
-          return true; // consume back to close sheet
+          return true;
         }
-        return false; // allow navigation back normally
+        return false;
       };
 
       const sub = BackHandler.addEventListener(
@@ -92,11 +94,17 @@ const FileUploadBottomSheet: React.FC<FileUploadBottomSheetProps> = ({
     setIsOpen(position === 0);
   }, []);
 
+  const handleAddMoreFiles = () => {
+    if (onAddMoreFiles) {
+      onAddMoreFiles();
+    }
+  };
+
   return (
     <BottomSheetModal
       ref={sheetRef}
       index={0}
-      snapPoints={files.length > 5 ? ['70%'] : ['60%']}
+      snapPoints={files.length > 5 ? ['90%'] : ['70%']}
       enablePanDownToClose
       enableDismissOnClose
       enableDynamicSizing={false}
@@ -155,6 +163,24 @@ const FileUploadBottomSheet: React.FC<FileUploadBottomSheetProps> = ({
             );
           })}
         </View>
+
+        {onAddMoreFiles && (
+          <TouchableOpacity
+            style={styles.addMoreButton}
+            onPress={handleAddMoreFiles}
+            disabled={isUploading}
+          >
+            <Ionicons
+              name="add"
+              size={20}
+              color="#007AFF"
+              style={styles.addMoreIcon}
+            />
+            <GeistText weight={600} style={styles.addMoreText}>
+              Добавить еще
+            </GeistText>
+          </TouchableOpacity>
+        )}
       </BottomSheetKeyboardAwareScrollView>
 
       {/* Fixed Footer with Buttons */}
@@ -259,11 +285,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#71717A',
   },
+  addMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    marginBottom: 4,
+  },
+  addMoreIcon: {
+    marginRight: 8,
+  },
+  addMoreText: {
+    fontSize: 16,
+    color: '#007AFF',
+  },
   footer: {
     flexDirection: 'row',
     gap: 12,
     padding: 20,
-    paddingBottom: 34, // Extra padding for safe area
+    paddingBottom: 34,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#E4E4E7',

@@ -5,6 +5,7 @@ import { useHouseDetails } from '@/hooks/useHouseDetails';
 import { Ionicons } from '@expo/vector-icons';
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useMemo, useRef, useState } from 'react';
 import {
@@ -62,7 +63,51 @@ const EditHouseFiles = () => {
     );
   }, [files, searchQuery]);
 
-  const handleFileSelect = async () => {
+  const requestCameraPermission = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Доступ к камере отклонен',
+        'Для съемки фото необходимо предоставить доступ к камере в настройках приложения.',
+      );
+      return false;
+    }
+    return true;
+  };
+
+  const takePhoto = async () => {
+    try {
+      const hasPermission = await requestCameraPermission();
+      if (!hasPermission) return;
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images', 'videos'],
+        quality: 0.8,
+        base64: false,
+      });
+
+      if (result.canceled) return;
+
+      const asset = result.assets[0];
+      if (asset) {
+        const fileAsset: DocumentPicker.DocumentPickerAsset = {
+          uri: asset.uri,
+          name: `photo_${Date.now()}.jpg`,
+          mimeType: 'image/jpeg',
+          size: asset.fileSize || 0,
+          lastModified: Date.now(),
+        };
+
+        setNewFiles((files) => [...files, fileAsset]);
+        bottomSheetRef.current?.present();
+      }
+    } catch (error) {
+      console.error('Error taking photo:', error);
+      Alert.alert('Ошибка', 'Не удалось сделать фото');
+    }
+  };
+
+  const pickDocuments = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: [
@@ -83,12 +128,52 @@ const EditHouseFiles = () => {
 
       if (result.canceled) return;
 
-      setNewFiles(result.assets);
+      setNewFiles((files) => [...files, ...result.assets]);
       bottomSheetRef.current?.present();
     } catch (error) {
       console.error('Error selecting file:', error);
       Alert.alert('Ошибка', 'Не удалось выбрать файл');
     }
+  };
+
+  const handleAddFile = async () => {
+    Alert.alert(
+      'Выберите источник',
+      'Откуда вы хотите добавить файл?',
+      [
+        {
+          text: 'Сделать фото',
+          onPress: takePhoto,
+          style: 'default',
+        },
+        {
+          text: 'Выбрать файл',
+          onPress: pickDocuments,
+          style: 'default',
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
+  const handleAddMoreFiles = async () => {
+    Alert.alert(
+      'Выберите источник',
+      'Откуда вы хотите добавить файлы?',
+      [
+        {
+          text: 'Сделать фото',
+          onPress: takePhoto,
+          style: 'default',
+        },
+        {
+          text: 'Выбрать файлы',
+          onPress: pickDocuments,
+          style: 'default',
+        },
+      ],
+      { cancelable: true },
+    );
   };
 
   const handleSubmitFiles = async () => {
@@ -143,7 +228,7 @@ const EditHouseFiles = () => {
     }
   };
 
-  const removeFileFromModal = (index: number) => {
+  const removeFile = (index: number) => {
     if (newFiles.length === 0) return;
     if (newFiles.length === 1 && index === 0) {
       bottomSheetRef.current?.dismiss();
@@ -239,7 +324,7 @@ const EditHouseFiles = () => {
 
         <TouchableOpacity
           style={styles.addButton}
-          onPress={handleFileSelect}
+          onPress={handleAddFile}
           activeOpacity={0.7}
         >
           <Ionicons name="add" size={24} color="#FFFFFF" />
@@ -272,14 +357,14 @@ const EditHouseFiles = () => {
         />
       </View>
 
-      {/* File Upload Bottom Sheet */}
       <FileUploadBottomSheet
         sheetRef={bottomSheetRef}
         files={newFiles}
         isUploading={isUploading}
         onDismiss={handleDismissBottomSheet}
         onSubmit={handleSubmitFiles}
-        onRemoveFile={removeFileFromModal}
+        onRemoveFile={removeFile}
+        onAddMoreFiles={handleAddMoreFiles}
       />
     </View>
   );

@@ -45,6 +45,15 @@ module.exports = {
           defaultChannel: 'default',
         },
       ],
+      [
+        'expo-image-picker',
+        {
+          photosPermission:
+            'Приложение использует галерею для загрузки фотографий',
+          cameraPermission:
+            'Приложение использует камеру для съемки фотографий',
+        },
+      ],
     ],
     experiments: {
       typedRoutes: true,
