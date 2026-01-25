@@ -25,7 +25,7 @@ module.exports = {
           image: './assets/icons/mainIcon.png',
           imageWidth: 200,
           resizeMode: 'contain',
-          backgroundColor: '#3b639d',
+          backgroundColor: '#fff',
         },
       ],
       'expo-secure-store',
