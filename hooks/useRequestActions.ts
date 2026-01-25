@@ -1,4 +1,5 @@
 import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
 import { Alert } from 'react-native';
 import type { KeyedMutator } from 'swr';
 import { statusConfig } from '../constants/requests';
@@ -31,7 +32,7 @@ export function useRequestActions({
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ status: currentStatus.sentAPIStatus }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -40,7 +41,7 @@ export function useRequestActions({
         const errorData = await response.json();
         Alert.alert(
           'Ошибка',
-          errorData.message || 'Не удалось изменить статус'
+          errorData.message || 'Не удалось изменить статус',
         );
       }
     } catch (error) {
@@ -48,49 +49,96 @@ export function useRequestActions({
     }
   };
 
-  const handleAddFile = async () => {
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'image/*',
-        copyToCacheDirectory: true,
-        multiple: true,
-      });
+  const handleAddFile = async (source: string) => {
+    if (source === 'camera') {
+      const permissionResult =
+        await ImagePicker.requestCameraPermissionsAsync();
 
-      if (!result.canceled && result.assets) {
-        const formData = new FormData();
+      if (!permissionResult.granted) {
+        Alert.alert(
+          'Требуется разрешение',
+          'Необходимо разрешение на использование камеры',
+        );
+        return;
+      }
 
-        result.assets.forEach((asset) => {
-          formData.append('files[]', {
-            uri: asset.uri,
-            type: asset.mimeType || 'image/jpeg',
-            name: asset.name || `file-${Date.now()}.jpg`,
-          } as any);
+      try {
+        const result = await ImagePicker.launchCameraAsync({
+          allowsEditing: true,
+          aspect: [4, 3],
+          quality: 0.8,
+          cameraType: ImagePicker.CameraType.back,
         });
 
-        const response = await fetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/requests/${requestId}/media`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'multipart/form-data',
-            },
-            body: formData,
-          }
-        );
-
-        if (response.ok) {
-          mutate();
-        } else {
-          const errorData = await response.json();
-          Alert.alert(
-            'Ошибка',
-            errorData.message || 'Не удалось добавить файлы'
-          );
+        if (!result.canceled && result.assets) {
+          await uploadFiles(result.assets);
         }
+      } catch (error) {
+        Alert.alert('Ошибка', 'Не удалось сделать фото');
+      }
+    } else if (source === 'gallery') {
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permissionResult.granted) {
+        Alert.alert(
+          'Требуется разрешение',
+          'Необходимо разрешение на доступ к галерее',
+        );
+        return;
+      }
+
+      try {
+        const result = await DocumentPicker.getDocumentAsync({
+          type: 'image/*',
+          copyToCacheDirectory: true,
+          multiple: true,
+        });
+
+        if (!result.canceled && result.assets) {
+          await uploadFiles(result.assets);
+        }
+      } catch (error) {
+        Alert.alert('Ошибка', 'Не удалось выбрать файлы');
+      }
+    }
+  };
+
+  const uploadFiles = async (assets: any[]) => {
+    try {
+      const formData = new FormData();
+
+      assets.forEach((asset) => {
+        formData.append('files[]', {
+          uri: asset.uri,
+          type: asset.mimeType || 'image/jpeg',
+          name: asset.name || `photo-${Date.now()}.jpg`,
+        } as any);
+      });
+
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/requests/${requestId}/media`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        },
+      );
+
+      if (response.ok) {
+        mutate();
+        Alert.alert('Успешно', 'Фото добавлены');
+      } else {
+        const errorData = await response.json();
+        Alert.alert(
+          'Ошибка',
+          errorData.message || 'Не удалось загрузить файлы',
+        );
       }
     } catch (error) {
-      Alert.alert('Ошибка', 'Не удалось добавить файлы');
+      Alert.alert('Ошибка', 'Не удалось загрузить файлы');
     }
   };
 
@@ -107,7 +155,7 @@ export function useRequestActions({
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({ comment: newNote.trim() }),
-          }
+          },
         );
 
         if (response.ok) {

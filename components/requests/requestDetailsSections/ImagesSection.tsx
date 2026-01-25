@@ -5,13 +5,14 @@ import {
   ScrollView,
   Image,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GeistText } from '@/components/GeistText';
 
 interface ImagesSectionProps {
   files: File[];
-  onAddFile: () => void;
+  onAddFile: (source: string) => void;
   onImagePress: (index: number) => void;
 }
 
@@ -20,13 +21,31 @@ const ImagesSection: React.FC<ImagesSectionProps> = ({
   onAddFile,
   onImagePress,
 }) => {
+  const handleAddFilePress = () => {
+    Alert.alert(
+      'Добавить фото',
+      'Выберите способ добавления',
+      [
+        {
+          text: 'Сделать фото',
+          onPress: () => onAddFile('camera'),
+        },
+        {
+          text: 'Выбрать из галереи',
+          onPress: () => onAddFile('gallery'),
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
         <GeistText weight={600} style={styles.sectionTitle}>
           Фото ({files.length})
         </GeistText>
-        <TouchableOpacity onPress={onAddFile} style={styles.addButton}>
+        <TouchableOpacity onPress={handleAddFilePress} style={styles.addButton}>
           <Ionicons name="add" size={20} color="#1F5EDB" />
           <GeistText weight={500} style={styles.addButtonText}>
             Добавить
