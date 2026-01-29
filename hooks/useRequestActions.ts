@@ -64,10 +64,7 @@ export function useRequestActions({
 
       try {
         const result = await ImagePicker.launchCameraAsync({
-          allowsEditing: true,
-          aspect: [4, 3],
           quality: 0.8,
-          cameraType: ImagePicker.CameraType.back,
         });
 
         if (!result.canceled && result.assets) {
