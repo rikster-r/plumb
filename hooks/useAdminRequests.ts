@@ -66,7 +66,7 @@ export function useAdminRequests() {
     requests,
     pagination,
     isLoading,
-    isLoadingMore: isValidating && size > 1,
+    isLoadingMore: isValidating && pagination.hasMore,
     error,
     fetchNextPage,
     refresh,

@@ -5,8 +5,6 @@ import { RequestCard } from './RequestCard';
 
 interface RequestsListProps {
   requests: Request[];
-  statusConfig: Record<string, any>;
-  priorityColors: Record<string, string>;
   onRequestPress?: (requestId: string) => void;
   emptyMessage?: string;
   onEndReached?: () => void;
@@ -17,8 +15,6 @@ interface RequestsListProps {
 
 export const RequestCardsList: React.FC<RequestsListProps> = ({
   requests,
-  statusConfig,
-  priorityColors,
   onRequestPress,
   emptyMessage = 'Нет заявок по заданным критериям.',
   onEndReached,
@@ -50,17 +46,12 @@ export const RequestCardsList: React.FC<RequestsListProps> = ({
       refreshing={refreshing}
       onRefresh={onRefresh}
       renderItem={({ item }) => (
-        <RequestCard
-          request={item}
-          statusConfig={statusConfig}
-          priorityColors={priorityColors}
-          onPress={onRequestPress}
-        />
+        <RequestCard request={item} onPress={onRequestPress} />
       )}
       ListFooterComponent={canLoadMore ? ListFooterComponent : null}
       ListEmptyComponent={
         <GeistText weight={400} style={styles.emptyText}>
-          {emptyMessage}
+          {refreshing ? emptyMessage : ''}
         </GeistText>
       }
     />

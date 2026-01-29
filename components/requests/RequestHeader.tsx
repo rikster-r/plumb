@@ -3,6 +3,7 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GeistText } from '@/components/GeistText';
 import { router } from 'expo-router';
+import { StatusData } from '@/constants/requests';
 
 interface RequestHeaderProps {
   request: {
@@ -10,23 +11,13 @@ interface RequestHeaderProps {
     status: string;
     paid?: boolean;
   };
-  statusConfig: Record<
-    string,
-    {
-      color: string;
-      backgroundColor: string;
-      borderColor: string;
-      icon: keyof typeof Ionicons.glyphMap;
-    }
-  >;
+  currentStatusConfig: StatusData;
 }
 
 const RequestHeader: React.FC<RequestHeaderProps> = ({
   request,
-  statusConfig,
+  currentStatusConfig,
 }) => {
-  const statusStyle = statusConfig[request.status as keyof typeof statusConfig];
-
   return (
     <View style={styles.header}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -41,21 +32,21 @@ const RequestHeader: React.FC<RequestHeaderProps> = ({
             style={[
               styles.statusBadge,
               {
-                backgroundColor: statusStyle.backgroundColor,
-                borderColor: statusStyle.borderColor,
+                backgroundColor: currentStatusConfig.backgroundColor,
+                borderColor: currentStatusConfig.borderColor,
               },
             ]}
           >
             <Ionicons
-              name={statusStyle.icon}
+              name={currentStatusConfig.icon}
               size={14}
-              color={statusStyle.color}
+              color={currentStatusConfig.color}
             />
             <GeistText
               weight={500}
-              style={[styles.statusText, { color: statusStyle.color }]}
+              style={[styles.statusText, { color: currentStatusConfig.color }]}
             >
-              {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+              {currentStatusConfig.label}
             </GeistText>
           </View>
         </View>

@@ -1,4 +1,4 @@
-import { priorityColors, statusConfig, statusTabs } from '@/constants/requests';
+import { adminStatusTabs as statusTabs } from '@/constants/requests';
 import { useAdminRequests } from '@/hooks/useAdminRequests';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
@@ -10,7 +10,7 @@ import { RequestCardsList } from '@/components/requests/RequestCardsList';
 import { StatusTabs } from '@/components/StatusTabs';
 
 const AdminRequestsPage = () => {
-  const [selectedStatus, setSelectedStatus] = useState('Актуальные');
+  const [selectedStatus, setSelectedStatus] = useState('Активные');
   const router = useRouter();
 
   const {
@@ -23,16 +23,24 @@ const AdminRequestsPage = () => {
     refresh,
   } = useAdminRequests();
 
-  const filteredRequests = useMemo(() => {
-    if (selectedStatus === 'Все') return requests;
-    if (selectedStatus === 'Актуальные') {
-      return requests.filter(
-        (request) =>
-          request.status !== 'Выполнена' && request.status !== 'Закрыта'
-      );
-    }
-    return requests.filter((request) => request.status === selectedStatus);
-  }, [selectedStatus, requests]);
+  const filteredRequests = useMemo(
+    () =>
+      (requests ?? [])
+        .filter((request) => {
+          return request.status !== 'Принята';
+        })
+        .filter((request) => {
+          if (selectedStatus === 'Активные')
+            return !['Выполнена', 'Закрыта', 'Отменена'].includes(
+              request.status,
+            );
+          if (selectedStatus === 'Все') {
+            return true;
+          }
+          return request.status === selectedStatus;
+        }),
+    [selectedStatus, requests],
+  );
 
   const handleRequestPress = (requestId: string) => {
     router.push({
@@ -86,8 +94,6 @@ const AdminRequestsPage = () => {
 
       <RequestCardsList
         requests={filteredRequests}
-        statusConfig={statusConfig}
-        priorityColors={priorityColors}
         onRequestPress={handleRequestPress}
         onEndReached={handleEndReached}
         onRefresh={refresh}

@@ -1,4 +1,4 @@
-import { priorityColors, statusConfig, statusTabs } from '@/constants/requests';
+import { priorityColors, statusTabs } from '@/constants/requests';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -9,28 +9,33 @@ import { StatusTabs } from '@/components/StatusTabs';
 import { useRequests } from '@/hooks/useRequests';
 
 const RequestsPage = () => {
-  const [selectedStatus, setSelectedStatus] = useState('Актуальные');
+  const [selectedStatus, setSelectedStatus] = useState('Активные');
   const router = useRouter();
 
   const { requests } = useRequests();
 
   const filteredRequests = useMemo(
     () =>
-      (requests ?? []).filter((request) => {
-        if (selectedStatus === 'Все') return true;
-        if (selectedStatus === 'Актуальные')
-          return request.status !== 'Выполнена' && request.status !== 'Закрыта';
-        return request.status === selectedStatus;
-      }),
-    [selectedStatus, requests]
+      (requests ?? [])
+        .filter((request) => {
+          return request.status !== 'Принята';
+        })
+        .filter((request) => {
+          if (selectedStatus === 'Активные')
+            return !['Выполнена', 'Закрыта', 'Отменена'].includes(
+              request.status,
+            );
+          return request.status === selectedStatus;
+        }),
+    [selectedStatus, requests],
   );
 
   const activeRequestsCount = useMemo(
     () =>
       (requests ?? []).filter(
-        (r) => r.status !== 'Выполнена' && r.status !== 'Закрыта'
+        (r) => r.status !== 'Выполнена' && r.status !== 'Закрыта',
       ).length,
-    [requests]
+    [requests],
   );
 
   const handleRequestPress = (requestId: string) => {
@@ -52,8 +57,6 @@ const RequestsPage = () => {
 
       <RequestCardsList
         requests={filteredRequests}
-        statusConfig={statusConfig}
-        priorityColors={priorityColors}
         onRequestPress={handleRequestPress}
       />
     </View>

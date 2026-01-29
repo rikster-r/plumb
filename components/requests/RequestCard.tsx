@@ -2,29 +2,25 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GeistText } from '@/components/GeistText';
+import { statusConfig, priorityColors } from '@/constants/requests';
 
 interface RequestCardProps {
   request: Request;
-  statusConfig: Record<string, any>;
-  priorityColors: Record<string, string>;
   onPress?: (requestId: string) => void;
 }
 
 export const RequestCard: React.FC<RequestCardProps> = ({
   request,
-  statusConfig,
-  priorityColors,
   onPress,
 }) => {
-  const statusStyle = statusConfig[request.status] || {};
+  const statusData = statusConfig[request.status] || {};
 
-  const address = (typeof request.house === 'object' && request.house?.full_address) || request.organization || 'Адрес не указан';
+  const address =
+    (typeof request.house === 'object' && request.house?.full_address) ||
+    request.organization ||
+    'Адрес не указан';
   const customer = request.customer || request.applicant || null;
   const problem = request.problem || request.problem_customer || null;
-
-  const status = request.status
-    ? request.status[0].toUpperCase() + request.status.slice(1)
-    : 'Неизвестно';
 
   const priority = request.priority
     ? request.priority[0].toUpperCase() + request.priority.slice(1)
@@ -54,21 +50,24 @@ export const RequestCard: React.FC<RequestCardProps> = ({
           style={[
             styles.statusBadge,
             {
-              backgroundColor: statusStyle.backgroundColor || '#F5F5F5',
-              borderColor: statusStyle.borderColor || '#E4E4E7',
+              backgroundColor: statusData.backgroundColor || '#F5F5F5',
+              borderColor: statusData.borderColor || '#E4E4E7',
             },
           ]}
         >
           <Ionicons
-            name={statusStyle.icon || 'help-outline'}
+            name={statusData.icon || 'help-outline'}
             size={14}
-            color={statusStyle.color || '#52525B'}
+            color={statusData.color || '#52525B'}
           />
           <GeistText
             weight={500}
-            style={[styles.statusText, { color: statusStyle.color || '#52525B' }]}
+            style={[
+              styles.statusText,
+              { color: statusData.color || '#52525B' },
+            ]}
           >
-            {status}
+            {statusData.label}
           </GeistText>
         </View>
       </View>
@@ -112,7 +111,6 @@ export const RequestCard: React.FC<RequestCardProps> = ({
     </TouchableOpacity>
   );
 };
-
 
 const styles = StyleSheet.create({
   requestCard: {
