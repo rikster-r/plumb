@@ -26,7 +26,7 @@ export function useAdminRequests() {
       {
         revalidateFirstPage: false,
         revalidateAll: false,
-      }
+      },
     );
 
   useSWRNative({ mutate });
@@ -63,7 +63,7 @@ export function useAdminRequests() {
   const refresh = () => mutate();
 
   return {
-    requests,
+    requests: requests?.sort((a, b) => b.id - a.id) ?? [],
     pagination,
     isLoading,
     isLoadingMore: isValidating && pagination.hasMore,

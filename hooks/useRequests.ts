@@ -20,7 +20,7 @@ export function useRequests() {
     user && token
       ? [`${process.env.EXPO_PUBLIC_API_URL}/users/${user.id}/requests`, token]
       : null,
-    ([url, token]) => fetcherWithToken(url, token)
+    ([url, token]) => fetcherWithToken(url, token),
   );
 
   // useEffect(() => {
@@ -33,7 +33,7 @@ export function useRequests() {
 
   //     const apiKey = process.env.EXPO_PUBLIC_PUSHER_API_KEY;
   //     const cluster = process.env.EXPO_PUBLIC_CLUSTER;
-      
+
   //     if (!apiKey || !cluster) return;
 
   //     try {
@@ -89,7 +89,7 @@ export function useRequests() {
   // }, [user, mutate]);
 
   return {
-    requests,
+    requests: requests?.sort((a, b) => b.id - a.id) ?? [],
     isLoading,
     error,
     refresh: mutate,

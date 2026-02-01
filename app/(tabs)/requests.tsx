@@ -37,6 +37,9 @@ const AdminRequestsPage = () => {
           if (selectedStatus === 'Все') {
             return true;
           }
+          if (selectedStatus === 'На исполнении') {
+            return ['На исполнении', 'Прибыл'].includes(request.status);
+          }
           return request.status === selectedStatus;
         }),
     [selectedStatus, requests],

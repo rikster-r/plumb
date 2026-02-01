@@ -1,4 +1,4 @@
-import { priorityColors, statusTabs } from '@/constants/requests';
+import { statusTabs } from '@/constants/requests';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -25,6 +25,11 @@ const RequestsPage = () => {
             return !['Выполнена', 'Закрыта', 'Отменена'].includes(
               request.status,
             );
+
+          if (selectedStatus === 'На исполнении') {
+            return ['На исполнении', 'Прибыл'].includes(request.status);
+          }
+
           return request.status === selectedStatus;
         }),
     [selectedStatus, requests],

@@ -16,9 +16,9 @@ export const RequestCard: React.FC<RequestCardProps> = ({
   const statusData = statusConfig[request.status] || {};
 
   const address =
-    (typeof request.house === 'object' && request.house?.full_address) ||
-    request.organization ||
-    'Адрес не указан';
+    typeof request.house === 'object'
+      ? (request.house?.full_address ?? 'Адрес не указан')
+      : (request.house ?? 'Адрес не указан');
   const customer = request.customer || request.applicant || null;
   const problem = request.problem || request.problem_customer || null;
 
