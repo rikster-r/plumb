@@ -9,8 +9,8 @@ const ITEMS_PER_PAGE = 10;
 export function useAdminRequests() {
   const { token } = useUser();
 
-  const getKey = (pageIndex: number, previousPageData: Request[][] | null) => {
-    if (previousPageData && previousPageData[0].length === 0) return null;
+  const getKey = (pageIndex: number, previousPageData: Request[] | null) => {
+    if (previousPageData && previousPageData.length === 0) return null;
 
     const page = pageIndex + 1;
 
@@ -63,7 +63,7 @@ export function useAdminRequests() {
   const refresh = () => mutate();
 
   return {
-    requests: requests?.sort((a, b) => b.id - a.id) ?? [],
+    requests: [...requests].sort((a, b) => b.id - a.id) ?? [],
     pagination,
     isLoading,
     isLoadingMore: isValidating && pagination.hasMore,

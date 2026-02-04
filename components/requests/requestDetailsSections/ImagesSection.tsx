@@ -12,7 +12,7 @@ import { GeistText } from '@/components/GeistText';
 
 interface ImagesSectionProps {
   files: File[];
-  onAddFile: (source: string) => void;
+  onAddFile: (source: 'camera' | 'gallery') => void;
   onImagePress: (index: number) => void;
 }
 

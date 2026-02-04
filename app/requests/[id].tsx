@@ -4,15 +4,13 @@ import { useRequestActions } from '@/hooks/useRequestActions';
 import { fetcherWithToken } from '@/lib/fetcher';
 import useSWRNative from '@nandorojo/swr-react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Linking, StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { statusConfig } from '../../constants/requests';
+import { inWorkStatuses, statusConfig } from '../../constants/requests';
 
 // Import components
 import RequestDetailsSkeleton from '@/components/requests/requestDetailsSections/RequestDetailsSkeleton';
-import { formatDateTime } from '@/utils/dates';
-import BottomAction from '../../components/requests/BottomRequestAction';
 import ImagesSection from '../../components/requests/requestDetailsSections/ImagesSection';
 import {
   InfoRow,
@@ -21,11 +19,12 @@ import {
 import NotesSection from '../../components/requests/requestDetailsSections/NotesSection';
 import ProblemSection from '../../components/requests/requestDetailsSections/ProblemSection';
 import RequestHeader from '../../components/requests/RequestHeader';
-import TimelineSection from '../../components/requests/requestDetailsSections/TimelineSection';
+import { useRequests } from '@/hooks/useRequests';
 
 const RequestDetailsPage = () => {
   const { id: requestId } = useLocalSearchParams();
   const { token } = useUser();
+  const { requests } = useRequests();
 
   const {
     data: request,
@@ -35,7 +34,7 @@ const RequestDetailsPage = () => {
     [`${process.env.EXPO_PUBLIC_API_URL}/requests/${requestId}`, token],
     ([url, token]) => fetcherWithToken(url, token),
   );
-  const { handleStatusChange, handleAddFile, handleAddNote } =
+  const { handleStatusChange, handleAddFile, handleNoteChange } =
     useRequestActions({
       request,
       requestId: Number(requestId),
@@ -43,14 +42,11 @@ const RequestDetailsPage = () => {
       mutate,
     });
 
-  const [newNote, setNewNote] = useState('');
-  const [isEditingNote, setIsEditingNote] = useState(false);
-
-  useEffect(() => {
-    if (request) {
-      setNewNote(request.note || '');
-    }
-  }, [request]);
+  // Находим активную заявку и сортируем: активная всегда сверху
+  const activeRequest = useMemo(
+    () => requests.find((r) => inWorkStatuses.includes(r.status)),
+    [requests],
+  );
 
   const handleImagePress = (index: number) => {
     if (!request) return;
@@ -64,28 +60,20 @@ const RequestDetailsPage = () => {
     });
   };
 
-  const handleEditNotePress = () => {
-    setIsEditingNote(true);
-  };
-
-  const handleCancelNote = () => {
-    setIsEditingNote(false);
-    setNewNote(request?.note || '');
-  };
-
   if (!request || isLoading) {
     return <RequestDetailsSkeleton />;
   }
 
   const currentStatusConfig = statusConfig[request.status];
-  const nextStatus = currentStatusConfig?.nextStatus;
   const nextStatusLabel = currentStatusConfig?.nextLabel;
 
   return (
     <View style={styles.container}>
       <RequestHeader
         request={request}
-        currentStatusConfig={currentStatusConfig}
+        nextStatusLabel={nextStatusLabel}
+        onStatusChange={handleStatusChange}
+        isActionBlocked={activeRequest?.id !== request.id}
       />
 
       <KeyboardAwareScrollView
@@ -205,15 +193,6 @@ const RequestDetailsPage = () => {
           </InfoSection>
         )}
 
-        {/* Timeline */}
-        <TimelineSection
-          createdAt={request.created_at}
-          existTime={request.exist_time}
-          arrivalTime={request.arrival_time}
-          completeTime={request.complete_time}
-          formatDateTime={formatDateTime}
-        />
-
         {/* Assigned Users */}
         {request.users && request.users.length > 0 && (
           <InfoSection title={`Исполнители (${request.users.length})`}>
@@ -235,21 +214,9 @@ const RequestDetailsPage = () => {
         {/* Notes Section */}
         <NotesSection
           note={request.note || ''}
-          isEditing={isEditingNote}
-          newNote={newNote}
-          onEditPress={handleEditNotePress}
-          onNoteChange={setNewNote}
-          onSave={() => handleAddNote(newNote, setIsEditingNote)}
-          onCancel={handleCancelNote}
+          onNoteChange={handleNoteChange}
         />
       </KeyboardAwareScrollView>
-
-      {/* Bottom Action Button */}
-      <BottomAction
-        nextStatus={nextStatus}
-        nextStatusLabel={nextStatusLabel}
-        onStatusChange={handleStatusChange}
-      />
     </View>
   );
 };

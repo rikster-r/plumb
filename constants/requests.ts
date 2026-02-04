@@ -29,20 +29,30 @@ export const statusConfig: Record<string, StatusData> = {
     borderColor: '#BFDBFE',
     icon: 'book-outline',
     sentAPIStatus: 'in_transit',
-    nextStatus: 'На исполнении',
+    nextStatus: 'В пути',
     nextLabel: 'Выехать на заявку',
   },
-  'На исполнении': {
+  'В пути': {
     label: 'В пути',
     color: '#0A7E5E',
     backgroundColor: '#ECFDF5',
     borderColor: '#A7F3D0',
     icon: 'construct-outline',
     sentAPIStatus: 'arrived',
-    nextStatus: 'Прибыл',
+    nextStatus: 'На исполнении',
     nextLabel: 'Прибыл',
   },
   Прибыл: {
+    label: 'На исполнении',
+    color: '#0A7E5E',
+    backgroundColor: '#ECFDF5',
+    borderColor: '#A7F3D0',
+    icon: 'construct-outline',
+    sentAPIStatus: 'completed',
+    nextStatus: 'Выполнена',
+    nextLabel: 'Заявка выполнена',
+  },
+  'На исполнении': {
     label: 'На исполнении',
     color: '#0A7E5E',
     backgroundColor: '#ECFDF5',
@@ -84,20 +94,22 @@ export const statusConfig: Record<string, StatusData> = {
   },
 };
 
-export const statusTabs: string[] = [
-  'Активные',
-  'На исполнении',
-  'Выполнена',
-  'Отменена',
-];
+export const statusTabs: string[] = ['Новые', 'Выполнена', 'Отменена'];
 
 export const adminStatusTabs: string[] = [
-  'Активные',
+  'Новые',
   'Все',
   'На исполнении',
   'Выполнена',
   'Отменена',
   'Закрыта',
+];
+
+export const inWorkStatuses: string[] = [
+  'Принято исполнителем',
+  'В пути',
+  'Прибыл',
+  'На исполнении',
 ];
 
 export const priorityColors: Record<string, string> = {

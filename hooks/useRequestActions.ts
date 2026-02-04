@@ -139,35 +139,39 @@ export function useRequestActions({
     }
   };
 
-  const handleAddNote = async (newNote: string, setIsEditingNote: Function) => {
+  const handleNoteChange = async (newNote: string) => {
     if (!request) return;
-    if (newNote.trim()) {
-      try {
-        const response = await fetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/requests/${requestId}/comment`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ comment: newNote.trim() }),
-          },
-        );
 
-        if (response.ok) {
-          mutate({ ...request, note: newNote.trim() }, false);
-          setIsEditingNote(false);
-          Alert.alert('Успешно', 'Примечание сохранено');
-        } else {
-          const errorData = await response.json();
-          Alert.alert('Ошибка', errorData.message || 'Не удалось сохранить');
-        }
-      } catch {
-        Alert.alert('Ошибка', 'Не удалось подключиться к серверу');
+    // Оптимистическое обновление
+    mutate(
+      { ...request, note: newNote.trim() },
+      false,
+    );
+
+    try {
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/requests/${requestId}/comment`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ comment: newNote.trim() }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to save note');
       }
+
+      mutate();
+    } catch (err) {
+      console.error(err);
+      // откатить оптимистическое обновление в случае ошибки
+      mutate(request, false);
     }
   };
 
-  return { handleStatusChange, handleAddFile, handleAddNote };
+  return { handleStatusChange, handleAddFile, handleNoteChange };
 }

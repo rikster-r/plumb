@@ -1,7 +1,8 @@
 import { GeistText } from '@/components/GeistText';
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import { RequestCard } from './RequestCard';
+import { inWorkStatuses } from '@/constants/requests';
 
 interface RequestsListProps {
   requests: Request[];
@@ -11,6 +12,8 @@ interface RequestsListProps {
   onRefresh?: () => void;
   refreshing?: boolean;
   ListFooterComponent?: React.ReactElement | null;
+  singleActiveRequestMode?: boolean;
+  isLoadingMore?: boolean;
 }
 
 export const RequestCardsList: React.FC<RequestsListProps> = ({
@@ -21,34 +24,60 @@ export const RequestCardsList: React.FC<RequestsListProps> = ({
   onRefresh,
   refreshing = false,
   ListFooterComponent,
+  singleActiveRequestMode = true,
+  isLoadingMore
 }) => {
-  const canLoadMore = useRef(true);
+  const { data, activeRequest } = useMemo(() => {
+    if (!singleActiveRequestMode) {
+      return {
+        data: requests,
+        activeRequest: undefined,
+      };
+    }
+
+    const active = requests.find((r) => inWorkStatuses.includes(r.status));
+    const others = active
+      ? requests.filter((r) => r.id !== active.id)
+      : requests;
+
+    return {
+      data: active ? [active, ...others] : requests,
+      activeRequest: active,
+    };
+  }, [requests, singleActiveRequestMode]);
+
+  const hasActiveRequest = Boolean(activeRequest);
 
   return (
     <FlatList
-      data={requests}
+      data={data}
       keyExtractor={(item) => item.id.toString()}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.list}
       windowSize={8}
       initialNumToRender={10}
       maxToRenderPerBatch={10}
-      removeClippedSubviews={true}
-      onMomentumScrollBegin={() => {
-        canLoadMore.current = true;
-      }}
-      onEndReached={() => {
-        if (!canLoadMore.current) return;
-        canLoadMore.current = false;
-        onEndReached?.();
-      }}
+      removeClippedSubviews
+      onEndReached={onEndReached}
       onEndReachedThreshold={0.5}
       refreshing={refreshing}
       onRefresh={onRefresh}
-      renderItem={({ item }) => (
-        <RequestCard request={item} onPress={onRequestPress} />
-      )}
-      ListFooterComponent={canLoadMore ? ListFooterComponent : null}
+      renderItem={({ item }) => {
+        const isActive =
+          singleActiveRequestMode && activeRequest?.id === item.id;
+
+        return (
+          <RequestCard
+            request={item}
+            onPress={onRequestPress}
+            isActive={isActive}
+            isOtherActive={
+              singleActiveRequestMode && hasActiveRequest && !isActive
+            }
+          />
+        );
+      }}
+      ListFooterComponent={isLoadingMore ? ListFooterComponent : null}
       ListEmptyComponent={
         <GeistText weight={400} style={styles.emptyText}>
           {refreshing ? emptyMessage : ''}

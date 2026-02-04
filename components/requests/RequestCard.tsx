@@ -1,18 +1,59 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GeistText } from '@/components/GeistText';
 import { statusConfig, priorityColors } from '@/constants/requests';
+import { useRequests } from '@/hooks/useRequests';
+import { useUser } from '@/context/currentUser';
 
 interface RequestCardProps {
   request: Request;
   onPress?: (requestId: string) => void;
+  isActive?: boolean;
+  isOtherActive?: boolean;
 }
 
 export const RequestCard: React.FC<RequestCardProps> = ({
   request,
   onPress,
+  isActive = false,
+  isOtherActive = false,
 }) => {
+  const { token } = useUser();
+  const { refresh } = useRequests();
+
+  const handleStatusChange = async () => {
+    if (!request) return;
+    const currentStatus = statusConfig[request.status];
+    if (!currentStatus?.nextStatus) return;
+
+    try {
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/requests/${request.id}/status`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: currentStatus.sentAPIStatus }),
+        },
+      );
+
+      if (response.ok) {
+        refresh();
+      } else {
+        const errorData = await response.json();
+        Alert.alert(
+          'Ошибка',
+          errorData.message || 'Не удалось изменить статус',
+        );
+      }
+    } catch (error) {
+      Alert.alert('Ошибка', 'Не удалось подключиться к серверу');
+    }
+  };
+
   const statusData = statusConfig[request.status] || {};
 
   const address =
@@ -26,68 +67,63 @@ export const RequestCard: React.FC<RequestCardProps> = ({
     ? request.priority[0].toUpperCase() + request.priority.slice(1)
     : '';
 
+  // Определяем стили в зависимости от статуса
+  const isGreyedOut = isOtherActive && !isActive;
+
   return (
     <TouchableOpacity
-      style={styles.requestCard}
+      style={[
+        styles.requestCard,
+        isActive && styles.requestCardActive,
+        isGreyedOut && styles.requestCardGreyed,
+      ]}
       onPress={() => onPress?.(String(request.id))}
       activeOpacity={0.7}
     >
       {/* HEADER */}
       <View style={styles.requestHeader}>
         <View style={styles.requestClient}>
-          <GeistText weight={600} style={styles.clientName}>
+          <GeistText
+            weight={600}
+            style={[styles.clientName, isGreyedOut && styles.textGreyed]}
+          >
             {address}
           </GeistText>
 
           {customer && (
-            <GeistText weight={400} style={styles.clientAddress}>
+            <GeistText
+              weight={400}
+              style={[styles.clientAddress, isGreyedOut && styles.textGreyed]}
+            >
               {customer}
             </GeistText>
           )}
         </View>
-
-        <View
-          style={[
-            styles.statusBadge,
-            {
-              backgroundColor: statusData.backgroundColor || '#F5F5F5',
-              borderColor: statusData.borderColor || '#E4E4E7',
-            },
-          ]}
-        >
-          <Ionicons
-            name={statusData.icon || 'help-outline'}
-            size={14}
-            color={statusData.color || '#52525B'}
-          />
-          <GeistText
-            weight={500}
-            style={[
-              styles.statusText,
-              { color: statusData.color || '#52525B' },
-            ]}
-          >
-            {statusData.label}
-          </GeistText>
-        </View>
       </View>
 
-      {/* PROBLEM — only render if exists */}
+      {/* PROBLEM */}
       {problem && (
-        <GeistText weight={400} style={styles.problemText} numberOfLines={2}>
+        <GeistText
+          weight={400}
+          style={[styles.problemText, isGreyedOut && styles.textGreyed]}
+          numberOfLines={2}
+        >
           {problem}
         </GeistText>
       )}
 
-      {/* DIVIDER — only show if there is problem or useful footer */}
+      {/* DIVIDER */}
       {(problem || request.created_at || request.priority) && (
-        <View style={styles.divider} />
+        <View style={[styles.divider, isGreyedOut && styles.dividerGreyed]} />
       )}
 
       {/* FOOTER */}
       <View style={styles.requestFooter}>
         {request.created_at ? (
-          <GeistText weight={400} style={styles.timeText}>
+          <GeistText
+            weight={400}
+            style={[styles.timeText, isGreyedOut && styles.textGreyed]}
+          >
             {request.created_at.replace(' ', ' в ')}
           </GeistText>
         ) : (
@@ -100,7 +136,9 @@ export const RequestCard: React.FC<RequestCardProps> = ({
             style={[
               styles.priorityText,
               {
-                color: priorityColors[request.priority] || '#52525B',
+                color: isGreyedOut
+                  ? '#A1A1AA'
+                  : priorityColors[request.priority] || '#52525B',
               },
             ]}
           >
@@ -108,11 +146,41 @@ export const RequestCard: React.FC<RequestCardProps> = ({
           </GeistText>
         )}
       </View>
+
+      {isActive && (
+        <View style={styles.bottomAction}>
+          <TouchableOpacity
+            onPress={handleStatusChange}
+            style={styles.actionButton}
+          >
+            <GeistText weight={600} style={styles.actionButtonText}>
+              {statusData.nextLabel}
+            </GeistText>
+            <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
+      )}
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
+  bottomAction: {
+    marginTop: 16,
+  },
+  actionButton: {
+    backgroundColor: '#1F5EDB',
+    paddingVertical: 16,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  actionButtonText: {
+    fontSize: 16,
+    color: '#FFFFFF',
+  },
   requestCard: {
     backgroundColor: '#FFFFFF',
     padding: 18,
@@ -125,6 +193,29 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 1,
     marginBottom: 12,
+  },
+  requestCardActive: {
+    borderWidth: 1,
+    borderColor: '#3B82F6',
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  requestCardGreyed: {
+    opacity: 1,
+    backgroundColor: '#FAFAFA',
+  },
+  textGreyed: {
+    color: '#A1A1AA',
+  },
+  statusBadgeGreyed: {
+    backgroundColor: '#F5F5F5',
+    borderColor: '#E4E4E7',
+  },
+  dividerGreyed: {
+    backgroundColor: '#E4E4E7',
   },
   requestHeader: {
     flexDirection: 'row',
@@ -181,11 +272,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#71717A',
     flex: 1,
-  },
-  footerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
   },
   priorityText: {
     fontSize: 13,

@@ -10,7 +10,7 @@ import { RequestCardsList } from '@/components/requests/RequestCardsList';
 import { StatusTabs } from '@/components/StatusTabs';
 
 const AdminRequestsPage = () => {
-  const [selectedStatus, setSelectedStatus] = useState('Активные');
+  const [selectedStatus, setSelectedStatus] = useState('Новые');
   const router = useRouter();
 
   const {
@@ -30,7 +30,7 @@ const AdminRequestsPage = () => {
           return request.status !== 'Принята';
         })
         .filter((request) => {
-          if (selectedStatus === 'Активные')
+          if (selectedStatus === 'Новые')
             return !['Выполнена', 'Закрыта', 'Отменена'].includes(
               request.status,
             );
@@ -109,6 +109,8 @@ const AdminRequestsPage = () => {
             <GeistText style={styles.footerText}>Загрузка</GeistText>
           </View>
         }
+        singleActiveRequestMode={false}
+        isLoadingMore={isLoadingMore}
       />
     </View>
   );

@@ -9,7 +9,7 @@ import { StatusTabs } from '@/components/StatusTabs';
 import { useRequests } from '@/hooks/useRequests';
 
 const RequestsPage = () => {
-  const [selectedStatus, setSelectedStatus] = useState('Активные');
+  const [selectedStatus, setSelectedStatus] = useState('Новые');
   const router = useRouter();
 
   const { requests } = useRequests();
@@ -21,7 +21,7 @@ const RequestsPage = () => {
           return request.status !== 'Принята';
         })
         .filter((request) => {
-          if (selectedStatus === 'Активные')
+          if (selectedStatus === 'Новые')
             return !['Выполнена', 'Закрыта', 'Отменена'].includes(
               request.status,
             );
@@ -37,9 +37,12 @@ const RequestsPage = () => {
 
   const activeRequestsCount = useMemo(
     () =>
-      (requests ?? []).filter(
-        (r) => r.status !== 'Выполнена' && r.status !== 'Закрыта',
-      ).length,
+      (requests ?? [])
+        .filter((request) => {
+          return request.status !== 'Принята';
+        })
+        .filter((r) => !['Выполнена', 'Закрыта', 'Отменена'].includes(r.status))
+        .length,
     [requests],
   );
 
